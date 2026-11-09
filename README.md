@@ -4,7 +4,7 @@ Vibe Jam 2026 – lag 6
 ## Rock Rumble
 
 A local multiplayer asteroid shooter for up to 4 players sharing one keyboard,
-flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy bombers,
+flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy zeppelins,
 fighters and birds (large / medium / small targets).
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
@@ -30,7 +30,7 @@ then open http://localhost:8000.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
-- Bombers, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
+- Zeppelins, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
 - The landscape below changes every wave: a Swedish forest of pines, lakes and red
   cottages, a harbour city along a rocky coastline, then the snowy Alps, and round again.
 - **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
