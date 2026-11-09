@@ -25,7 +25,12 @@ then open http://localhost:8000.
 | P1 (red)    | W       | A / D       | S       | E             |
 | P2 (blue)   | ↑       | ← / →       | ↓       | Right Shift   |
 
-- **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **Enter** starts.
+- **Flying solo:** with only one pilot joined, **Space** fires too (and takes an upgrade between waves).
+- **Mouse control:** in the lobby, **C** hands the mouse to nobody → P1 → P2. That pilot's jet turns its
+  nose towards the pointer, the **left button** fires, the **right button** thrusts and the **middle
+  button** self-destructs; between waves the **wheel** browses upgrades and a **left click** takes one.
+  Their keys keep working too, so e.g. P1 can fly with WASD while P2 uses the mouse.
+- **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse, **Enter** starts.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
@@ -87,6 +92,8 @@ src/
   config.js               all tunable data (players, keys, physics, rules) – no behaviour
   core/                   EventBus, GameLoop (fixed timestep), StateMachine, Viewport, math
   input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent),
+                          MouseInput / MouseShipController (pointer aim, buttons -> intent),
+                          PlayerController (a player's keys plus the mouse if it is theirs),
                           TestControls (invincible mode and wave jumps),
                           TouchControls (on-screen buttons that press the same key codes)
   audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),

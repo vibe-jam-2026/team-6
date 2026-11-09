@@ -21,6 +21,7 @@ export class LobbyState {
     session.controllers.forEach((c, i) => {
       if (c.togglePressed()) { session.toggleJoined(i); this.#click(); }
     });
+    if (input.wasPressed(MENU_KEYS.mouse)) { session.cycleMouseOwner(); this.#click(); }
     if (input.wasPressed(MENU_KEYS.switchMode)) { session.nextMode(); this.#click(); }
     if (input.wasPressed(MENU_KEYS.start) && session.joinedCount > 0) {
       this.#click();

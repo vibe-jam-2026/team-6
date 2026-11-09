@@ -12,6 +12,7 @@ export class Session {
   result = null;
   detonatedBy = null; // the ship that self-destructed and ended the match, if any
   invincible = false; // testing aid: ships cannot be destroyed
+  mouseOwner = null;  // index of the player flying with the mouse, or null
 
   constructor(bus, controllers, modes = GAME_MODES) {
     this.controllers = controllers;
@@ -29,10 +30,21 @@ export class Session {
 
   toggleJoined(i) { this.joined[i] = !this.joined[i]; }
   toggleInvincible() { this.invincible = !this.invincible; }
+  // nobody -> P1 -> P2 -> ... -> nobody
+  cycleMouseOwner() {
+    const next = this.mouseOwner === null ? 0 : this.mouseOwner + 1;
+    this.mouseOwner = next < PLAYERS.length ? next : null;
+  }
+
   nextMode() { this.#modeIndex = (this.#modeIndex + 1) % this.modes.length; }
 
   createShips() {
     this.detonatedBy = null;
+    const solo = this.joinedCount === 1;
+    this.controllers.forEach((c, i) => {
+      c.solo = solo;               // a lone pilot can also fire with Space
+      c.useMouse = i === this.mouseOwner;
+    });
     return PLAYERS
       .map((player, i) => this.joined[i] ? new Ship(i, player, this.controllers[i]) : null)
       .filter(Boolean);
