@@ -25,6 +25,13 @@ export class Scenery {
     if (this.#key) this.#build();
   }
 
+  // keep the fog at the same depth while the camera swings closer or further away
+  setCameraDistance(d) {
+    this.cameraDistance = d;
+    const fog = this.scene.fog;
+    if (fog) { fog.near = d * 1.15; fog.far = d * 2.6; }
+  }
+
   show(key) {
     if (key === this.#key) return;
     this.#key = key;

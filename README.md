@@ -51,6 +51,9 @@ then open http://localhost:8000.
   realm (red-rock warlands with spiked war camps and a glowing portal, and an
   enchanted violet forest with mana crystals and a blue-roofed keep, where the zeppelins,
   fighters and drones are replaced by flapping fish-folk raiders), and round again.
+- **Shaky camera:** every 9–18 seconds of play the camera swings to a random new 3D angle
+  around the arena (turned up to ~35° either way, from almost straight down to a low, steep view),
+  always refitted so the whole arena stays on screen. It settles back to the normal view in the lobby.
 - **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
   It warps in, drifts around the arena and fires rings, aimed fans and spirals; below half
   health it gets faster and angrier. Its bullets hit everyone and fly through the other enemies, and ramming
