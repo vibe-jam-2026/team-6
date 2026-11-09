@@ -3,7 +3,9 @@ Vibe Jam 2026 – lag 6
 
 ## Rock Rumble
 
-A local multiplayer asteroid shooter for up to 4 players sharing one keyboard.
+A local multiplayer asteroid shooter for up to 4 players sharing one keyboard,
+flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy bombers,
+fighters and birds (large / medium / small targets).
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
 (tilted camera, lit low-poly rocks, shadows, bloom glow). Play it at
@@ -25,13 +27,13 @@ then open http://localhost:8000.
 | P4 (yellow) | Num 8   | Num 4 / 6   | Num 5   |
 
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **Enter** starts.
-- **Modes:** *Free-for-all* (bullets hit other ships, 250 pts per kill, last ship flying wins)
+- **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
-- **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound.
-- Asteroids score 20 / 50 / 100 by size; extra life every 10 000 points.
+- **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
+- Bombers, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
 - **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
   It warps in, drifts around the arena and fires rings, aimed fans and spirals; below half
-  health it gets faster and angrier. Its bullets hit everyone and fly through rocks, and ramming
+  health it gets faster and angrier. Its bullets hit everyone and fly through the other enemies, and ramming
   it is fatal. 10 points per hit, 3 000 for the final blow.
 
 ### Testing shortcuts
@@ -40,8 +42,8 @@ then open http://localhost:8000.
 |-----|--------|
 | **G** | toggle invincible mode (lobby or in game) – ships can't be destroyed |
 | **1–9**, **0** | jump to wave 1–9 / 10 (from the lobby: start the match at that wave) |
-| **N** | skip to the next wave |
-| **B** | jump to the next boss wave (from the lobby: start at the first boss) |
+| **N** | skip to the next wave (hint shown only while invincible) |
+| **B** | jump to the next boss wave (from the lobby: start at the first boss; hint shown only while invincible) |
 
 Jumping clears the field (rocks, boss and its bullets) and starts the chosen wave at once.
 
@@ -60,7 +62,8 @@ src/
   core/                   EventBus, GameLoop (fixed timestep), StateMachine, Viewport, math
   input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent),
                           TestControls (invincible mode and wave jumps)
-  audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds)
+  audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),
+                          MusicPlayer (procedural soundtrack per game state)
   world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet, Boss
   systems/                ShipSystem, BulletSystem, BossSystem, CollisionSystem, WaveSpawner,
                           SpawnPlanner, ScoreKeeper
