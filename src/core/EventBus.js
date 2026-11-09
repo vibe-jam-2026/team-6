@@ -18,6 +18,7 @@ export class EventBus {
 // Event names used across the game, kept in one place.
 export const EVENTS = {
   SHOT_FIRED: 'shotFired',             // { ship }
+  WEAPON_SWITCHED: 'weaponSwitched',   // { ship, weapon }
   ASTEROID_DESTROYED: 'asteroidDestroyed', // { asteroid, by, inBlast }
   SHIP_DESTROYED: 'shipDestroyed',     // { ship, by, inBlast }
   SHIPS_BUMPED: 'shipsBumped',         // { a, b }

@@ -19,6 +19,7 @@ export class HudView {
           o.shipIcon(c.x + dir * (8 + i * 18), c.y + 22, -Math.PI / 2, s.color, 0.55);
         }
         if (s.isOut) o.text('OUT', c.x, c.y + 22, 14, s.color, c.align);
+        else if (s.weapons.length > 1) o.text(s.weapon.name, c.x, c.y + (c.y < H / 2 ? 44 : -22), 11, s.weapon.color, c.align);
       });
     }
     o.text(`WAVE ${waves.wave}  ·  ${session.mode.title}`, W / 2, 22, 13, '#c3cad8', 'center');

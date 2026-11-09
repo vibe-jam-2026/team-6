@@ -1,4 +1,4 @@
-import { SHIP, RULES, BULLET, SPREAD_ANGLE } from '../../config.js';
+import { SHIP, RULES, BULLET, SPREAD_ANGLE, WEAPONS } from '../../config.js';
 import { Bullet } from './Bullet.js';
 
 const FACING_UP = -Math.PI / 2;
@@ -39,6 +39,19 @@ export class Ship {
     this.stats = baseStats();
     this.upgrades = new Map();     // upgrade id -> level
     this.shieldCharges = 0;
+    this.weapons = [...WEAPONS];   // the guns this ship can switch between
+    this.weaponIndex = 0;
+  }
+
+  get weapon() { return this.weapons[this.weaponIndex]; }
+
+  // Switches to the next available weapon (dir -1 for the previous one).
+  // Returns true if the weapon changed.
+  cycleWeapon(dir = 1) {
+    const n = this.weapons.length;
+    if (n < 2 || !dir) return false;
+    this.weaponIndex = (this.weaponIndex + Math.sign(dir) + n) % n;
+    return true;
   }
 
   get name() { return this.player.name + (this.controller.isComputer ? ' CPU' : ''); }
@@ -115,16 +128,17 @@ export class Ship {
   // Returns the bullets fired this step (several with spread shot), or [] if
   // the trigger is up, the gun is cooling down or too many shots are in the air.
   tryFire(bulletsInFlight) {
-    const st = this.stats;
-    if (!this.wantsToFire || this.cooldown > 0 || bulletsInFlight >= st.maxBullets) return [];
-    this.cooldown = st.fireCooldown;
+    const st = this.stats, w = this.weapon;
+    if (!this.wantsToFire || this.cooldown > 0 || bulletsInFlight >= st.maxBullets + w.magazine) return [];
+    this.cooldown = st.fireCooldown * w.cooldown;
+    const shots = st.shots + w.shots, speed = st.bulletSpeed * w.speed, spread = SPREAD_ANGLE * w.spread;
     const bullets = [];
-    for (let k = 0; k < st.shots; k++) {
-      const a = this.angle + (k - (st.shots - 1) / 2) * SPREAD_ANGLE;
+    for (let k = 0; k < shots; k++) {
+      const a = this.angle + (k - (shots - 1) / 2) * spread;
       const nx = Math.cos(a), ny = Math.sin(a);
       bullets.push(new Bullet(this,
         this.x + nx * SHIP.muzzleOffset, this.y + ny * SHIP.muzzleOffset,
-        this.vx + nx * st.bulletSpeed, this.vy + ny * st.bulletSpeed, { life: st.bulletLife }));
+        this.vx + nx * speed, this.vy + ny * speed, { life: st.bulletLife * w.life, weapon: w }));
     }
     return bullets;
   }

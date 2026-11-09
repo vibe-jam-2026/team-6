@@ -1,10 +1,10 @@
 // All tunable data lives here. Nothing in this file has behaviour.
 
 export const PLAYERS = [
-  { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS', selfDestruct: 'KeyE' },
-    labels: ['W thrust', 'A/D turn', 'S fire', 'E self-destruct'] },
-  { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown', selfDestruct: 'ShiftRight' },
-    labels: ['↑ thrust', '←/→ turn', '↓ fire', 'R-Shift self-destruct'] },
+  { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS', selfDestruct: 'KeyE', weapon: 'KeyQ' },
+    labels: ['W thrust', 'A/D turn', 'S fire', 'Q switch weapon', 'E self-destruct'] },
+  { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown', selfDestruct: 'ShiftRight', weapon: 'Slash' },
+    labels: ['↑ thrust', '←/→ turn', '↓ fire', '/ switch weapon', 'R-Shift self-destruct'] },
 ];
 
 // the player the lobby's computer key hands to the computer (P2)
@@ -14,7 +14,7 @@ export const COMPUTER_PLAYER = 1;
 export const COMPUTER_LABELS = ['flown by the computer', 'V to hand it back'];
 
 // card hints for whoever the lobby gives the mouse to (their keys still work too)
-export const MOUSE_LABELS = ['mouse aims', 'right btn thrust', 'left btn fire', 'middle btn self-destruct'];
+export const MOUSE_LABELS = ['mouse aims', 'right btn thrust', 'left btn fire', 'wheel switches weapon', 'middle btn self-destruct'];
 
 export const MENU_KEYS = {
   start: 'Enter',
@@ -48,6 +48,20 @@ export const SHIP = {
 
 export const BULLET = { speed: 560, life: 0.95, radius: 2 };
 export const SPREAD_ANGLE = 0.14; // radians between bullets of a spread shot
+
+// The guns every jet carries; a pilot cycles through them with their weapon key.
+// Each one scales the ship's own (upgradeable) gun stats, so upgrades help every weapon.
+//   cooldown / speed / life: multipliers on fire cooldown, shot speed and range
+//   shots: extra bullets per trigger pull, spread: multiplier on SPREAD_ANGLE
+//   magazine: extra shots allowed in the air, size: visual scale of the rocket
+export const WEAPONS = [
+  { id: 'rockets', name: 'ROCKETS', color: '#e8ecf4',
+    cooldown: 1, speed: 1, life: 1, shots: 0, spread: 1, magazine: 0, size: 1 },
+  { id: 'blaster', name: 'BLASTER', color: '#ffd23f',
+    cooldown: 0.45, speed: 1.35, life: 0.7, shots: 0, spread: 1, magazine: 4, size: 0.7 },
+  { id: 'scatter', name: 'SCATTER', color: '#9dff5c',
+    cooldown: 2.1, speed: 0.9, life: 0.5, shots: 4, spread: 1.6, magazine: 8, size: 0.85 },
+];
 
 export const ASTEROID_TYPES = {
   3: { radius: 46, speed: [35, 75],  score: 20 },

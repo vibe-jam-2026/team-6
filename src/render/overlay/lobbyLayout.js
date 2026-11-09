@@ -1,7 +1,7 @@
 import { PLAYERS } from '../../config.js';
 
 const GAP = 12;
-const CARD_HEIGHT = 168;
+const CARD_HEIGHT = 182;
 const SHORT_CARD_HEIGHT = 110; // no room for the key hints
 
 // Where the lobby cards go. Shared by the 2D cards and the 3D ships on them.
