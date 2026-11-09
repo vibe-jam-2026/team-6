@@ -31,6 +31,7 @@ export const SHIP = {
 };
 
 export const BULLET = { speed: 560, life: 0.95, radius: 2 };
+export const SPREAD_ANGLE = 0.14; // radians between bullets of a spread shot
 
 export const ASTEROID_TYPES = {
   3: { radius: 46, speed: [35, 75],  score: 20 },
@@ -49,6 +50,9 @@ export const RULES = {
   speedGrowthPerWave: 0.04,
   gameOverDelay: 1.6,
   lobbyDemoRocks: 6,
+  upgradeChoices: 3,     // upgrades offered to each player between waves
+  upgradeInputLock: 0.6, // seconds before a pick counts, so held fire keys don't auto-pick
+  shieldHitInvuln: 1.2,  // grace time after the deflector absorbs a hit
 };
 
 export const DEFAULT_JOINED = [true, true, false, false];

@@ -6,7 +6,8 @@ import { Asteroid } from '../world/entities/Asteroid.js';
 const EDGE_BAND = 60;
 const SAFE_DISTANCE = 200;
 
-// Sends a new, larger and faster wave of rocks whenever the field is clear.
+// Sends a new, larger and faster wave of rocks. update() reports when the field
+// has been clear for a moment; whoever runs the match decides when to call startNext().
 export class WaveSpawner {
   wave = 0;
   #timer = 0;
@@ -20,15 +21,17 @@ export class WaveSpawner {
     this.#timer = 0;
   }
 
+  // true once the current wave is cleared and the next one may start
   update(dt, world) {
-    if (world.asteroids.length > 0) return;
+    if (world.asteroids.length > 0) return false;
     this.#timer += dt;
-    if (this.#timer > RULES.waveDelay) this.startNext(world);
+    return this.#timer > RULES.waveDelay;
   }
 
   startNext(world) {
     this.#timer = 0;
     this.wave++;
+    for (const ship of world.ships) ship.prepareForWave();
     world.speedScale = 1 + this.wave * RULES.speedGrowthPerWave;
     const count = Math.min(3 + this.wave + Math.floor(world.ships.length / 2), RULES.maxWaveSize);
     for (let i = 0; i < count; i++) {

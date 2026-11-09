@@ -29,6 +29,20 @@ then open http://localhost:8000.
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound.
 - Asteroids score 20 / 50 / 100 by size; extra life every 10 000 points.
+- **Upgrades:** after each cleared wave, every player still in the game is offered three
+  random upgrades. Browse with your turn keys and take one with your fire key; the next
+  wave starts once everyone has picked. Upgrades stack up to a level cap:
+
+  | Upgrade | Effect | Max |
+  |---------|--------|-----|
+  | Rapid Fire | fire rate +25% | 4 |
+  | Afterburner | thrust +20%, top speed +12% | 4 |
+  | Gyro Thrusters | turn speed +20% | 3 |
+  | Big Magazine | +2 shots in the air | 3 |
+  | Rail Rounds | shot speed +20%, range +15% | 3 |
+  | Spread Shot | +1 bullet per shot | 2 |
+  | Deflector | blocks one hit per wave (faint bubble while charged) | 2 |
+  | Spare Ship | +1 life | – |
 
 Note: some keyboards can't register many simultaneous keys ("ghosting"), so with
 4 players on one keyboard a few key combinations may drop out.
@@ -50,7 +64,8 @@ src/
                           SpawnPlanner, ScoreKeeper
   modes/                  GameMode base class, FreeForAllMode, CoopMode
   game/Session.js         lobby choices, wave banner and final result
-  states/                 LobbyState, PlayState, PausedState, GameOverState
+  upgrades/               catalog (every upgrade and its effect), UpgradeDraft (deal + pick)
+  states/                 LobbyState, PlayState, PausedState, UpgradeState, GameOverState
   effects/                ParticleSystem (data) and EffectsDirector (events -> particles)
   render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting, Starfield,
                           EntityViewSync + views/ (ShipView, AsteroidView, BulletView, ParticleView)
@@ -61,7 +76,7 @@ How the SOLID principles show up:
 
 - **Single responsibility** – simulation, scoring, sound, particles, 3D and 2D drawing
   live in separate classes. Renderers only read game state.
-- **Open/closed** – add a game mode by subclassing `GameMode` and listing it in
+- **Open/closed** – add an upgrade by appending it to `upgrades/catalog.js`; add a game mode by subclassing `GameMode` and listing it in
   `modes/index.js`; add a screen by registering a view in `main.js`; add an entity type
   with a new `EntityViewSync`. Existing classes don't change.
 - **Liskov substitution** – every `GameMode` answers the same questions

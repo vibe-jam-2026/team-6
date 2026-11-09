@@ -3,6 +3,7 @@ import { rand, TAU } from '../core/math.js';
 
 const ROCK_DUST = '#c9cfdc';
 const FLAME = '#ffb347';
+const SHIELD = '#9fe4ff';
 
 // Turns game events into particle effects: explosions, debris and engine trails.
 export class EffectsDirector {
@@ -11,6 +12,7 @@ export class EffectsDirector {
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid: a }) =>
       particles.burst(a.x, a.y, ROCK_DUST, 8 + a.size * 6, 90 + a.size * 30, 0.9));
     bus.on(EVENTS.SHIP_DESTROYED, ({ ship }) => this.#shipExplosion(ship));
+    bus.on(EVENTS.SHIELD_HIT, ({ ship: s }) => particles.burst(s.x, s.y, SHIELD, 28, 200, 0.6));
   }
 
   update(dt, world) {

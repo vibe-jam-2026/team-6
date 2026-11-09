@@ -23,5 +23,8 @@ export const EVENTS = {
   SHIPS_BUMPED: 'shipsBumped',         // { a, b }
   EXTRA_LIFE: 'extraLife',             // { ship }
   WAVE_STARTED: 'waveStarted',         // { wave }
+  WAVE_CLEARED: 'waveCleared',         // { wave }
+  SHIELD_HIT: 'shieldHit',             // { ship, by }
+  UPGRADE_CHOSEN: 'upgradeChosen',     // { ship, upgrade }
   MENU_ACTION: 'menuAction',           // {}
 };

@@ -37,6 +37,10 @@ export class World {
 
   destroyShip(ship, by = null) {
     if (!ship.alive) return;
+    if (ship.absorbHit()) {
+      this.bus.emit(EVENTS.SHIELD_HIT, { ship, by });
+      return;
+    }
     ship.destroy();
     this.bus.emit(EVENTS.SHIP_DESTROYED, { ship, by });
   }

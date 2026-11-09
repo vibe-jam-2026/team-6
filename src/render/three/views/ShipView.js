@@ -20,10 +20,11 @@ export class ShipView {
     m.flame.visible = ship.thrusting;
     if (ship.thrusting) m.flame.scale.set(14 + Math.random() * 12, 1 + Math.random() * 0.2, 1);
     const shielded = ship.invulnerable > 0;
-    m.shield.visible = shielded;
-    if (shielded) {
+    const deflector = ship.shieldCharges > 0; // charged deflector upgrade: a calm, steady bubble
+    m.shield.visible = shielded || deflector;
+    if (m.shield.visible) {
       m.shield.rotation.set(t * 1.3, 0, t * 2);
-      m.shield.material.opacity = 0.1 + 0.08 * Math.sin(t * 20);
+      m.shield.material.opacity = shielded ? 0.1 + 0.08 * Math.sin(t * 20) : 0.05 + 0.02 * Math.sin(t * 3);
     }
     m.hull.material.emissiveIntensity = shielded && Math.sin(t * 25) > 0 ? 0.75 : 0.35;
   }

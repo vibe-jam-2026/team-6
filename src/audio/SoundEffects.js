@@ -11,6 +11,9 @@ export class SoundEffects {
     });
     bus.on(EVENTS.SHIPS_BUMPED, () => synth.tone(140, 90, 0.08, 'triangle', 0.12));
     bus.on(EVENTS.EXTRA_LIFE, () => [523, 659, 784, 1046].forEach((f, k) => synth.tone(f, f, 0.12, 'triangle', 0.12, k * 0.09)));
+    bus.on(EVENTS.SHIELD_HIT, () => synth.tone(1200, 300, 0.25, 'sine', 0.14));
+    bus.on(EVENTS.WAVE_CLEARED, () => [392, 523, 659].forEach((f, k) => synth.tone(f, f, 0.14, 'triangle', 0.1, k * 0.08)));
+    bus.on(EVENTS.UPGRADE_CHOSEN, ({ ship }) => [660, 990].forEach((f, k) => synth.tone(f + ship.index * 40, f * 1.5, 0.12, 'square', 0.07, k * 0.07)));
     bus.on(EVENTS.MENU_ACTION, () => synth.tone(660, 660, 0.06, 'triangle', 0.1));
   }
 }

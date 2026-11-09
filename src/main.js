@@ -23,6 +23,8 @@ import { LobbyState } from './states/LobbyState.js';
 import { PlayState } from './states/PlayState.js';
 import { PausedState } from './states/PausedState.js';
 import { GameOverState } from './states/GameOverState.js';
+import { UpgradeState } from './states/UpgradeState.js';
+import { UpgradeDraft } from './upgrades/UpgradeDraft.js';
 import { WorldRenderer } from './render/three/WorldRenderer.js';
 import { Overlay2D } from './render/overlay/Overlay2D.js';
 import { OverlayRenderer } from './render/overlay/OverlayRenderer.js';
@@ -31,6 +33,7 @@ import { HudView } from './render/overlay/views/HudView.js';
 import { BannerView } from './render/overlay/views/BannerView.js';
 import { PauseView } from './render/overlay/views/PauseView.js';
 import { GameOverView } from './render/overlay/views/GameOverView.js';
+import { UpgradeView } from './render/overlay/views/UpgradeView.js';
 
 // --- infrastructure ---
 const bus = new EventBus();
@@ -46,6 +49,7 @@ const controllers = PLAYERS.map(p => new KeyboardShipController(input, p.keys));
 const world = new World(viewport, bus);
 const session = new Session(bus, controllers);
 const waves = new WaveSpawner(bus);
+const upgrades = new UpgradeDraft();
 const particles = new ParticleSystem();
 const effects = new EffectsDirector(bus, particles);
 new ScoreKeeper(bus);
@@ -57,11 +61,12 @@ const systems = {
 
 // --- states ---
 const states = new StateMachine();
-const deps = { input, bus, world, session, waves, effects, states, systems };
+const deps = { input, bus, world, session, waves, effects, states, systems, upgrades };
 states
   .register('lobby', new LobbyState(deps))
   .register('playing', new PlayState(deps))
   .register('paused', new PausedState(deps))
+  .register('upgrade', new UpgradeState(deps))
   .register('gameover', new GameOverState(deps));
 
 // --- presentation ---
@@ -70,10 +75,11 @@ const worldRenderer = new WorldRenderer({
 });
 const hud = new HudView();
 const overlay = new OverlayRenderer(
-  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio })
+  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, upgrades })
   .register('lobby', [new LobbyView()])
   .register('playing', [hud, new BannerView()])
   .register('paused', [hud, new PauseView()])
+  .register('upgrade', [hud, new UpgradeView()])
   .register('gameover', [hud, new GameOverView()]);
 const footer = document.getElementById('foot');
 
