@@ -1,12 +1,13 @@
 // Composition root: creates every object and wires them together.
 // This is the only file that knows the concrete classes of everything.
-import { PLAYERS, MENU_KEYS } from './config.js';
+import { PLAYERS, MENU_KEYS, TEST_KEYS } from './config.js';
 import { EventBus } from './core/EventBus.js';
 import { Viewport } from './core/Viewport.js';
 import { GameLoop } from './core/GameLoop.js';
 import { StateMachine } from './core/StateMachine.js';
 import { KeyboardInput } from './input/KeyboardInput.js';
 import { KeyboardShipController } from './input/KeyboardShipController.js';
+import { TestControls } from './input/TestControls.js';
 import { TouchControls } from './input/TouchControls.js';
 import { SynthAudio } from './audio/SynthAudio.js';
 import { SoundEffects } from './audio/SoundEffects.js';
@@ -16,6 +17,7 @@ import { Session } from './game/Session.js';
 import { ShipSystem } from './systems/ShipSystem.js';
 import { BulletSystem } from './systems/BulletSystem.js';
 import { CollisionSystem } from './systems/CollisionSystem.js';
+import { BossSystem } from './systems/BossSystem.js';
 import { SpawnPlanner } from './systems/SpawnPlanner.js';
 import { WaveSpawner } from './systems/WaveSpawner.js';
 import { ScoreKeeper } from './systems/ScoreKeeper.js';
@@ -57,6 +59,7 @@ new ScoreKeeper(bus);
 const systems = {
   ships: new ShipSystem(bus, new SpawnPlanner()),
   bullets: new BulletSystem(),
+  boss: new BossSystem(bus),
   collisions: new CollisionSystem(bus),
 };
 
@@ -68,6 +71,7 @@ states
   .register('playing', new PlayState(deps))
   .register('paused', new PausedState(deps))
   .register('gameover', new GameOverState(deps));
+const testControls = new TestControls(deps);
 
 // --- presentation ---
 const worldRenderer = new WorldRenderer({
@@ -89,6 +93,7 @@ states.change('lobby');
 new GameLoop({
   update(dt) {
     if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
+    testControls.update();
     states.update(dt);
     music.setMood(states.currentName);
     music.tick();
@@ -103,4 +108,4 @@ new GameLoop({
 }).start();
 
 // handle for debugging from the browser console
-window.game = { states, world, session, bus };
+window.game = { states, world, session, bus, waves };

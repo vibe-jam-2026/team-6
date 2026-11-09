@@ -31,6 +31,21 @@ then open http://localhost:8000.
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
 - Bombers, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
+- **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
+  It warps in, drifts around the arena and fires rings, aimed fans and spirals; below half
+  health it gets faster and angrier. Its bullets hit everyone and fly through the other enemies, and ramming
+  it is fatal. 10 points per hit, 3 000 for the final blow.
+
+### Testing shortcuts
+
+| Key | Effect |
+|-----|--------|
+| **G** | toggle invincible mode (lobby or in game) – ships can't be destroyed |
+| **1–9**, **0** | jump to wave 1–9 / 10 (from the lobby: start the match at that wave) |
+| **N** | skip to the next wave (hint shown only while invincible) |
+| **B** | jump to the next boss wave (from the lobby: start at the first boss; hint shown only while invincible) |
+
+Jumping clears the field (rocks, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
 touch. ◀ ▶ turn, ▲ thrusts and ● fires (they fly P1). In the lobby, tap a pilot's card
@@ -53,18 +68,19 @@ src/
   config.js               all tunable data (players, keys, physics, rules) – no behaviour
   core/                   EventBus, GameLoop (fixed timestep), StateMachine, Viewport, math
   input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent),
+                          TestControls (invincible mode and wave jumps),
                           TouchControls (on-screen buttons that press the same key codes)
   audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),
                           MusicPlayer (procedural soundtrack per game state)
-  world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet
-  systems/                ShipSystem, BulletSystem, CollisionSystem, WaveSpawner,
+  world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet, Boss
+  systems/                ShipSystem, BulletSystem, BossSystem, CollisionSystem, WaveSpawner,
                           SpawnPlanner, ScoreKeeper
   modes/                  GameMode base class, FreeForAllMode, CoopMode
   game/Session.js         lobby choices, wave banner and final result
   states/                 LobbyState, PlayState, PausedState, GameOverState
   effects/                ParticleSystem (data) and EffectsDirector (events -> particles)
   render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting, Starfield,
-                          EntityViewSync + views/ (ShipView, AsteroidView, BulletView, ParticleView)
+                          EntityViewSync + views/ (ShipView, AsteroidView, BulletView, BossView, ParticleView)
   render/overlay/         2D HUD and menus: Overlay2D primitives, OverlayRenderer, views/
 ```
 

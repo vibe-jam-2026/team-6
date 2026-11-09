@@ -20,6 +20,11 @@ export class HudView {
       });
     }
     o.text(`WAVE ${waves.wave}  ·  ${session.mode.title}`, W / 2, 22, 13, '#7d8496', 'center');
-    if (!touch?.enabled) o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'}`, W / 2, H - 16, 11, '#545a6a', 'center');
+    if (world.boss) o.bossBar(world.boss, W / 2, 46, Math.min(420, W * 0.4));
+    if (session.invincible) o.text('INVINCIBLE · G to turn off', W / 2, H - 34, 12, '#ffd23f', 'center', '#ffd23f');
+    if (!touch?.enabled) {
+      o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · G invincible · 1-9 wave${session.invincible ? ' · N next · B boss' : ''}`,
+        W / 2, H - 16, 11, '#545a6a', 'center');
+    }
   }
 }

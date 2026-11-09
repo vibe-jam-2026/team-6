@@ -16,6 +16,7 @@ export class CameraRig {
   constructor(camera, bus) {
     this.camera = camera;
     bus.on(EVENTS.SHIP_DESTROYED, () => { this.#shake = 10; });
+    bus.on(EVENTS.BOSS_DESTROYED, () => { this.#shake = 28; });
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid }) => { this.#shake = Math.max(this.#shake, asteroid.size * 2); });
   }
 

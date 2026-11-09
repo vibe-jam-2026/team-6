@@ -1,4 +1,4 @@
-import { RULES } from '../config.js';
+import { BOSS, RULES } from '../config.js';
 import { EVENTS } from '../core/EventBus.js';
 
 // Awards points for destruction events and grants extra lives.
@@ -6,6 +6,8 @@ export class ScoreKeeper {
   constructor(bus) {
     this.bus = bus;
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid, by }) => by && this.award(by, asteroid.score));
+    bus.on(EVENTS.BOSS_HIT, ({ by }) => by && this.award(by, BOSS.hitScore));
+    bus.on(EVENTS.BOSS_DESTROYED, ({ by }) => by && this.award(by, BOSS.killScore));
     bus.on(EVENTS.SHIP_DESTROYED, ({ ship, by }) => {
       if (!by || by === ship) return;
       by.kills++;

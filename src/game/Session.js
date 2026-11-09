@@ -10,17 +10,20 @@ export class Session {
   #modeIndex = 0;
   banner = { text: '', timeLeft: 0 };
   result = null;
+  invincible = false; // testing aid: ships cannot be destroyed
 
   constructor(bus, controllers, modes = GAME_MODES) {
     this.controllers = controllers;
     this.modes = modes;
-    bus.on(EVENTS.WAVE_STARTED, ({ wave }) => this.announce(`WAVE ${wave}`));
+    bus.on(EVENTS.WAVE_STARTED, ({ wave, boss }) => this.announce(boss ? `WAVE ${wave} · BOSS` : `WAVE ${wave}`, boss ? 3 : 2));
+    bus.on(EVENTS.BOSS_DESTROYED, () => this.announce('BOSS DESTROYED', 3));
   }
 
   get mode() { return this.modes[this.#modeIndex]; }
   get joinedCount() { return this.joined.filter(Boolean).length; }
 
   toggleJoined(i) { this.joined[i] = !this.joined[i]; }
+  toggleInvincible() { this.invincible = !this.invincible; }
   nextMode() { this.#modeIndex = (this.#modeIndex + 1) % this.modes.length; }
 
   createShips() {

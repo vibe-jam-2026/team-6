@@ -32,6 +32,10 @@ export class LobbyView {
     } else if (n === 0) {
       o.text('nobody has joined yet', W / 2, layout.startY, 16, '#7d8496', 'center');
     }
-    if (!tap) o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game`, W / 2, by + 100, 12, '#545a6a', 'center');
+    if (!tap) {
+      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game`, W / 2, by + 100, 12, '#545a6a', 'center');
+      o.text(`testing: G invincible ${session.invincible ? 'ON' : 'off'}  ·  1-9/0 start at wave${session.invincible ? '  ·  B start at boss' : ''}`,
+        W / 2, by + 120, 12, session.invincible ? '#ffd23f' : '#545a6a', 'center');
+    }
   }
 }
