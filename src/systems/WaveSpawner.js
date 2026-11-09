@@ -1,4 +1,4 @@
-import { BOSS, RULES } from '../config.js';
+import { BOSS, RULES, WAVES } from '../config.js';
 import { dist2, rand } from '../core/math.js';
 import { EVENTS } from '../core/EventBus.js';
 import { Asteroid } from '../world/entities/Asteroid.js';
@@ -7,12 +7,15 @@ import { Boss } from '../world/entities/Boss.js';
 const EDGE_BAND = 60;
 const SAFE_DISTANCE = 200;
 
-// Sends a new, larger and faster wave of rocks. Every BOSS.every-th wave
-// (5, 10, ...) is a boss fight instead. update() reports when the field has
-// been clear for a moment; whoever runs the match decides when to call startNext().
+// Runs the waves. A normal wave lasts WAVES.duration seconds: it opens with a
+// group of enemies and keeps sending reinforcements from the edges, more and
+// more often as the waves go on. The final wave (WAVES.final) is the boss
+// fight and has no clock. update() reports when a timed wave is over; whoever
+// runs the match decides what happens next (the shop) and calls startNext().
 export class WaveSpawner {
   wave = 0;
-  #timer = 0;
+  timeLeft = 0;      // seconds left in the current timed wave
+  #spawnTimer = 0;
 
   constructor(bus) {
     this.bus = bus;
@@ -20,40 +23,68 @@ export class WaveSpawner {
 
   reset() {
     this.wave = 0;
-    this.#timer = 0;
+    this.timeLeft = 0;
+    this.#spawnTimer = 0;
   }
 
-  // true once the current wave is cleared and the next one may start
+  get isFinalWave() { return this.wave >= WAVES.final; }
+  get isTimed() { return !this.isBossWave(); }
+
+  // true once a timed wave has run out of time
   update(dt, world) {
-    if (world.asteroids.length > 0 || world.boss) return false;
-    this.#timer += dt;
-    return this.#timer > RULES.waveDelay;
+    if (!this.isTimed) return false;
+    this.timeLeft = Math.max(0, this.timeLeft - dt);
+    if (this.timeLeft <= 0) return true;
+    this.#reinforce(dt, world);
+    return false;
   }
+
+  // the final wave is won once its boss is gone
+  bossBeaten(world) { return this.isFinalWave && this.isBossWave() && !world.boss; }
 
   isBossWave(wave = this.wave) { return wave > 0 && wave % BOSS.every === 0; }
 
-  // the first boss wave after `wave`
-  bossWaveAfter(wave) { return (Math.floor(wave / BOSS.every) + 1) * BOSS.every; }
+  // the first boss wave after `wave` (never past the final wave)
+  bossWaveAfter(wave) { return Math.min(WAVES.final, (Math.floor(wave / BOSS.every) + 1) * BOSS.every); }
 
   // Testing aid: wipe the field and start wave `wave` straight away.
   jumpTo(wave, world) {
     world.clearField();
-    this.wave = Math.max(0, wave - 1);
+    this.wave = Math.max(0, Math.min(WAVES.final, wave) - 1);
     this.startNext(world);
   }
 
   startNext(world) {
-    this.#timer = 0;
     this.wave++;
+    this.timeLeft = WAVES.duration;
+    this.#spawnTimer = this.#interval();
     for (const ship of world.ships) ship.prepareForWave();
     world.speedScale = 1 + this.wave * RULES.speedGrowthPerWave;
     if (this.isBossWave()) return this.#spawnBoss(world);
     const count = Math.min(3 + this.wave + Math.floor(world.ships.length / 2), RULES.maxWaveSize);
+    this.#spawn(world, count);
+    this.bus.emit(EVENTS.WAVE_STARTED, { wave: this.wave, boss: false });
+  }
+
+  // Reinforcements on a timer, sooner if the field is empty, never in the
+  // last seconds and never past the enemy cap.
+  #reinforce(dt, world) {
+    this.#spawnTimer -= dt;
+    const due = this.#spawnTimer <= 0 || world.asteroids.length === 0;
+    if (!due || this.timeLeft < WAVES.quietEnd || world.asteroids.length >= WAVES.maxEnemies) return;
+    this.#spawnTimer = this.#interval();
+    this.#spawn(world, 1 + Math.floor(this.wave * WAVES.groupPerWave));
+  }
+
+  #interval() {
+    return Math.max(WAVES.minInterval, WAVES.interval + (this.wave - 1) * WAVES.intervalPerWave);
+  }
+
+  #spawn(world, count) {
     for (let i = 0; i < count; i++) {
       const p = this.#edgePoint(world);
       world.asteroids.push(new Asteroid(3, p.x, p.y, world.speedScale));
     }
-    this.bus.emit(EVENTS.WAVE_STARTED, { wave: this.wave, boss: false });
   }
 
   #spawnBoss(world) {

@@ -22,6 +22,15 @@ export class World {
     this.speedScale = 1;
   }
 
+  // When a wave's time is up the enemies still flying turn back: no score,
+  // no money, just gone (effects can show them leaving).
+  retreatEnemies() {
+    const leaving = this.asteroids;
+    this.asteroids = [];
+    this.bullets = [];
+    if (leaving.length) this.bus.emit(EVENTS.ENEMIES_RETREATED, { enemies: leaving });
+  }
+
   // removes everything hostile: rocks, the boss and its bullets (used when jumping waves)
   clearField() {
     this.asteroids = [];

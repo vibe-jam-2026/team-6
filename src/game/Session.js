@@ -22,7 +22,7 @@ export class Session {
     this.modes = modes;
     bus.on(EVENTS.WAVE_STARTED, ({ wave, boss }) => {
       const place = sceneryForWave(wave).title.toUpperCase();
-      this.announce(boss ? `WAVE ${wave} · BOSS · ${place}` : `WAVE ${wave}  ·  ${place}`, boss ? 3 : 2);
+      this.announce(boss ? `WAVE ${wave} · FINAL BOSS · ${place}` : `WAVE ${wave}  ·  ${place}`, boss ? 3 : 2);
     });
     bus.on(EVENTS.SELF_DESTRUCT, ({ ship }) => { this.detonatedBy = ship; });
     bus.on(EVENTS.BOSS_DESTROYED, () => this.announce('BOSS DESTROYED', 3));
@@ -68,13 +68,18 @@ export class Session {
   announce(text, seconds = 2) { this.banner = { text, timeLeft: seconds }; }
   tickBanner(dt) { this.banner.timeLeft -= dt; }
 
-  finish(ships, wave) {
+  // won: the final boss went down (a self-destruct that takes it out doesn't count)
+  finish(ships, wave, { won = false } = {}) {
     const mode = this.mode;
+    const ranked = [...ships].sort((a, b) => b.score - a.score);
+    won = won && !this.detonatedBy;
+    let headline = mode.headline(ships, wave);
+    if (this.detonatedBy) headline = `${this.detonatedBy.name} blew everything up · wave ${wave}`;
+    else if (won) headline = ships.length > 1 ? `boss defeated · ${ranked[0].name} tops the score` : `boss defeated · final score ${ranked[0].score}`;
     this.result = {
-      ranked: [...ships].sort((a, b) => b.score - a.score),
-      headline: this.detonatedBy
-        ? `${this.detonatedBy.name} blew everything up · wave ${wave}`
-        : mode.headline(ships, wave),
+      won,
+      ranked,
+      headline,
       showKills: mode.showKills(ships),
       multiplayer: ships.length > 1,
     };

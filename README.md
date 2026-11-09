@@ -30,63 +30,74 @@ then open http://localhost:8000.
   **Blaster** fires fast, small, short-range bolts and **Scatter** is a slow five-shot
   shotgun blast. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 
-- **Flying solo:** with only one pilot joined, **Space** fires too (and takes an upgrade between waves).
+- **Flying solo:** with only one pilot joined, **Space** fires too (and buys in the shop between waves).
 - **Mouse control:** in the lobby, **C** hands the mouse to nobody → P1 → P2. That pilot's jet turns its
   nose towards the pointer, the **left button** fires, the **right button** thrusts, the **wheel**
-  switches weapon and the **middle button** self-destructs; between waves the **wheel** browses upgrades and a **left click** takes one.
+  switches weapon and the **middle button** self-destructs; between waves the **wheel** browses the shop and a **left click** buys.
   Their keys keep working too, so e.g. P1 can fly with WASD while P2 uses the mouse.
 - **Computer pilot:** in the lobby, **V** hands P2 to the computer (and joins it), and **V** again
   takes it back. It dodges rocks, the boss and its bullets, leads its shots, hunts the nearest
-  target (including you in free-for-all), switches to the weapon that suits the range and takes its own upgrades between waves. Its HUD
+  target (including you in free-for-all), switches to the weapon that suits the range and spends its own money in the shop between waves. Its HUD
   name reads *P2 CPU*. With P1 as the only human, **Space** fires too.
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse,
   **V** lets the computer fly P2, **Enter** starts.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
-  or *Co-op* (no friendly fire, survive as many waves as you can).
+  or *Co-op* (no friendly fire, fight through to the final boss together).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
-- Zeppelins, fighters and drones score 20 / 50 / 100; extra life every 10 000 points.
+- **Waves:** waves 1–4 each last **1 minute**. A wave opens with a group of enemies and more keep
+  arriving from the edges (more often and in bigger groups each wave); the HUD shows the clock.
+  When time is up the survivors retreat and the shop opens. **Wave 5 is the final boss** —
+  beat it and the game ends in **VICTORY**.
+- Zeppelins, fighters and drones score 20 / 50 / 100 and pay **$5 / $10 / $15**; shooting down
+  another jet in free-for-all pays $50 and every hit on the boss $2. Each pilot's money is shown
+  in gold next to their score. Extra life every 10 000 points.
 - The landscape below changes every wave: a Swedish forest of pines, lakes and red
   cottages, a harbour city along a rocky coastline, the snowy Alps, then a high-fantasy
   realm (red-rock warlands with spiked war camps and a glowing portal, and an
   enchanted violet forest with mana crystals and a blue-roofed keep, where the zeppelins,
   fighters and drones are replaced by flapping fish-folk raiders), and round again.
-- **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
+- **Boss fight:** after wave 4 comes the final boss (wave 5, no clock).
   It warps in, drifts around the arena and fires rings, aimed fans and spirals; below half
   health it gets faster and angrier. Its bullets hit everyone and fly through the other enemies, and ramming
-  it is fatal. 10 points per hit, 3 000 for the final blow.
+  it is fatal. 10 points per hit, 3 000 for the final blow, which wins the game.
 - **Self-destruct:** blows your jet up in a massive blast that wipes out every enemy, bullet,
   jet and the boss, shields or not, and **ends the game**. You still score everything the
   blast takes out (and, in free-for-all, every kill) before the final scores are shown.
-- **Upgrades:** after each cleared wave, every player still in the game is offered three
-  random upgrades. Browse with your turn keys and take one with your fire key; the next
-  wave starts once everyone has picked. Upgrades stack up to a level cap:
+- **Shop:** between waves every pilot still in the game gets their own column in the shop with
+  the whole catalog. Browse with your turn keys, buy the highlighted upgrade with your fire key
+  (as many as you can afford), then pick **READY** at the bottom; the next wave starts once
+  everyone is ready. Each level costs more than the last:
 
-  | Upgrade | Effect | Max |
-  |---------|--------|-----|
-  | Rapid Fire | fire rate +25% | 4 |
-  | Afterburner | thrust +20%, top speed +12% | 4 |
-  | Gyro Thrusters | turn speed +20% | 3 |
-  | Big Magazine | +2 shots in the air | 3 |
-  | Rail Rounds | shot speed +20%, range +15% | 3 |
-  | Spread Shot | +1 bullet per shot | 2 |
-  | Deflector | blocks one hit per wave (faint bubble while charged) | 2 |
-  | Spare Ship | +1 life | – |
+  | Upgrade | Effect | Max | Price of level 1 → each next level |
+  |---------|--------|-----|------|
+  | Rapid Fire | fire rate +25% | 4 | $150, ×1.6 |
+  | Afterburner | thrust +20%, top speed +12% | 4 | $120, ×1.6 |
+  | Gyro Thrusters | turn speed +20% | 3 | $100, ×1.6 |
+  | Big Magazine | +2 shots in the air | 3 | $120, ×1.6 |
+  | Rail Rounds | shot speed +20%, range +15% | 3 | $140, ×1.6 |
+  | Spread Shot | +1 bullet per shot | 2 | $400, ×1.8 |
+  | Deflector | blocks one hit per wave (faint bubble while charged) | 2 | $300, ×1.8 |
+  | Spare Ship | +1 life | – | $250, ×1.3 |
 
 ### Testing shortcuts
 
 | Key | Effect |
 |-----|--------|
 | **G** | toggle invincible mode (lobby or in game) – ships can't be destroyed |
-| **1–9**, **0** | jump to wave 1–9 / 10 (from the lobby: start the match at that wave) |
+| **1–5** | jump to wave 1–5 (from the lobby: start the match at that wave); higher digits stop at the final wave |
 | **N** | skip to the next wave (hint shown only while invincible) |
-| **B** | jump to the next boss wave (from the lobby: start at the first boss; hint shown only while invincible) |
+| **B** | jump to the boss wave (from the lobby: start at the boss; hint shown only while invincible) |
+| **K** | give every pilot **$1000** (in game or in the shop) |
+
+From the browser console, `game.addMoney(500)` gives every pilot $500 and
+`game.addMoney(500, 0)` gives it to P1 only (1 = P2).
 
 Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
 touch. ◀ ▶ turn, ▲ thrusts, ● fires, ⇄ switches weapon and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
 to join or leave, tap P2's card to add or remove a computer pilot, tap the mode line to switch mode and the start line to start. Between
-waves, ◀ ▶ browse the upgrades and ● takes one. In
+waves, ◀ ▶ browse the shop and ● buys. In
 game there are pause and sound buttons at the bottom; on the game-over screen, tap
 anywhere to go back to the lobby. Add `?touch=1` to the URL to force the controls on
 (for example with a mouse), or `?touch=0` to keep them off.
@@ -104,18 +115,18 @@ src/
   input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent),
                           MouseInput / MouseShipController (pointer aim, buttons -> intent),
                           PlayerController (a player's keys plus the mouse if it is theirs),
-                          ComputerShipController (computer pilot: dodges, leads shots, picks upgrades),
-                          TestControls (invincible mode and wave jumps),
+                          ComputerShipController (computer pilot: dodges, leads shots, shops),
+                          TestControls (invincible mode, wave jumps, dev money),
                           TouchControls (on-screen buttons that press the same key codes)
   audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),
                           MusicPlayer (procedural soundtrack per game state)
   world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet, Boss
   systems/                ShipSystem, BulletSystem, BossSystem, CollisionSystem, WaveSpawner,
-                          SpawnPlanner, ScoreKeeper, SelfDestructSystem
+                          SpawnPlanner, ScoreKeeper, Paymaster (money), SelfDestructSystem
   modes/                  GameMode base class, FreeForAllMode, CoopMode
   game/Session.js         lobby choices, wave banner and final result
-  upgrades/               catalog (every upgrade and its effect), UpgradeDraft (deal + pick)
-  states/                 LobbyState, PlayState, PausedState, UpgradeState, GameOverState
+  upgrades/               catalog (every upgrade, its effect and price), Shop (prices, buying, ready)
+  states/                 LobbyState, PlayState, PausedState, ShopState, GameOverState
   effects/                ParticleSystem (data) and EffectsDirector (events -> particles)
   render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting,
                           EntityViewSync + views/ (ShipView, AsteroidView, BulletView, BossView, ParticleView)

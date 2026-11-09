@@ -29,6 +29,7 @@ export class Ship {
     this.alive = false;
     this.lives = RULES.lives;
     this.score = 0;
+    this.money = RULES.startMoney ?? 0; // earned from enemies, spent in the shop
     this.kills = 0;
     this.nextLifeAt = RULES.extraLifeEvery;
     this.respawnTimer = 0.2 + index * 0.05;
@@ -61,6 +62,9 @@ export class Ship {
   get vulnerable() { return this.alive && this.invulnerable <= 0; }
 
   upgradeLevel(id) { return this.upgrades.get(id) ?? 0; }
+
+  earn(amount) { this.money += amount; }
+  spend(amount) { this.money -= amount; }
 
   applyUpgrade(upgrade) {
     upgrade.apply(this);

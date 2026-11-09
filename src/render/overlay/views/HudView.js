@@ -1,3 +1,5 @@
+import { RULES } from '../../../config.js';
+
 const MAX_LIFE_ICONS = 8;
 const SWITCH_PULSE_MS = 500; // how long the active weapon tag flares after a switch
 
@@ -17,7 +19,9 @@ export class HudView {
       const c = corners[s.index];
       const dir = c.align === 'left' ? 1 : -1;
       o.withAlpha(s.isOut ? 0.35 : 1, () => {
-        o.text(`${s.name}  ${String(s.score).padStart(6, '0')}`, c.x, c.y, 18, s.color, c.align, s.color);
+        const scoreText = `${s.name}  ${String(s.score).padStart(6, '0')}`;
+        o.text(scoreText, c.x, c.y, 18, s.color, c.align, s.color);
+        o.text(`$${s.money}`, c.x + dir * (o.measure(scoreText, 18) + 16), c.y, 18, '#ffd23f', c.align, '#ffd23f');
         for (let i = 0; i < Math.min(s.lives, MAX_LIFE_ICONS); i++) {
           o.shipIcon(c.x + dir * (8 + i * 18), c.y + 22, -Math.PI / 2, s.color, 0.55);
         }
@@ -27,13 +31,21 @@ export class HudView {
         }
       });
     }
-    o.text(`WAVE ${waves.wave}  ·  ${session.mode.title}`, W / 2, 22, 13, '#c3cad8', 'center');
+    o.text(`${this.#waveText(waves)}  ·  ${session.mode.title}`, W / 2, 22, 13,
+      waves.isTimed && waves.timeLeft <= 10 ? '#ffd23f' : '#c3cad8', 'center');
     if (world.boss) o.bossBar(world.boss, W / 2, 46, Math.min(420, W * 0.4));
     if (session.invincible) o.text('INVINCIBLE · G to turn off', W / 2, H - 34, 12, '#ffd23f', 'center', '#ffd23f');
     if (!touch?.enabled) {
-      o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · G invincible · 1-9 wave${session.invincible ? ' · N next · B boss' : ''}`,
+      o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · G invincible · 1-5 wave · K +$${RULES.devMoney}${session.invincible ? ' · N next · B boss' : ''}`,
         W / 2, H - 16, 11, '#9aa1b2', 'center');
     }
+  }
+
+  // "WAVE 2 · 0:43", or the boss fight
+  #waveText(waves) {
+    if (!waves.isTimed) return `WAVE ${waves.wave}  ·  FINAL BOSS`;
+    const t = Math.ceil(waves.timeLeft);
+    return `WAVE ${waves.wave}  ·  ${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
   }
 
   // 1 right after the ship switched weapon, fading to 0

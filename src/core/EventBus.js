@@ -27,7 +27,10 @@ export const EVENTS = {
   WAVE_CLEARED: 'waveCleared',         // { wave }
   SELF_DESTRUCT: 'selfDestruct',       // { ship, x, y } after everything in the blast is gone
   SHIELD_HIT: 'shieldHit',             // { ship, by }
-  UPGRADE_CHOSEN: 'upgradeChosen',     // { ship, upgrade }
+  UPGRADE_BOUGHT: 'upgradeBought',     // { ship, upgrade, price }
+  PURCHASE_DENIED: 'purchaseDenied',   // { ship, reason: 'money' | 'maxed' }
+  MONEY_EARNED: 'moneyEarned',         // { ship, amount }
+  ENEMIES_RETREATED: 'enemiesRetreated', // { enemies } when a wave's time runs out
   BOSS_FIRED: 'bossFired',             // { boss }
   BOSS_HIT: 'bossHit',                 // { boss, by, x, y }
   BOSS_DESTROYED: 'bossDestroyed',     // { boss, by, inBlast }

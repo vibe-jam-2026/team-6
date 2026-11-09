@@ -39,6 +39,12 @@ export class Overlay2D {
     ctx.shadowBlur = 0;
   }
 
+  // width of a line of text at this size, in CSS pixels
+  measure(str, size) {
+    this.ctx.font = `${size}px ${FONT}`;
+    return this.ctx.measureText(str).width;
+  }
+
   fillScreen(color) {
     this.ctx.fillStyle = color;
     this.ctx.fillRect(0, 0, this.width, this.height);

@@ -27,9 +27,11 @@ export const MENU_KEYS = {
 };
 
 // Testing shortcuts: G toggles invincibility (lobby or in game),
-// 1–9 / 0 jump straight to wave 1–9 / 10, N skips to the next wave, B jumps to the next boss.
+// 1–5 jump straight to that wave (higher digits stop at the final wave),
+// N skips to the next wave, B jumps to the boss, K gives every pilot money.
 export const TEST_KEYS = {
   invincible: 'KeyG',
+  addMoney: 'KeyK',
   nextWave: 'KeyN',
   nextBoss: 'KeyB',
   waves: ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'],
@@ -63,15 +65,16 @@ export const WEAPONS = [
     cooldown: 2.1, speed: 0.9, life: 0.5, shots: 4, spread: 1.6, magazine: 8, size: 0.85 },
 ];
 
+// bounty: money paid to the pilot who destroys one (smaller, faster ones pay more)
 export const ASTEROID_TYPES = {
-  3: { radius: 46, speed: [35, 75],  score: 20 },
-  2: { radius: 25, speed: [65, 120], score: 50 },
-  1: { radius: 13, speed: [95, 175], score: 100 },
+  3: { radius: 46, speed: [35, 75],  score: 20,  bounty: 5 },
+  2: { radius: 25, speed: [65, 120], score: 50,  bounty: 10 },
+  1: { radius: 13, speed: [95, 175], score: 100, bounty: 15 },
 };
 
 // The boss arrives on every `every`-th wave (wave 5, 10, ... - i.e. right after wave 4).
 export const BOSS = {
-  every: 5,
+  every: 5,             // must match WAVES.final: the boss is the final wave
   radius: 64,
   baseHp: 45,           // hit points for a single pilot...
   hpPerShip: 25,        // ...plus this per extra pilot
@@ -79,6 +82,7 @@ export const BOSS = {
   speed: 70,
   entryTime: 1.6,       // seconds it warps in, untouchable
   hitScore: 10,         // per bullet that lands
+  hitBounty: 2,         // money per bullet that lands
   killScore: 3000,      // to the pilot landing the final blow
   bullet: { speed: 230, life: 3.2, radius: 5 },
   color: '#ff3b5c',
@@ -90,14 +94,30 @@ export const RULES = {
   invulnTime: 2.6,
   extraLifeEvery: 10000,
   killScore: 250,
-  waveDelay: 1.5,
-  maxWaveSize: 14,
+  maxWaveSize: 14,      // enemies at the start of a wave (more keep arriving)
   speedGrowthPerWave: 0.04,
   gameOverDelay: 1.6,
   lobbyDemoRocks: 6,
-  upgradeChoices: 3,     // upgrades offered to each player between waves
-  upgradeInputLock: 0.6, // seconds before a pick counts, so held fire keys don't auto-pick
+  startMoney: 0,
+  killBounty: 50,        // money for shooting down another jet (free-for-all)
+  victoryDelay: 3,       // seconds the final boss explosion plays before the results
+  shopInputLock: 0.6,    // seconds before shop presses count, so held fire keys don't buy
+  devMoney: 1000,        // what the K testing key gives every pilot
   shieldHitInvuln: 1.2,  // grace time after the deflector absorbs a hit
+};
+
+// Waves last a fixed time while enemies keep arriving from the edges. When the
+// time is up the survivors retreat and the shop opens. The final wave is the
+// boss fight; it has no clock and beating the boss wins the game.
+export const WAVES = {
+  duration: 60,          // seconds per wave
+  final: 5,              // the boss wave that ends the game
+  interval: 5.5,         // seconds between reinforcements on wave 1...
+  intervalPerWave: -0.8, // ...this much shorter each wave after
+  minInterval: 2,
+  groupPerWave: 0.5,     // reinforcements arrive in groups of 1 + wave * this (rounded down)
+  maxEnemies: 28,        // no reinforcements while this many enemies (any size) are up
+  quietEnd: 4,           // no reinforcements in the last seconds of a wave
 };
 
 export const DEFAULT_JOINED = [true, true];

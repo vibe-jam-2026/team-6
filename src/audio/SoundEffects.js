@@ -21,7 +21,9 @@ export class SoundEffects {
     });
     bus.on(EVENTS.SHIELD_HIT, () => synth.tone(1200, 300, 0.25, 'sine', 0.14));
     bus.on(EVENTS.WAVE_CLEARED, () => [392, 523, 659].forEach((f, k) => synth.tone(f, f, 0.14, 'triangle', 0.1, k * 0.08)));
-    bus.on(EVENTS.UPGRADE_CHOSEN, ({ ship }) => [660, 990].forEach((f, k) => synth.tone(f + ship.index * 40, f * 1.5, 0.12, 'square', 0.07, k * 0.07)));
+    bus.on(EVENTS.UPGRADE_BOUGHT, ({ ship }) => [660, 990, 1320].forEach((f, k) => synth.tone(f + ship.index * 40, f * 1.5, 0.1, 'square', 0.07, k * 0.06)));
+    bus.on(EVENTS.PURCHASE_DENIED, () => synth.tone(150, 110, 0.18, 'sawtooth', 0.09));
+    bus.on(EVENTS.ENEMIES_RETREATED, () => synth.tone(300, 900, 0.5, 'sine', 0.08));
     bus.on(EVENTS.WAVE_STARTED, ({ boss }) => {
       if (boss) for (let k = 0; k < 3; k++) synth.tone(440, 220, 0.4, 'sawtooth', 0.09, k * 0.45);
     });

@@ -9,6 +9,7 @@ export class Asteroid {
     this.size = size;
     this.radius = type.radius;
     this.score = type.score;
+    this.bounty = type.bounty;
     this.x = x; this.y = y;
     this.vx = Math.cos(dir) * speed;
     this.vy = Math.sin(dir) * speed;
