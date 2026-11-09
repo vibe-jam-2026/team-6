@@ -16,7 +16,8 @@ html, body { touch-action: none; -webkit-user-select: none; user-select: none; -
 #touch[data-state="paused"] .menu.paused { display: flex; }
 /* between waves the pad only browses (◀ ▶) and picks (●) upgrades */
 #touch[data-state="upgrade"] .pad { display: flex; }
-#touch[data-state="upgrade"] .pad .thrust, #touch[data-state="upgrade"] .pad .boom { visibility: hidden; }
+#touch[data-state="upgrade"] .pad .thrust, #touch[data-state="upgrade"] .pad .boom,
+#touch[data-state="upgrade"] .pad .weapon { visibility: hidden; }
 #touch button {
   pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent;
   width: 76px; height: 76px; border-radius: 50%; padding: 0;
@@ -30,6 +31,7 @@ html, body { touch-action: none; -webkit-user-select: none; user-select: none; -
 #touch .pad.right .fire { width: 92px; height: 92px; }
 #touch .pad.right .thrust { margin-bottom: 40px; }
 #touch .pad.right .boom { width: 52px; height: 52px; font-size: 22px; margin-bottom: 12px; border-color: rgba(255, 179, 71, 0.6); }
+#touch .pad.right .weapon { width: 52px; height: 52px; font-size: 22px; margin-bottom: 12px; border-color: rgba(255, 210, 63, 0.6); }
 #touch .menu { left: 50%; transform: translateX(-50%); }
 #touch .menu button { width: 44px; height: 44px; font-size: 16px; border-color: rgba(125, 132, 150, 0.5); }
 #touch .menu.play { bottom: calc(10px + env(safe-area-inset-bottom)); }

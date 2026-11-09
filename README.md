@@ -20,15 +20,20 @@ python3 -m http.server 8000
 
 then open http://localhost:8000.
 
-| Player | Thrust | Turn | Fire | Self-destruct |
-|--------|--------|------|------|---------------|
-| P1 (red)    | W       | A / D       | S       | E             |
-| P2 (blue)   | ↑       | ← / →       | ↓       | Right Shift   |
+| Player | Thrust | Turn | Fire | Switch weapon | Self-destruct |
+|--------|--------|------|------|---------------|---------------|
+| P1 (red)    | W       | A / D       | S       | Q             | E             |
+| P2 (blue)   | ↑       | ← / →       | ↓       | /             | Right Shift   |
+
+- **Weapons:** every jet carries three guns and the switch-weapon key cycles through them
+  (the current one is shown under your lives). **Rockets** are the all-rounder, the
+  **Blaster** fires fast, small, short-range bolts and **Scatter** is a slow five-shot
+  shotgun blast. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 
 - **Flying solo:** with only one pilot joined, **Space** fires too (and takes an upgrade between waves).
 - **Mouse control:** in the lobby, **C** hands the mouse to nobody → P1 → P2. That pilot's jet turns its
-  nose towards the pointer, the **left button** fires, the **right button** thrusts and the **middle
-  button** self-destructs; between waves the **wheel** browses upgrades and a **left click** takes one.
+  nose towards the pointer, the **left button** fires, the **right button** thrusts, the **wheel**
+  switches weapon and the **middle button** self-destructs; between waves the **wheel** browses upgrades and a **left click** takes one.
   Their keys keep working too, so e.g. P1 can fly with WASD while P2 uses the mouse.
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse, **Enter** starts.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
@@ -74,7 +79,7 @@ then open http://localhost:8000.
 Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
-touch. ◀ ▶ turn, ▲ thrusts, ● fires and ✸ self-destructs (they fly P1). In the lobby, tap a pilot's card
+touch. ◀ ▶ turn, ▲ thrusts, ● fires, ⇄ switches weapon and ✸ self-destructs (they fly P1). In the lobby, tap a pilot's card
 to join or leave, tap the mode line to switch mode and the start line to start. Between
 waves, ◀ ▶ browse the upgrades and ● takes one. In
 game there are pause and sound buttons at the bottom; on the game-over screen, tap

@@ -1,6 +1,6 @@
 import { EVENTS } from '../core/EventBus.js';
 
-// Flies the ships: respawning, movement, and firing.
+// Flies the ships: respawning, movement, weapon switching and firing.
 export class ShipSystem {
   constructor(bus, spawnPlanner) {
     this.bus = bus;
@@ -14,6 +14,9 @@ export class ShipSystem {
         continue;
       }
       ship.update(dt, world.bounds);
+      if (ship.cycleWeapon(ship.controller.weaponStep?.() ?? 0)) {
+        this.bus.emit(EVENTS.WEAPON_SWITCHED, { ship, weapon: ship.weapon });
+      }
       const inFlight = world.bullets.filter(b => b.owner === ship).length;
       const bullets = ship.tryFire(inFlight);
       if (bullets.length) {

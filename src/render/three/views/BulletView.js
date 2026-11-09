@@ -39,7 +39,7 @@ export class BulletView {
     }
     const tip = tipMaterialFor(bullet.owner.color);
     this.object = new THREE.Group();
-    this.object.scale.setScalar(1.4);
+    this.object.scale.setScalar(1.4 * (bullet.weapon?.size ?? 1));
     this.object.rotation.order = 'ZYX'; // yaw to the heading, then spin about the rocket's own axis
     this.flame = new THREE.Mesh(flameGeometry, flameMaterial);
     this.flame.position.x = -4.5;
