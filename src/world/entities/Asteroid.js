@@ -44,8 +44,8 @@ export class Asteroid {
   get heading() { return Math.atan2(this.vy, this.vx); }
 
   // one hit; true if that destroyed it
-  takeHit() {
-    this.hp -= 1;
+  takeHit(damage = 1) {
+    this.hp -= damage;
     return this.hp <= 0;
   }
 

@@ -39,7 +39,7 @@ export class CollisionSystem {
     for (const b of world.bullets) {
       if (b.dead || b.hostile) continue;
       const enemy = world.asteroids.find(a => circlesOverlap(b, b.radius, a, a.radius * 0.92));
-      if (enemy) { b.expire(); world.hitEnemy(enemy, b.owner); }
+      if (enemy) { b.expire(); world.hitEnemy(enemy, b.owner, b.weapon?.damage ?? 1); }
     }
   }
 

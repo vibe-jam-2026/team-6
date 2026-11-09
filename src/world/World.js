@@ -46,9 +46,9 @@ export class World {
   }
 
   // A bullet lands on an enemy: tougher types (planes, zeppelins) take a few hits.
-  hitEnemy(enemy, by = null) {
+  hitEnemy(enemy, by = null, damage = 1) {
     if (!this.asteroids.includes(enemy)) return;
-    if (enemy.takeHit()) this.destroyAsteroid(enemy, by);
+    if (enemy.takeHit(damage)) this.destroyAsteroid(enemy, by);
     else this.bus.emit(EVENTS.ENEMY_HIT, { enemy, by });
   }
 
@@ -64,7 +64,7 @@ export class World {
   hitBoss(by, at) {
     const boss = this.boss;
     if (!boss?.vulnerable) return;
-    boss.takeHit(1);
+    boss.takeHit(at.weapon?.damage ?? 1);
     this.bus.emit(EVENTS.BOSS_HIT, { boss, by, x: at.x, y: at.y });
     if (boss.alive) return;
     this.boss = null;
