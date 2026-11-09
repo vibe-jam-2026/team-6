@@ -9,7 +9,7 @@ export class LobbyView {
     const small = layout.small;
     o.dim(0.32);
     const titleY = H * (layout.short ? 0.12 : 0.16);
-    o.text('MACH SCHNELL', W / 2, titleY, small ? 40 : 64, '#e8ecf4', 'center', '#7aa7ff');
+    o.text('MACH MANIA', W / 2, titleY, small ? 40 : 64, '#e8ecf4', 'center', '#7aa7ff');
     o.text(tap ? 'fighter-jet shooter · 2 pilots' : 'local multiplayer fighter-jet shooter · 2 pilots on one keyboard',
       W / 2, titleY + (small ? 36 : 52), small ? 12 : 15, '#7d8496', 'center');
 

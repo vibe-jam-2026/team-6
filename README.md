@@ -1,10 +1,10 @@
 # team-6
 Vibe Jam 2026 – lag 6
 
-## Mach Schnell
+## Mach Mania
 
 A local multiplayer fighter-jet shooter for 2 players sharing one keyboard.
-Scramble your low-poly Saab JAS 39 Gripen E, go *schnell*, and fire rockets at
+Scramble your low-poly Saab JAS 39 Gripen E, go full throttle, and fire rockets at
 waves of enemy zeppelins, fighters and drones (large / medium / small targets),
 then at bosses. Fly with your wingman in co-op, or fight them in free-for-all.
 It is a static site with no server: `index.html` plus a vendored copy of
