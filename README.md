@@ -1,14 +1,15 @@
 # team-6
 Vibe Jam 2026 – lag 6
 
-## Rock Rumble
+## Mach Schnell
 
-A local multiplayer asteroid shooter for 2 players sharing one keyboard,
-flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy zeppelins,
-fighters and birds (large / medium / small targets).
+A local multiplayer fighter-jet shooter for 2 players sharing one keyboard.
+Scramble your low-poly Saab JAS 39 Gripen E, go *schnell*, and fire rockets at
+waves of enemy zeppelins, fighters and birds (large / medium / small targets),
+then at bosses. Fly with your wingman in co-op, or fight them in free-for-all.
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
-(tilted camera, lit low-poly rocks, shadows, bloom glow). Play it at
+(tilted camera, lit low-poly aircraft and scenery, shadows, bloom glow). Play it at
 https://vibe-jam-2026.github.io/team-6/.
 
 To run it locally, serve the folder over HTTP (ES modules don't load from `file://`):
@@ -62,7 +63,7 @@ then open http://localhost:8000.
 | **N** | skip to the next wave (hint shown only while invincible) |
 | **B** | jump to the next boss wave (from the lobby: start at the first boss; hint shown only while invincible) |
 
-Jumping clears the field (rocks, boss and its bullets) and starts the chosen wave at once.
+Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
 touch. ◀ ▶ turn, ▲ thrusts, ● fires and ✸ self-destructs (they fly P1). In the lobby, tap a pilot's card
