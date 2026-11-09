@@ -9,7 +9,7 @@ waves of enemy bombers, fighters and birds (large / medium / small targets),
 then at bosses. Fly with your wingmen in co-op, or fight them in free-for-all.
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
-(tilted camera, lit low-poly rocks, shadows, bloom glow). Play it at
+(tilted camera, lit low-poly aircraft and scenery, shadows, bloom glow). Play it at
 https://vibe-jam-2026.github.io/team-6/.
 
 To run it locally, serve the folder over HTTP (ES modules don't load from `file://`):
