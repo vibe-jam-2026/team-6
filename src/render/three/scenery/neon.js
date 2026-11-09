@@ -8,9 +8,9 @@ const TOWERS = [0x161827, 0x1c1f30, 0x22253a, 0x131522];
 
 // Glowing parts use MeshBasicMaterial (unlit) with colours pushed past 1 so
 // the bloom pass makes them shine against the night.
-const glow = () => {
+const glow = strength => {
   const m = new THREE.MeshBasicMaterial();
-  m.color.setScalar(2.2);
+  m.color.setScalar(strength);
   return m;
 };
 
@@ -39,8 +39,8 @@ export const neon = {
         const height = Math.min(cap, 10 + rng() * 14 + near * near * 200 * rng());
         const sx = 18 + rng() * 6, sy = 18 + rng() * 6;
         towers.push({ x, y, z, sx, sy, sz: height, color: pick(TOWERS) });
-        roofs.push({ x, y, z: z + height, sx: sx + 0.6, sy: sy + 0.6, sz: 1.2, color: pick(NEON) });
-        if (height > 30 && rng() < 0.6) {
+        if (rng() < 0.35) roofs.push({ x, y, z: z + height, sx: sx + 0.6, sy: sy + 0.6, sz: 1.2, color: pick(NEON) });
+        if (height > 30 && rng() < 0.3) {
           strips.push({ x: x + sx / 2, y: y + sy / 2, z, sx: 1.4, sy: 1.4, sz: height, color: pick(NEON) });
         }
       }
@@ -58,9 +58,9 @@ export const neon = {
     return [
       terrain,
       instanced(createBlockGeometry(), new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.4, flatShading: true }), towers),
-      instanced(createBlockGeometry(), glow(), roofs),
-      instanced(createBlockGeometry(), glow(), strips),
-      instanced(createBlockGeometry(), glow(), lines),
+      instanced(createBlockGeometry(), glow(0.75), roofs),
+      instanced(createBlockGeometry(), glow(1.3), strips),
+      instanced(createBlockGeometry(), glow(0.55), lines),
     ];
   },
 };

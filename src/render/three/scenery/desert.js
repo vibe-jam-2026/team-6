@@ -3,7 +3,7 @@ import { valueNoise, fbm, seededRandom, smoothstep } from './noise.js';
 import { mergeFlat } from '../geometry.js';
 import { BASE, CEILING, outsideBy, visibleArea, createTerrain, createWater, instanced, createBlockGeometry } from './terrain.js';
 
-const OASIS = BASE + 2;
+const OASIS = BASE - 3;
 
 // Square pyramid, base 1 x 1 at z = 0, apex at z = 1.
 const pyramidGeometry = () => new THREE.ConeGeometry(Math.SQRT1_2, 1, 4).rotateX(Math.PI / 2).rotateZ(Math.PI / 4).translate(0, 0, 0.5);
@@ -26,14 +26,14 @@ export const desert = {
       // 1 - |sin| gives sharp dune crests with long smooth troughs
       const crest = 1 - Math.abs(Math.sin((x * 0.8 + y * 0.6) / 95 + fbm(dunes, x / 340, y / 340, 3) * 7));
       const far = outsideBy(x, y, w, h) * 0.12 * (y < -h / 2 ? 0.3 : 1);
-      return BASE + 3 + crest ** 1.6 * 13 + far - smoothstep(0.6, 0.68, oasisAt(x, y)) * 13;
+      return BASE + 6 + crest ** 1.6 * 13 + far - smoothstep(0.8, 0.85, oasisAt(x, y)) * 16;
     };
     const sandLight = new THREE.Color(0xe2bd7c), sandDark = new THREE.Color(0xb38449), grass = new THREE.Color(0x5f7a34), mud = new THREE.Color(0x8a6a44);
     const colorAt = (x, y, z, c) => {
       const o = oasisAt(x, y);
       if (z < OASIS + 1.5) return c.copy(mud);
-      if (o > 0.56) return c.copy(grass).lerp(sandDark, smoothstep(0.62, 0.56, o));
-      return c.copy(sandDark).lerp(sandLight, Math.min(1, (z - BASE - 3) / 12));
+      if (o > 0.76) return c.copy(grass).lerp(sandDark, smoothstep(0.81, 0.76, o));
+      return c.copy(sandDark).lerp(sandLight, Math.min(1, (z - BASE - 6) / 12));
     };
     const terrain = createTerrain(w, h, heightAt, colorAt);
     const groundAt = terrain.userData.groundAt;
@@ -44,9 +44,9 @@ export const desert = {
     const palms = [], houses = [];
     for (let i = 0; i < 6000 && palms.length < 260; i++) {
       const [x, y] = randomPoint(), o = oasisAt(x, y), z = groundAt(x, y);
-      if (o < 0.55 || z < OASIS + 1) continue;
+      if (o < 0.76 || z < OASIS + 1) continue;
       palms.push({ x, y, z, s: 12 + rng() * 6, rot: rng() * 6.3 });
-      if (houses.length < 30 && o < 0.6 && rng() < 0.25) {
+      if (houses.length < 30 && o < 0.8 && rng() < 0.25) {
         houses.push({ x: x + 14, y: y + 8, z, sx: 10 + rng() * 6, sy: 9 + rng() * 5, sz: 6 + rng() * 3, rot: rng() * 1.5, color: rng() < 0.5 ? 0xc79a62 : 0xd8b07a });
       }
     }

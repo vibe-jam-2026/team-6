@@ -7,7 +7,7 @@ const SEA = BASE + 1;
 // Arctic: cracked sheets of pack ice drifting on a dark polar sea, tall
 // icebergs, a red research station, and a glacier wall to the north.
 export const arctic = {
-  mood: { sky: 0x9ab8cf, hemiSky: 0xf0f8ff, hemiGround: 0x2c4a66, hemi: 1.15, sun: 0xfff6ee, sunIntensity: 2.3 },
+  mood: { sky: 0x7d98b0, hemiSky: 0xd8e6f4, hemiGround: 0x2c4a66, hemi: 0.75, sun: 0xfff6ee, sunIntensity: 1.5 },
 
   build(w, h) {
     const floes = valueNoise(81), cracks = valueNoise(82), rng = seededRandom(8);
@@ -17,7 +17,7 @@ export const arctic = {
       const glacier = Math.max(0, y - h * 0.62) * 0.9 + outsideBy(x, y, w, h) * 0.08;
       return SEA - 6 + ice * (7.5 + fbm(cracks, x / 30, y / 30, 2) * 1.5) + glacier;
     };
-    const deep = new THREE.Color(0x0c2236), snow = new THREE.Color(0xeef4fa), blueIce = new THREE.Color(0xa8cce4);
+    const deep = new THREE.Color(0x0c2236), snow = new THREE.Color(0xb4c2d0), blueIce = new THREE.Color(0x7fa2bc);
     const colorAt = (x, y, z, c) => {
       if (z < SEA) return c.copy(deep);
       return c.copy(blueIce).lerp(snow, smoothstep(SEA + 1, SEA + 3, z) * (0.6 + fbm(cracks, x / 70, y / 70, 2) * 0.4));
@@ -36,7 +36,7 @@ export const arctic = {
       const cap = outsideBy(x, y, w, h) > 40 ? 60 : (CEILING - (SEA - 4) - 2) / 1.6;
       const s = 10 + rng() * 22;
       bergs.push({ x, y, z: SEA - 4, sx: s, sy: s * (0.7 + rng() * 0.5), sz: Math.min(cap, s * (0.8 + rng())), rot: rng() * 6.3,
-        color: rng() < 0.6 ? 0xe8f4ff : 0xbcdcf0 });
+        color: rng() < 0.6 ? 0xb8cad8 : 0x8fb4cc });
     }
 
     // a research station on one of the larger floes: huts and radio masts

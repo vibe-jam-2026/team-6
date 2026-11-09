@@ -5,7 +5,7 @@ import { BASE, CEILING, outsideBy, visibleArea, createTerrain, instanced, create
 // Lunar surface: grey regolith pocked with craters of every size, under a
 // black sky, with a small moon base of domes and solar panels.
 export const moon = {
-  mood: { sky: 0x04050a, hemiSky: 0xa8b2cc, hemiGround: 0x0c0c10, hemi: 0.55, sun: 0xffffff, sunIntensity: 3.0 },
+  mood: { sky: 0x04050a, hemiSky: 0xa8b2cc, hemiGround: 0x0c0c10, hemi: 0.45, sun: 0xffffff, sunIntensity: 2.2 },
 
   build(w, h) {
     const dust = valueNoise(101), rng = seededRandom(10);
@@ -31,7 +31,7 @@ export const moon = {
       return dz;
     };
     const heightAt = (x, y) => BASE + 8 + fbm(dust, x / 160, y / 160, 3) * 6 + craterAt(x, y) + outsideBy(x, y, w, h) * 0.1;
-    const light = new THREE.Color(0x9a9a9c), dark = new THREE.Color(0x4e4e54);
+    const light = new THREE.Color(0x7c7c80), dark = new THREE.Color(0x3c3c42);
     const colorAt = (x, y, z, c) => c.copy(dark).lerp(light, Math.min(1, Math.max(0, (z - BASE + 4) / 22)) * (0.75 + fbm(dust, x / 40, y / 40, 2) * 0.3));
     const terrain = createTerrain(w, h, heightAt, colorAt);
     const groundAt = terrain.userData.groundAt;
@@ -42,7 +42,7 @@ export const moon = {
     for (let i = 0; i < 7; i++) {
       const x = base.x + (rng() - 0.5) * 220, y = base.y + (rng() - 0.5) * 140, z = groundAt(x, y);
       const r = Math.min(10 + rng() * 10, (CEILING - z - 2));
-      domes.push({ x, y, z, s: r, color: 0xe8ecf0 });
+      domes.push({ x, y, z, s: r, color: 0xa8aeb8 });
       windows.push({ x, y, z: z + r * 0.25, sx: r * 2.05, sy: r * 2.05, sz: r * 0.12, color: 0x7ad8ff });
     }
     for (let i = 0; i < 14; i++) {
