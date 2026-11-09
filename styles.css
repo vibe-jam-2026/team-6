@@ -6,3 +6,28 @@ canvas { display: block; position: fixed; inset: 0; width: 100vw; height: 100vh;
 #hud { pointer-events: none; }
 a { color: var(--mut); }
 #foot { position: fixed; right: 10px; bottom: 6px; font-size: 11px; color: var(--mut); pointer-events: auto; }
+
+/* touch controls (src/input/TouchControls.js): hidden until the first touch */
+html, body { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#touch { position: fixed; inset: 0; pointer-events: none; display: none; }
+#touch.on { display: block; }
+#touch > div { position: absolute; display: none; gap: 14px; }
+#touch[data-state="playing"] .pad, #touch[data-state="playing"] .menu.play { display: flex; }
+#touch[data-state="paused"] .menu.paused { display: flex; }
+#touch button {
+  pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent;
+  width: 76px; height: 76px; border-radius: 50%; padding: 0;
+  font: 26px/1 ui-monospace, Menlo, monospace; color: rgba(232, 236, 244, 0.8);
+  background: rgba(255, 255, 255, 0.07); border: 2px solid rgba(255, 93, 115, 0.45);
+}
+#touch button.down { background: rgba(255, 93, 115, 0.35); color: #fff; }
+#touch .pad { bottom: calc(22px + env(safe-area-inset-bottom)); }
+#touch .pad.left { left: calc(18px + env(safe-area-inset-left)); }
+#touch .pad.right { right: calc(18px + env(safe-area-inset-right)); align-items: flex-end; }
+#touch .pad.right .fire { width: 92px; height: 92px; }
+#touch .pad.right .thrust { margin-bottom: 40px; }
+#touch .menu { left: 50%; transform: translateX(-50%); }
+#touch .menu button { width: 44px; height: 44px; font-size: 16px; border-color: rgba(125, 132, 150, 0.5); }
+#touch .menu.play { bottom: calc(10px + env(safe-area-inset-bottom)); }
+#touch .menu.paused { top: calc(50% + 90px); }
+#touch .menu.paused button:not(:last-child) { width: auto; border-radius: 22px; padding: 0 22px; }

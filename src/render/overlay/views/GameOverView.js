@@ -1,5 +1,5 @@
 export class GameOverView {
-  draw(o, { session }) {
+  draw(o, { session, touch }) {
     const result = session.result;
     if (!result) return;
     const W = o.width;
@@ -14,6 +14,6 @@ export class GameOverView {
       o.text(String(s.score), W / 2 + 40, ry, 18, '#e8ecf4', 'right');
       if (result.showKills) o.text(`${s.kills} kill${s.kills === 1 ? '' : 's'}`, W / 2 + 150, ry, 13, '#7d8496', 'right');
     });
-    o.text('ENTER  back to lobby', W / 2, y + h - 28, 14, '#ffffff', 'center');
+    o.text(touch?.enabled ? 'TAP  back to lobby' : 'ENTER  back to lobby', W / 2, y + h - 28, 14, '#ffffff', 'center');
   }
 }

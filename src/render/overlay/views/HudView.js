@@ -2,7 +2,7 @@ const MAX_LIFE_ICONS = 8;
 
 // Score and lives in each player's corner, plus wave and mode at the top.
 export class HudView {
-  draw(o, { world, waves, session, audio }) {
+  draw(o, { world, waves, session, audio, touch }) {
     const { width: W, height: H } = o;
     const corners = [
       { x: 18, y: 22, align: 'left' }, { x: W - 18, y: 22, align: 'right' },
@@ -20,6 +20,6 @@ export class HudView {
       });
     }
     o.text(`WAVE ${waves.wave}  ·  ${session.mode.title}`, W / 2, 22, 13, '#7d8496', 'center');
-    o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'}`, W / 2, H - 16, 11, '#545a6a', 'center');
+    if (!touch?.enabled) o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'}`, W / 2, H - 16, 11, '#545a6a', 'center');
   }
 }
