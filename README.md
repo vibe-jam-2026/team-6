@@ -47,6 +47,13 @@ then open http://localhost:8000.
 
 Jumping clears the field (rocks, boss and its bullets) and starts the chosen wave at once.
 
+**Touch screens:** on a phone or tablet, on-screen controls appear after the first
+touch. ◀ ▶ turn, ▲ thrusts and ● fires (they fly P1). In the lobby, tap a pilot's card
+to join or leave, tap the mode line to switch mode and the start line to start. In
+game there are pause and sound buttons at the bottom; on the game-over screen, tap
+anywhere to go back to the lobby. Add `?touch=1` to the URL to force the controls on
+(for example with a mouse), or `?touch=0` to keep them off.
+
 Note: some keyboards can't register many simultaneous keys ("ghosting"), so with
 4 players on one keyboard a few key combinations may drop out.
 
@@ -61,7 +68,8 @@ src/
   config.js               all tunable data (players, keys, physics, rules) – no behaviour
   core/                   EventBus, GameLoop (fixed timestep), StateMachine, Viewport, math
   input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent),
-                          TestControls (invincible mode and wave jumps)
+                          TestControls (invincible mode and wave jumps),
+                          TouchControls (on-screen buttons that press the same key codes)
   audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),
                           MusicPlayer (procedural soundtrack per game state)
   world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet, Boss
