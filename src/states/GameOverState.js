@@ -12,11 +12,12 @@ export class GameOverState {
 
   update(dt) {
     // a demo shows the results for a moment, then flies the next match
-    if (this.session?.demo && (this.#demoTimer -= dt) <= 0) {
-      this.states.change('playing');
-      return;
-    }
-    if (this.input.wasPressed(MENU_KEYS.start)) {
+    if (this.session?.demo) {
+      if ((this.#demoTimer -= dt) <= 0) {
+        this.states.change('playing');
+        return;
+      }
+    } else if (this.input.wasPressed(MENU_KEYS.start)) {
       this.bus.emit(EVENTS.MENU_ACTION);
       this.states.change('lobby');
       return;

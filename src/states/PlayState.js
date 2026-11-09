@@ -18,7 +18,7 @@ export class PlayState {
   }
 
   update(dt) {
-    if (this.input.wasPressed(MENU_KEYS.pause)) {
+    if (!this.session.demo && this.input.wasPressed(MENU_KEYS.pause)) {
       this.bus.emit(EVENTS.MENU_ACTION);
       this.states.change('paused');
       return;

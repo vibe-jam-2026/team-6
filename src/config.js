@@ -25,11 +25,12 @@ export const MENU_KEYS = {
   mouse: 'KeyC',     // lobby: hand the mouse to nobody / P1 / P2
   computer: 'KeyV',  // lobby: let the computer fly P2 (or hand it back)
   demo: 'KeyX',      // lobby: watch a demo where the computer flies both jets
+  exitDemo: 'Escape', // the only key that ends a demo
 };
 
 // Demo mode: the computer flies every jet. It starts from the lobby with
-// MENU_KEYS.demo or by itself after `idleTime` seconds without input, and any
-// key, click or touch ends it and goes back to the lobby.
+// MENU_KEYS.demo or by itself after `idleTime` seconds without input, and only
+// MENU_KEYS.exitDemo (Esc) ends it and goes back to the lobby.
 export const DEMO = {
   idleTime: 30,       // seconds of lobby inactivity before the demo starts
   resultsTime: 7,     // seconds the results stay up before the next demo match

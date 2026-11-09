@@ -44,8 +44,8 @@ then open http://localhost:8000.
   **V** lets the computer fly P2, **X** starts a demo, **Enter** starts.
 - **Demo mode:** **X** in the lobby (or 30 seconds without touching anything there) starts a match
   where the computer flies both jets, in the mode picked in the lobby. When a demo match ends the results
-  show for a few seconds and the next one starts. Any key, click or tap ends the demo and puts the
-  lobby back the way it was.
+  show for a few seconds and the next one starts. Only **Esc** ends the demo (other keys, clicks and
+  taps don't) and puts the lobby back the way it was.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, fight through to the final boss together).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.

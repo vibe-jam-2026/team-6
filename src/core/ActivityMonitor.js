@@ -1,11 +1,10 @@
 // Notices when a person touches the keyboard, mouse or screen, so the game
-// can start a demo after a while without any input, and end it on the first one.
+// can start a demo after a while without any input.
 export class ActivityMonitor {
   #last = performance.now();
-  #fresh = false;
 
   constructor(target = window) {
-    const touched = () => { this.#last = performance.now(); this.#fresh = true; };
+    const touched = () => { this.#last = performance.now(); };
     for (const type of ['pointerdown', 'wheel', 'touchstart']) {
       target.addEventListener(type, touched, { passive: true });
     }
@@ -20,11 +19,6 @@ export class ActivityMonitor {
   // seconds since the last input
   get idleSeconds() { return (performance.now() - this.#last) / 1000; }
 
-  // true when there was input since the last step
-  get active() { return this.#fresh; }
-
   // forget old input, as if the player had just touched something
   reset() { this.#last = performance.now(); }
-
-  endStep() { this.#fresh = false; }
 }
