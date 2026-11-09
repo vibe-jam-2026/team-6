@@ -2,7 +2,9 @@ import { ThreeStage } from './ThreeStage.js';
 import { Lighting } from './Lighting.js';
 import { ArenaView } from './ArenaView.js';
 import { CameraRig } from './CameraRig.js';
-import { createStarfield } from './Starfield.js';
+import { Scenery } from './scenery/Scenery.js';
+import { SCENERY, sceneryForWave } from '../../config.js';
+import { EVENTS } from '../../core/EventBus.js';
 import { createGlowDotTexture } from './textures.js';
 import { EntityViewSync } from './EntityViewSync.js';
 import { ShipView } from './views/ShipView.js';
@@ -24,7 +26,9 @@ export class WorldRenderer {
     this.lighting = new Lighting(scene);
     this.arena = new ArenaView(scene);
     this.cameraRig = new CameraRig(camera, bus);
-    scene.add(createStarfield(dot));
+    this.scenery = new Scenery(scene, this.lighting);
+    this.wave = 1;
+    bus.on(EVENTS.WAVE_STARTED, ({ wave }) => { this.wave = wave; });
     this.asteroidViews = new EntityViewSync(scene, a => new AsteroidView(a));
     this.shipViews = new EntityViewSync(scene, s => new ShipView(s));
     this.bulletViews = new EntityViewSync(scene, b => new BulletView(b));
@@ -38,6 +42,7 @@ export class WorldRenderer {
       this.arena.build(vp);
       this.lighting.fit(vp);
       this.cameraRig.fit(vp);
+      this.scenery.fit(vp, this.stage.camera.position.length());
     });
   }
 
@@ -46,6 +51,7 @@ export class WorldRenderer {
     const dt = this.#lastTime === null ? 0 : Math.min(0.1, t - this.#lastTime);
     this.#lastTime = t;
     const inLobby = this.states.currentName === 'lobby';
+    this.scenery.show(inLobby ? SCENERY[0].key : sceneryForWave(this.wave).key);
     const frame = { t, bounds: this.viewport, session: this.session };
 
     this.asteroidViews.sync(this.world.asteroids, frame);

@@ -1,4 +1,4 @@
-import { DEFAULT_JOINED, PLAYERS } from '../config.js';
+import { DEFAULT_JOINED, PLAYERS, sceneryForWave } from '../config.js';
 import { EVENTS } from '../core/EventBus.js';
 import { GAME_MODES } from '../modes/index.js';
 import { Ship } from '../world/entities/Ship.js';
@@ -15,7 +15,10 @@ export class Session {
   constructor(bus, controllers, modes = GAME_MODES) {
     this.controllers = controllers;
     this.modes = modes;
-    bus.on(EVENTS.WAVE_STARTED, ({ wave, boss }) => this.announce(boss ? `WAVE ${wave} · BOSS` : `WAVE ${wave}`, boss ? 3 : 2));
+    bus.on(EVENTS.WAVE_STARTED, ({ wave, boss }) => {
+      const place = sceneryForWave(wave).title.toUpperCase();
+      this.announce(boss ? `WAVE ${wave} · BOSS · ${place}` : `WAVE ${wave}  ·  ${place}`, boss ? 3 : 2);
+    });
     bus.on(EVENTS.BOSS_DESTROYED, () => this.announce('BOSS DESTROYED', 3));
   }
 
