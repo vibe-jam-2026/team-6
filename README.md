@@ -4,8 +4,18 @@ Vibe Jam 2026 – lag 6
 ## Rock Rumble
 
 A local multiplayer asteroid shooter for up to 4 players sharing one keyboard.
-It is a single static page (`index.html`) with no server and no dependencies —
-open it in a browser or visit https://vibe-jam-2026.github.io/team-6/.
+It is a static site with no server: `index.html` plus a vendored copy of
+[Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
+(tilted camera, lit low-poly rocks, shadows, bloom glow). Play it at
+https://vibe-jam-2026.github.io/team-6/.
+
+To run it locally, serve the folder over HTTP (ES modules don't load from `file://`):
+
+```bash
+python3 -m http.server 8000
+```
+
+then open http://localhost:8000.
 
 | Player | Thrust | Turn | Fire |
 |--------|--------|------|------|

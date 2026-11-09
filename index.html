@@ -9,16 +9,25 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
   body { font: 16px/1.4 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; color: var(--fg); }
-  canvas { display: block; width: 100vw; height: 100vh; }
+  canvas { display: block; position: fixed; inset: 0; width: 100vw; height: 100vh; }
+  #hud { pointer-events: none; }
   a { color: var(--mut); }
   #foot { position: fixed; right: 10px; bottom: 6px; font-size: 11px; color: var(--mut); pointer-events: auto; }
 </style>
 </head>
 <body>
-<canvas id="game"></canvas>
+<canvas id="gl"></canvas>
+<canvas id="hud"></canvas>
 <div id="foot"><a href="instructions.html">instructions</a></div>
-<script>
-'use strict';
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/three.module.min.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from './vendor/three/postprocessing/EffectComposer.js';
+import { RenderPass } from './vendor/three/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from './vendor/three/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from './vendor/three/postprocessing/OutputPass.js';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -59,7 +68,8 @@ const CFG = {
 // ---------------------------------------------------------------------------
 // Canvas setup
 // ---------------------------------------------------------------------------
-const canvas = document.getElementById('game');
+const glCanvas = document.getElementById('gl');
+const canvas = document.getElementById('hud');
 const ctx = canvas.getContext('2d');
 const foot = document.getElementById('foot');
 let W = 0, H = 0, DPR = 1;
@@ -67,19 +77,9 @@ function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, 2);
   W = window.innerWidth; H = window.innerHeight;
   canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  makeStars();
+  onResize3d();
 }
 window.addEventListener('resize', resize);
-
-let stars = [];
-function makeStars() {
-  const n = Math.round((W * H) / 6000);
-  stars = Array.from({ length: n }, () => ({
-    x: Math.random() * W, y: Math.random() * H,
-    r: Math.random() * 1.2 + 0.2, a: Math.random() * 0.6 + 0.15,
-  }));
-}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -168,7 +168,7 @@ function makeShip(idx) {
   return {
     idx, def: PLAYERS[idx], x: W / 2, y: H / 2, vx: 0, vy: 0, a: -Math.PI / 2,
     alive: false, lives: CFG.lives, score: 0, nextLife: CFG.extraLifeEvery,
-    invuln: 0, cooldown: 0, respawn: 0.3, thrusting: false, kills: 0,
+    invuln: 0, cooldown: 0, respawn: 0.3, thrusting: false, kills: 0, bank: 0,
   };
 }
 
@@ -176,13 +176,8 @@ function makeAsteroid(size, x, y) {
   const c = CFG.asteroid[size];
   const sp = rand(c.speed[0], c.speed[1]) * (1 + wave * 0.04);
   const dir = rand(0, TAU);
-  const n = 9 + Math.floor(Math.random() * 5);
-  const verts = Array.from({ length: n }, (_, k) => {
-    const ang = (k / n) * TAU;
-    const rr = c.r * rand(0.72, 1.12);
-    return [Math.cos(ang) * rr, Math.sin(ang) * rr];
-  });
-  return { size, r: c.r, x, y, vx: Math.cos(dir) * sp, vy: Math.sin(dir) * sp, a: rand(0, TAU), spin: rand(-1.2, 1.2), verts };
+  return { size, r: c.r, x, y, vx: Math.cos(dir) * sp, vy: Math.sin(dir) * sp, a: rand(0, TAU), spin: rand(-1.2, 1.2),
+    ax: rand(0, TAU), ay: rand(0, TAU), rx: rand(-1.2, 1.2), ry: rand(-1.2, 1.2) };
 }
 
 function startGame() {
@@ -231,7 +226,8 @@ function spawnPoint(ship) {
 function burst(x, y, color, n, speed, life) {
   for (let i = 0; i < n; i++) {
     const a = rand(0, TAU), sp = rand(speed * 0.2, speed);
-    particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(life * 0.4, life), max: life, color });
+    particles.push({ x, y, z: 0, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, vz: rand(-0.7, 0.9) * sp,
+      life: rand(life * 0.4, life), max: life, color });
   }
 }
 
@@ -250,7 +246,7 @@ function killShip(s, killer) {
   for (let i = 0; i < 5; i++) {
     const a = rand(0, TAU), sp = rand(30, 110);
     particles.push({ x: s.x, y: s.y, vx: Math.cos(a) * sp + s.vx * 0.3, vy: Math.sin(a) * sp + s.vy * 0.3,
-      life: 1.6, max: 1.6, color: s.def.color, line: rand(6, 14), rot: rand(0, TAU), spin: rand(-6, 6) });
+      z: 0, vz: rand(-40, 120), life: 1.6, max: 1.6, color: s.def.color });
   }
   audio.shipBoom();
   shake = 10;
@@ -308,6 +304,8 @@ function update(dt) {
       }
       continue;
     }
+    const turn = (down.has(k.right) ? 1 : 0) - (down.has(k.left) ? 1 : 0);
+    s.bank += (turn * 0.75 - s.bank) * Math.min(1, dt * 8);
     if (down.has(k.left)) s.a -= CFG.turnSpeed * dt;
     if (down.has(k.right)) s.a += CFG.turnSpeed * dt;
     s.thrusting = down.has(k.thrust);
@@ -391,13 +389,15 @@ function update(dt) {
 }
 
 function updateAsteroids(dt) {
-  for (const a of asteroids) { a.x += a.vx * dt; a.y += a.vy * dt; a.a += a.spin * dt; wrap(a); }
+  for (const a of asteroids) {
+    a.x += a.vx * dt; a.y += a.vy * dt; a.a += a.spin * dt; a.ax += a.rx * dt; a.ay += a.ry * dt; wrap(a);
+  }
 }
 function updateParticles(dt) {
   for (const p of particles) {
     p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
     p.vx *= 0.985; p.vy *= 0.985;
-    if (p.spin) p.rot += p.spin * dt;
+    if (p.vz) { p.z += p.vz * dt; p.vz *= 0.985; }
   }
   particles = particles.filter(p => p.life > 0);
   shake = Math.max(0, shake - dt * 30);
@@ -429,17 +429,11 @@ function updateLobby() {
 }
 
 // ---------------------------------------------------------------------------
-// Rendering
+// Rendering: 3D world (Three.js) + 2D overlay for HUD and menus
 // ---------------------------------------------------------------------------
 function glow(color, blur) { ctx.shadowColor = color; ctx.shadowBlur = blur; }
 
-function drawWrapped(o, r, fn) {
-  const xs = [0], ys = [0];
-  if (o.x < r) xs.push(W); if (o.x > W - r) xs.push(-W);
-  if (o.y < r) ys.push(H); if (o.y > H - r) ys.push(-H);
-  for (const ox of xs) for (const oy of ys) fn(o.x + ox, o.y + oy);
-}
-
+// 2D ship outline, used only for the small lives icons in the HUD
 function drawShipShape(x, y, a, color, thrusting, scale = 1) {
   ctx.save();
   ctx.translate(x, y); ctx.rotate(a); ctx.scale(scale, scale);
@@ -447,74 +441,318 @@ function drawShipShape(x, y, a, color, thrusting, scale = 1) {
   ctx.beginPath();
   ctx.moveTo(16, 0); ctx.lineTo(-11, -10); ctx.lineTo(-6, 0); ctx.lineTo(-11, 10); ctx.closePath();
   ctx.stroke();
-  if (thrusting) {
-    ctx.strokeStyle = '#ffb347'; glow('#ffb347', 14);
-    ctx.beginPath();
-    ctx.moveTo(-7, -5); ctx.lineTo(-14 - Math.random() * 10, 0); ctx.lineTo(-7, 5);
-    ctx.stroke();
-  }
   ctx.restore();
 }
 
-function draw(time) {
-  ctx.save();
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.fillStyle = '#05060a'; ctx.fillRect(0, 0, W, H);
-  if (shake > 0) ctx.translate(rand(-shake, shake), rand(-shake, shake));
+// Game coordinates are screen-like (x right, y down, origin top-left, size W x H).
+// The 3D scene centres the arena on the origin with +y up and +z towards the camera.
+const sx = x => x - W / 2;
+const sy = y => H / 2 - y;
 
-  // stars
-  for (const s of stars) {
-    ctx.globalAlpha = s.a * (0.75 + 0.25 * Math.sin(time / 900 + s.x));
-    ctx.fillStyle = '#cfd6ff'; ctx.fillRect(s.x, s.y, s.r, s.r);
+const renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: true });
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x04050a);
+const camera = new THREE.PerspectiveCamera(42, 1, 10, 20000);
+camera.up.set(0, 0, 1);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.85, 0.45, 0.62);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+// lights
+scene.add(new THREE.HemisphereLight(0x8aa4ff, 0x1a1020, 0.9));
+const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.bias = -0.0005;
+scene.add(sun, sun.target);
+const rim = new THREE.DirectionalLight(0x6a7dff, 0.9);
+rim.position.set(400, 600, -300);
+scene.add(rim);
+
+// arena: shadow-catching floor, grid and glowing border, rebuilt on resize
+const ARENA_DEPTH = -60;
+const arena = new THREE.Group();
+scene.add(arena);
+
+// starfield far below the arena
+const starGeo = new THREE.BufferGeometry();
+{
+  const n = 2500, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    pos[i * 3] = rand(-6000, 6000); pos[i * 3 + 1] = rand(-5000, 7000); pos[i * 3 + 2] = rand(-3500, -900);
+    const c = rand(0.35, 1); col[i * 3] = c * 0.85; col[i * 3 + 1] = c * 0.9; col[i * 3 + 2] = c;
   }
-  ctx.globalAlpha = 1;
+  starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  starGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+}
+const dotTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.6)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({
+  size: 9, map: dotTex, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+})));
 
-  // asteroids
-  ctx.lineWidth = 1.6; ctx.strokeStyle = '#c9cfdc'; glow('#8f9bb8', 8);
+function buildArena() {
+  arena.clear();
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.ShadowMaterial({ opacity: 0.55 }));
+  floor.position.z = ARENA_DEPTH; floor.receiveShadow = true;
+  arena.add(floor);
+  const tint = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshBasicMaterial({ color: 0x0a1030, transparent: true, opacity: 0.45, depthWrite: false }));
+  tint.position.z = ARENA_DEPTH - 1;
+  arena.add(tint);
+  const pts = [];
+  const step = 80;
+  for (let x = -W / 2; x <= W / 2 + 0.1; x += step) pts.push(x, -H / 2, ARENA_DEPTH, x, H / 2, ARENA_DEPTH);
+  for (let y = -H / 2; y <= H / 2 + 0.1; y += step) pts.push(-W / 2, y, ARENA_DEPTH, W / 2, y, ARENA_DEPTH);
+  const gridGeo = new THREE.BufferGeometry();
+  gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  arena.add(new THREE.LineSegments(gridGeo, new THREE.LineBasicMaterial({ color: 0x1d2a5a, transparent: true, opacity: 0.7 })));
+  const border = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-W / 2, -H / 2, 0), new THREE.Vector3(W / 2, -H / 2, 0),
+    new THREE.Vector3(W / 2, H / 2, 0), new THREE.Vector3(-W / 2, H / 2, 0),
+  ]);
+  arena.add(new THREE.LineLoop(border, new THREE.LineBasicMaterial({ color: new THREE.Color(0x3d6bff).multiplyScalar(1.6) })));
+  // light + shadow camera covering the arena
+  sun.position.set(-W * 0.25, H * 0.35, 1200);
+  sun.target.position.set(0, 0, 0);
+  const sc = sun.shadow.camera;
+  sc.left = -W * 0.75; sc.right = W * 0.75; sc.top = H * 0.75; sc.bottom = -H * 0.75; sc.near = 100; sc.far = 3000;
+  sc.updateProjectionMatrix();
+}
+
+// tilt the camera and fit the whole arena on screen, centred
+const TILT = 0.48; // radians from straight down
+let camBase = new THREE.Vector3(), camTarget = new THREE.Vector3();
+function fitCamera() {
+  camera.aspect = W / H;
+  camera.updateProjectionMatrix();
+  const corners = [[-W / 2, -H / 2], [W / 2, -H / 2], [W / 2, H / 2], [-W / 2, H / 2]].map(([x, y]) => new THREE.Vector3(x, y, 0));
+  const v = new THREE.Vector3();
+  let ty = 0, d = 1000;
+  const place = dist => {
+    camera.position.set(0, ty - dist * Math.sin(TILT), dist * Math.cos(TILT));
+    camera.lookAt(0, ty, 0); camera.updateMatrixWorld();
+  };
+  const extent = () => {
+    let mx = 0, top = -Infinity, bot = Infinity;
+    for (const c of corners) { v.copy(c).project(camera); mx = Math.max(mx, Math.abs(v.x)); top = Math.max(top, v.y); bot = Math.min(bot, v.y); }
+    return { mx, top, bot };
+  };
+  for (let it = 0; it < 8; it++) {
+    let lo = 50, hi = 50000;
+    for (let i = 0; i < 40; i++) {
+      d = (lo + hi) / 2; place(d);
+      const e = extent();
+      if (e.mx <= 0.96 && e.top <= 0.86 && e.bot >= -0.9) hi = d; else lo = d;
+    }
+    d = hi; place(d);
+    const e = extent();
+    ty += ((e.top + e.bot) / 2 + 0.02) * H * 0.35;
+  }
+  place(d);
+  camBase.copy(camera.position); camTarget.set(0, ty, 0);
+}
+
+// screen pixel -> point on the arena plane (z = height)
+const raycaster = new THREE.Raycaster();
+function screenToWorld(px, py, height = 0) {
+  raycaster.setFromCamera(new THREE.Vector2((px / W) * 2 - 1, -(py / H) * 2 + 1), camera);
+  const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -height);
+  return raycaster.ray.intersectPlane(plane, new THREE.Vector3()) || new THREE.Vector3();
+}
+
+// --- ship model -------------------------------------------------------------
+const shipGeo = (() => {
+  const N = [19, 0, 1], L = [-12, -12, -1], R = [-12, 12, -1], B = [-7, 0, 0], T = [-5, 0, 8], D = [-5, 0, -4];
+  const tris = [N, L, T, N, T, R, L, B, T, T, B, R, N, D, L, N, R, D, L, D, B, B, D, R];
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(tris.flat(), 3));
+  g.computeVertexNormals();
+  return g;
+})();
+const shipEdges = new THREE.EdgesGeometry(shipGeo, 1);
+const flameGeo = new THREE.ConeGeometry(4.5, 1, 10).rotateZ(Math.PI / 2).translate(-0.5, 0, 0);
+const shieldGeo = new THREE.IcosahedronGeometry(25, 2);
+
+function makeShipModel(colorHex) {
+  const color = new THREE.Color(colorHex);
+  const root = new THREE.Group();
+  const body = new THREE.Group(); // banks inside the heading rotation
+  root.add(body);
+  const hull = new THREE.Mesh(shipGeo, new THREE.MeshStandardMaterial({
+    color, emissive: color, emissiveIntensity: 0.35, metalness: 0.45, roughness: 0.35, flatShading: true, side: THREE.DoubleSide,
+  }));
+  hull.castShadow = true;
+  const edges = new THREE.LineSegments(shipEdges, new THREE.LineBasicMaterial({ color: color.clone().multiplyScalar(2.2), transparent: true }));
+  const flame = new THREE.Mesh(flameGeo, new THREE.MeshBasicMaterial({
+    color: new THREE.Color(0xffa040).multiplyScalar(2.5), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  flame.position.set(-7, 0, 0.5);
+  const shield = new THREE.Mesh(shieldGeo, new THREE.MeshBasicMaterial({
+    color: color.clone().multiplyScalar(0.7), wireframe: true, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  body.add(hull, edges, flame);
+  root.add(shield);
+  root.userData = { body, hull, edges, flame, shield };
+  return root;
+}
+
+// --- asteroid model ---------------------------------------------------------
+const rockMat = new THREE.MeshStandardMaterial({ color: 0x7d8496, roughness: 0.92, metalness: 0.05, flatShading: true });
+const rockEdgeMat = new THREE.LineBasicMaterial({ color: 0x8fa6e0, transparent: true, opacity: 0.35 });
+function makeRockModel(a) {
+  const g = new THREE.IcosahedronGeometry(1, a.size === 1 ? 0 : 1);
+  const pos = g.attributes.position, bumps = new Map(), v = new THREE.Vector3();
+  const sq = [rand(0.8, 1.15), rand(0.8, 1.15), rand(0.7, 1)];
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i);
+    const key = `${v.x.toFixed(3)},${v.y.toFixed(3)},${v.z.toFixed(3)}`;
+    if (!bumps.has(key)) bumps.set(key, rand(0.72, 1.12));
+    v.multiplyScalar(bumps.get(key) * a.r);
+    pos.setXYZ(i, v.x * sq[0], v.y * sq[1], v.z * sq[2]);
+  }
+  g.computeVertexNormals();
+  const m = new THREE.Mesh(g, rockMat);
+  m.castShadow = true; m.receiveShadow = true;
+  m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 20), rockEdgeMat));
+  m.rotation.set(rand(0, TAU), rand(0, TAU), rand(0, TAU));
+  return m;
+}
+
+// --- bullets & particles ----------------------------------------------------
+const bulletGeo = new THREE.SphereGeometry(3, 10, 8);
+const bulletMats = PLAYERS.map(p => new THREE.MeshBasicMaterial({ color: new THREE.Color(p.color).multiplyScalar(3) }));
+
+const MAX_PARTICLES = 6000;
+const partPos = new Float32Array(MAX_PARTICLES * 3), partCol = new Float32Array(MAX_PARTICLES * 3);
+const partGeo = new THREE.BufferGeometry();
+partGeo.setAttribute('position', new THREE.BufferAttribute(partPos, 3));
+partGeo.setAttribute('color', new THREE.BufferAttribute(partCol, 3));
+const partPoints = new THREE.Points(partGeo, new THREE.PointsMaterial({
+  size: 10, map: dotTex, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+}));
+partPoints.frustumCulled = false;
+scene.add(partPoints);
+const colorCache = new Map();
+const toColor = hex => { if (!colorCache.has(hex)) colorCache.set(hex, new THREE.Color(hex).multiplyScalar(2.2)); return colorCache.get(hex); };
+
+// --- syncing game objects to meshes -------------------------------------------
+const live = new Set();
+let seen = new Set();
+function meshFor(o, create) {
+  if (!o.mesh) { o.mesh = create(); scene.add(o.mesh); live.add(o.mesh); }
+  seen.add(o.mesh);
+  return o.mesh;
+}
+function sweep() {
+  for (const m of live) if (!seen.has(m)) {
+    scene.remove(m); live.delete(m);
+    if (m.userData.ownGeo) { m.geometry.dispose(); m.children.forEach(c => c.geometry.dispose()); }
+  }
+  seen = new Set();
+}
+
+const lobbyShips = PLAYERS.map(p => { const m = makeShipModel(p.color); m.visible = false; scene.add(m); return m; });
+const lobbySlots = [];
+
+function onResize3d() {
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(W, H, false);
+  composer.setPixelRatio(DPR);
+  composer.setSize(W, H);
+  bloom.resolution.set(W, H);
+  buildArena();
+  fitCamera();
+}
+
+function render3d(time) {
+  const t = time / 1000;
+  // asteroids (lobby, game and game over)
   for (const a of asteroids) {
-    drawWrapped(a, a.r * 1.2, (x, y) => {
-      ctx.save(); ctx.translate(x, y); ctx.rotate(a.a);
-      ctx.beginPath();
-      a.verts.forEach(([vx, vy], k) => k ? ctx.lineTo(vx, vy) : ctx.moveTo(vx, vy));
-      ctx.closePath(); ctx.stroke(); ctx.restore();
-    });
+    const m = meshFor(a, () => { const r = makeRockModel(a); r.userData.ownGeo = true; return r; });
+    m.position.set(sx(a.x), sy(a.y), 0);
+    m.rotation.set(a.ax, a.ay, -a.a);
   }
+  // ships & bullets
+  const inGame = state !== 'lobby';
+  if (inGame) {
+    for (const s of ships) {
+      const m = meshFor(s, () => makeShipModel(s.def.color));
+      const u = m.userData;
+      m.visible = s.alive;
+      if (!s.alive) continue;
+      m.position.set(sx(s.x), sy(s.y), 4 + Math.sin(t * 3 + s.idx) * 2);
+      m.scale.setScalar(1.25);
+      m.rotation.set(0, 0, -s.a);
+      u.body.rotation.x = s.bank;
+      u.flame.visible = s.thrusting;
+      if (s.thrusting) u.flame.scale.set(14 + Math.random() * 12, 1 + Math.random() * 0.2, 1);
+      u.shield.visible = s.invuln > 0;
+      if (s.invuln > 0) {
+        u.shield.rotation.z = t * 2; u.shield.rotation.x = t * 1.3;
+        u.shield.material.opacity = 0.1 + 0.08 * Math.sin(t * 20);
+      }
+      u.hull.material.emissiveIntensity = s.invuln > 0 ? 0.35 + 0.4 * (Math.sin(t * 25) > 0 ? 1 : 0) : 0.35;
+    }
+    for (const b of bullets) {
+      const m = meshFor(b, () => new THREE.Mesh(bulletGeo, bulletMats[b.owner.idx]));
+      m.position.set(sx(b.x), sy(b.y), 4);
+    }
+  }
+  sweep();
+
+  // lobby showcase ships
+  lobbyShips.forEach((m, i) => {
+    const slot = lobbySlots[i];
+    m.visible = state === 'lobby' && !!slot;
+    if (!m.visible) return;
+    const on = joined[i];
+    const p = screenToWorld(slot.x, slot.y, 30);
+    m.position.copy(p);
+    m.scale.setScalar(slot.scale);
+    m.rotation.set(0, 0, Math.PI / 2 + Math.sin(t * 0.9 + i) * 0.9);
+    const u = m.userData;
+    u.body.rotation.x = Math.sin(t * 1.6 + i) * 0.5;
+    u.flame.visible = on;
+    u.flame.scale.set(10 + Math.random() * 8, 1, 1);
+    u.shield.visible = false;
+    u.hull.material.emissiveIntensity = on ? 0.45 : 0.05;
+    u.hull.material.color.set(on ? PLAYERS[i].color : 0x333844);
+    u.edges.material.opacity = on ? 1 : 0.2;
+  });
 
   // particles
-  for (const p of particles) {
-    const t = Math.max(0, p.life / p.max);
-    ctx.globalAlpha = t;
-    if (p.line) {
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-      ctx.strokeStyle = p.color; glow(p.color, 8); ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(-p.line / 2, 0); ctx.lineTo(p.line / 2, 0); ctx.stroke();
-      ctx.restore();
-    } else {
-      ctx.fillStyle = p.color; glow(p.color, 6);
-      ctx.fillRect(p.x - 1.2, p.y - 1.2, 2.4, 2.4);
-    }
+  const n = Math.min(particles.length, MAX_PARTICLES);
+  for (let i = 0; i < n; i++) {
+    const p = particles[i], k = Math.max(0, p.life / p.max), c = toColor(p.color);
+    partPos[i * 3] = sx(p.x); partPos[i * 3 + 1] = sy(p.y); partPos[i * 3 + 2] = p.z || 0;
+    partCol[i * 3] = c.r * k; partCol[i * 3 + 1] = c.g * k; partCol[i * 3 + 2] = c.b * k;
   }
-  ctx.globalAlpha = 1;
+  partGeo.setDrawRange(0, n);
+  partGeo.attributes.position.needsUpdate = true;
+  partGeo.attributes.color.needsUpdate = true;
 
-  if (state !== 'lobby') {
-    // bullets
-    for (const b of bullets) {
-      ctx.fillStyle = b.owner.def.color; glow(b.owner.def.color, 10);
-      ctx.beginPath(); ctx.arc(b.x, b.y, 2.2, 0, TAU); ctx.fill();
-    }
-    // ships
-    for (const s of ships) {
-      if (!s.alive) continue;
-      if (s.invuln > 0 && Math.floor(time / 90) % 2 === 0) continue;
-      drawWrapped(s, 20, (x, y) => drawShipShape(x, y, s.a, s.def.color, s.thrusting));
-      if (s.invuln > 0) {
-        ctx.strokeStyle = s.def.color; ctx.globalAlpha = 0.35; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(s.x, s.y, 22, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
-      }
-    }
-  }
-  ctx.restore();
+  // camera: gentle drift in menus, shake on explosions
+  camera.position.copy(camBase);
+  if (state === 'lobby') { camera.position.x += Math.sin(t * 0.25) * 60; camera.position.y += Math.cos(t * 0.2) * 30; }
+  if (shake > 0) { camera.position.x += rand(-shake, shake) * 1.5; camera.position.y += rand(-shake, shake) * 1.5; }
+  camera.lookAt(camTarget);
+  composer.render();
+}
 
+function draw(time) {
+  render3d(time);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
   ctx.shadowBlur = 0;
   foot.style.display = state === 'lobby' ? '' : 'none';
   if (state === 'lobby') drawLobby(time);
@@ -522,7 +760,7 @@ function draw(time) {
     drawHud();
     if (banner.t > 0 && state === 'playing') {
       ctx.globalAlpha = Math.min(1, banner.t);
-      text(banner.text, W / 2, H / 2 - 120, 34, '#e8ecf4', 'center');
+      text(banner.text, W / 2, H / 2 - 120, 34, '#e8ecf4', 'center', '#7aa7ff');
       ctx.globalAlpha = 1;
     }
     if (state === 'paused') drawPaused();
@@ -585,9 +823,7 @@ function drawLobby(time) {
     ctx.strokeStyle = on ? p.color : '#2a2f3d'; ctx.lineWidth = on ? 2 : 1;
     if (on) glow(p.color, 12);
     ctx.strokeRect(cx, cy, cw, ch); ctx.shadowBlur = 0;
-    ctx.globalAlpha = on ? 1 : 0.4;
-    drawShipShape(cx + cw / 2, cy + 42, -Math.PI / 2 + (on ? Math.sin(time / 500 + i) * 0.3 : 0), p.color, on && Math.floor(time / 120 + i) % 3 === 0, 1.3);
-    ctx.globalAlpha = 1;
+    lobbySlots[i] = { x: cx + cw / 2, y: cy + 44, scale: 1.7 };
     text(p.name + (on ? '  READY' : ''), cx + cw / 2, cy + 82, 16, on ? p.color : '#7d8496', 'center');
     const parts = p.label.split(' · ');
     parts.forEach((t, k) => text(t, cx + cw / 2, cy + 104 + k * 15, 11, '#9aa1b2', 'center'));
@@ -647,6 +883,7 @@ function frame(now) {
 }
 resize();
 requestAnimationFrame(frame);
+window.game = { get state() { return state; }, get ships() { return ships; }, get asteroids() { return asteroids; }, killShip };
 </script>
 </body>
 </html>
