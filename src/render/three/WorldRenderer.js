@@ -8,6 +8,7 @@ import { EntityViewSync } from './EntityViewSync.js';
 import { ShipView } from './views/ShipView.js';
 import { AsteroidView } from './views/AsteroidView.js';
 import { BulletView } from './views/BulletView.js';
+import { BossView } from './views/BossView.js';
 import { ParticleView } from './views/ParticleView.js';
 import { LobbyShowcase } from './LobbyShowcase.js';
 
@@ -27,6 +28,7 @@ export class WorldRenderer {
     this.asteroidViews = new EntityViewSync(scene, a => new AsteroidView(a));
     this.shipViews = new EntityViewSync(scene, s => new ShipView(s));
     this.bulletViews = new EntityViewSync(scene, b => new BulletView(b));
+    this.bossViews = new EntityViewSync(scene, b => new BossView(b));
     this.particleView = new ParticleView(dot);
     scene.add(this.particleView.object);
     this.lobby = new LobbyShowcase(scene, this.cameraRig);
@@ -49,6 +51,7 @@ export class WorldRenderer {
     this.asteroidViews.sync(this.world.asteroids, frame);
     this.shipViews.sync(inLobby ? [] : this.world.ships, frame);
     this.bulletViews.sync(inLobby ? [] : this.world.bullets, frame);
+    this.bossViews.sync(!inLobby && this.world.boss ? [this.world.boss] : [], frame);
     this.particleView.update(this.particles.particles, this.viewport);
     this.cameraRig.update(dt, t, { drift: inLobby });
     this.lobby.update(inLobby, frame);

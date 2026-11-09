@@ -12,6 +12,7 @@ export class LobbyState {
   enter() {
     this.world.ships = [];
     this.world.bullets = [];
+    this.world.boss = null;
     this.world.speedScale = 1;
   }
 

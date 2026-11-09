@@ -31,5 +31,7 @@ export class LobbyView {
       o.text('nobody has joined yet', W / 2, by + 66, 16, '#7d8496', 'center');
     }
     o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game`, W / 2, by + 100, 12, '#545a6a', 'center');
+    o.text(`testing: G invincible ${session.invincible ? 'ON' : 'off'}  ·  1-9/0 start at wave  ·  B start at boss`,
+      W / 2, by + 120, 12, session.invincible ? '#ffd23f' : '#545a6a', 'center');
   }
 }

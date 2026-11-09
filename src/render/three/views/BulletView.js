@@ -11,6 +11,7 @@ const materialFor = color => {
 export class BulletView {
   constructor(bullet) {
     this.object = new THREE.Mesh(geometry, materialFor(bullet.owner.color));
+    if (bullet.hostile) this.object.scale.setScalar(2);
   }
 
   update(b, { bounds }) {
