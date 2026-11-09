@@ -25,7 +25,7 @@ export class PlayState {
     }
     const { world, session, systems } = this;
     systems.ships.update(dt, world);
-    systems.bullets.update(dt, world);
+    systems.bullets.update(dt, world, session.mode);
     world.updateAsteroids(dt);
     systems.boss.update(dt, world);
     systems.selfDestruct.update(world, session.mode);

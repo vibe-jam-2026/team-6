@@ -54,6 +54,8 @@ export const SPREAD_ANGLE = 0.14; // radians between bullets of a spread shot
 //   cooldown / speed / life: multipliers on fire cooldown, shot speed and range
 //   shots: extra bullets per trigger pull, spread: multiplier on SPREAD_ANGLE
 //   magazine: extra shots allowed in the air, size: visual scale of the rocket
+//   homing (optional): turn rate in rad/s towards the nearest target ahead
+//   damage (optional): boss hit points one shot takes off (default 1)
 export const WEAPONS = [
   { id: 'rockets', name: 'ROCKETS', color: '#e8ecf4',
     cooldown: 1, speed: 1, life: 1, shots: 0, spread: 1, magazine: 0, size: 1 },
@@ -61,7 +63,14 @@ export const WEAPONS = [
     cooldown: 0.45, speed: 1.35, life: 0.7, shots: 0, spread: 1, magazine: 4, size: 0.7 },
   { id: 'scatter', name: 'SCATTER', color: '#9dff5c',
     cooldown: 2.1, speed: 0.9, life: 0.5, shots: 4, spread: 1.6, magazine: 8, size: 0.85 },
+  { id: 'homing', name: 'HOMING', color: '#ff8a5c',
+    cooldown: 2.8, speed: 0.6, life: 2.6, shots: 0, spread: 1, magazine: -2, size: 1.35,
+    homing: 3.2, damage: 3 },
 ];
+
+// how homing missiles pick a target: only things within this range and this
+// angle either side of the missile's heading count
+export const HOMING = { range: 520, cone: 1.4 };
 
 export const ASTEROID_TYPES = {
   3: { radius: 46, speed: [35, 75],  score: 20 },
