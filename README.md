@@ -3,9 +3,10 @@ Vibe Jam 2026 – lag 6
 
 ## Mach Schnell
 
-A local multiplayer asteroid shooter for up to 4 players sharing one keyboard,
-flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy bombers,
-fighters and birds (large / medium / small targets).
+A local multiplayer fighter-jet shooter for up to 4 players sharing one keyboard.
+Scramble your low-poly Saab JAS 39 Gripen E, go *schnell*, and fire rockets at
+waves of enemy bombers, fighters and birds (large / medium / small targets),
+then at bosses. Fly with your wingmen in co-op, or fight them in free-for-all.
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
 (tilted camera, lit low-poly rocks, shadows, bloom glow). Play it at
