@@ -35,7 +35,12 @@ then open http://localhost:8000.
   nose towards the pointer, the **left button** fires, the **right button** thrusts, the **wheel**
   switches weapon and the **middle button** self-destructs; between waves the **wheel** browses upgrades and a **left click** takes one.
   Their keys keep working too, so e.g. P1 can fly with WASD while P2 uses the mouse.
-- **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse, **Enter** starts.
+- **Computer pilot:** in the lobby, **V** hands P2 to the computer (and joins it), and **V** again
+  takes it back. It dodges rocks, the boss and its bullets, leads its shots, hunts the nearest
+  target (including you in free-for-all), switches to the weapon that suits the range and takes its own upgrades between waves. Its HUD
+  name reads *P2 CPU*. With P1 as the only human, **Space** fires too.
+- **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse,
+  **V** lets the computer fly P2, **Enter** starts.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
@@ -79,8 +84,8 @@ then open http://localhost:8000.
 Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
-touch. ◀ ▶ turn, ▲ thrusts, ● fires, ⇄ switches weapon and ✸ self-destructs (they fly P1). In the lobby, tap a pilot's card
-to join or leave, tap the mode line to switch mode and the start line to start. Between
+touch. ◀ ▶ turn, ▲ thrusts, ● fires, ⇄ switches weapon and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
+to join or leave, tap P2's card to add or remove a computer pilot, tap the mode line to switch mode and the start line to start. Between
 waves, ◀ ▶ browse the upgrades and ● takes one. In
 game there are pause and sound buttons at the bottom; on the game-over screen, tap
 anywhere to go back to the lobby. Add `?touch=1` to the URL to force the controls on
@@ -99,6 +104,7 @@ src/
   input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent),
                           MouseInput / MouseShipController (pointer aim, buttons -> intent),
                           PlayerController (a player's keys plus the mouse if it is theirs),
+                          ComputerShipController (computer pilot: dodges, leads shots, picks upgrades),
                           TestControls (invincible mode and wave jumps),
                           TouchControls (on-screen buttons that press the same key codes)
   audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),

@@ -54,7 +54,7 @@ export class Ship {
     return true;
   }
 
-  get name() { return this.player.name; }
+  get name() { return this.player.name + (this.controller.isComputer ? ' CPU' : ''); }
   get color() { return this.player.color; }
   get inPlay() { return this.alive || this.lives > 0; }
   get isOut() { return !this.inPlay; }

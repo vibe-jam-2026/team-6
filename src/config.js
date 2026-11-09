@@ -7,6 +7,12 @@ export const PLAYERS = [
     labels: ['↑ thrust', '←/→ turn', '↓ fire', '/ switch weapon', 'R-Shift self-destruct'] },
 ];
 
+// the player the lobby's computer key hands to the computer (P2)
+export const COMPUTER_PLAYER = 1;
+
+// card hints for a computer-flown jet
+export const COMPUTER_LABELS = ['flown by the computer', 'V to hand it back'];
+
 // card hints for whoever the lobby gives the mouse to (their keys still work too)
 export const MOUSE_LABELS = ['mouse aims', 'right btn thrust', 'left btn fire', 'wheel switches weapon', 'middle btn self-destruct'];
 
@@ -17,6 +23,7 @@ export const MENU_KEYS = {
   pause: ['KeyP', 'Escape'],
   quit: 'KeyQ',
   mouse: 'KeyC',     // lobby: hand the mouse to nobody / P1 / P2
+  computer: 'KeyV',  // lobby: let the computer fly P2 (or hand it back)
 };
 
 // Testing shortcuts: G toggles invincibility (lobby or in game),

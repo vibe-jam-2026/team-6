@@ -1,4 +1,4 @@
-import { PLAYERS, MOUSE_LABELS } from '../../../config.js';
+import { PLAYERS, MOUSE_LABELS, COMPUTER_LABELS, COMPUTER_PLAYER } from '../../../config.js';
 import { lobbyLayout } from '../lobbyLayout.js';
 
 export class LobbyView {
@@ -19,15 +19,16 @@ export class LobbyView {
         fill: on ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.015)',
         stroke: on ? p.color : '#2a2f3d', lineWidth: on ? 2 : 1, glowColor: on ? p.color : null,
       });
-      o.text(p.name + (on ? '  READY' : ''), c.x + c.w / 2, c.y + 82, 16, on ? p.color : '#7d8496', 'center');
-      const mouse = !tap && session.mouseOwner === i;
-      const labels = mouse ? MOUSE_LABELS : p.labels;
-      if (!layout.short) labels.forEach((t, k) => o.text(t, c.x + c.w / 2, c.y + 104 + k * 15, 11, mouse ? p.color : '#9aa1b2', 'center'));
+      const cpu = session.computer[i];
+      o.text(p.name + (cpu ? '  CPU' : '') + (on ? '  READY' : ''), c.x + c.w / 2, c.y + 82, 16, on ? p.color : '#7d8496', 'center');
+      const mouse = !tap && !cpu && session.mouseOwner === i;
+      const labels = cpu ? COMPUTER_LABELS.map(t => tap ? t.replace('V', 'tap') : t) : mouse ? MOUSE_LABELS : p.labels;
+      if (!layout.short) labels.forEach((t, k) => o.text(t, c.x + c.w / 2, c.y + 104 + k * 15, 11, mouse || cpu ? p.color : '#9aa1b2', 'center'));
     });
 
     const by = layout.footerY;
     const mode = session.mode;
-    o.text(tap ? 'tap a pilot to join / leave' : 'press a pilot\'s FIRE key to join / leave', W / 2, by, 14, '#9aa1b2', 'center');
+    o.text(tap ? 'tap P1 to join · tap P2 for a computer pilot' : 'press a pilot\'s FIRE key to join / leave', W / 2, by, 14, '#9aa1b2', 'center');
     o.text(`${tap ? '⇆' : 'TAB'}  mode: ${mode.title} (${mode.description})`, W / 2, layout.modeY, 15, '#e8ecf4', 'center');
     const n = session.joinedCount;
     if (n > 0 && Math.floor(time / 500) % 2 === 0) {
@@ -37,12 +38,15 @@ export class LobbyView {
     }
     if (!tap) {
       const owner = session.mouseOwner === null ? 'nobody (keyboard only)' : PLAYERS[session.mouseOwner].name;
-      o.text(`C  mouse control: ${owner}`, W / 2, by + 96, 13,
+      const cpu = PLAYERS[COMPUTER_PLAYER];
+      o.text(`V  ${cpu.name} flown by: ${session.computer[COMPUTER_PLAYER] ? 'the computer' : 'a player'}`, W / 2, by + 96, 13,
+        session.computer[COMPUTER_PLAYER] ? cpu.color : '#9aa1b2', 'center');
+      o.text(`C  mouse control: ${owner}`, W / 2, by + 114, 13,
         session.mouseOwner === null ? '#9aa1b2' : PLAYERS[session.mouseOwner].color, 'center');
-      if (session.joinedCount === 1) o.text('flying solo: SPACE fires too', W / 2, by + 114, 11, '#7d8496', 'center');
-      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game`, W / 2, by + 134, 12, '#545a6a', 'center');
+      if (session.humanCount === 1) o.text('flying solo: SPACE fires too', W / 2, by + 132, 11, '#7d8496', 'center');
+      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game`, W / 2, by + 152, 12, '#545a6a', 'center');
       o.text(`testing: G invincible ${session.invincible ? 'ON' : 'off'}  ·  1-9/0 start at wave${session.invincible ? '  ·  B start at boss' : ''}`,
-        W / 2, by + 154, 12, session.invincible ? '#ffd23f' : '#545a6a', 'center');
+        W / 2, by + 172, 12, session.invincible ? '#ffd23f' : '#545a6a', 'center');
     }
   }
 }
