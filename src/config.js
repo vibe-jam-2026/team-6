@@ -7,12 +7,16 @@ export const PLAYERS = [
     labels: ['↑ thrust', '←/→ turn', '↓ fire', 'R-Shift self-destruct'] },
 ];
 
+// card hints for whoever the lobby gives the mouse to (their keys still work too)
+export const MOUSE_LABELS = ['mouse aims', 'right btn thrust', 'left btn fire', 'middle btn self-destruct'];
+
 export const MENU_KEYS = {
   start: 'Enter',
   switchMode: 'Tab',
   mute: 'KeyM',
   pause: ['KeyP', 'Escape'],
   quit: 'KeyQ',
+  mouse: 'KeyC',     // lobby: hand the mouse to nobody / P1 / P2
 };
 
 // Testing shortcuts: G toggles invincibility (lobby or in game),

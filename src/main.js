@@ -7,6 +7,9 @@ import { GameLoop } from './core/GameLoop.js';
 import { StateMachine } from './core/StateMachine.js';
 import { KeyboardInput } from './input/KeyboardInput.js';
 import { KeyboardShipController } from './input/KeyboardShipController.js';
+import { MouseInput } from './input/MouseInput.js';
+import { MouseShipController } from './input/MouseShipController.js';
+import { PlayerController } from './input/PlayerController.js';
 import { TestControls } from './input/TestControls.js';
 import { TouchControls } from './input/TouchControls.js';
 import { SynthAudio } from './audio/SynthAudio.js';
@@ -48,11 +51,19 @@ const capturedKeys = [...PLAYERS.flatMap(p => Object.values(p.keys)), MENU_KEYS.
 const input = new KeyboardInput(window, capturedKeys);
 const audio = new SynthAudio();
 input.onKeyDown(() => audio.unlock());
+const mouse = new MouseInput(window);
+mouse.onButtonDown(() => audio.unlock());
 new SoundEffects(bus, audio);
 const music = new MusicPlayer(audio, bus);
 
 // --- game model ---
-const controllers = PLAYERS.map(p => new KeyboardShipController(input, p.keys));
+// screen pixel -> game coordinates, through the tilted 3D camera (ships fly a little above the plane)
+const screenToWorld = (px, py) => {
+  const p = worldRenderer.cameraRig.screenToPlane(px, py, 4);
+  return { x: p.x + viewport.width / 2, y: viewport.height / 2 - p.y };
+};
+const mouseController = new MouseShipController(mouse, screenToWorld);
+const controllers = PLAYERS.map(p => new PlayerController(new KeyboardShipController(input, p.keys), mouseController));
 const world = new World(viewport, bus);
 const session = new Session(bus, controllers);
 // a phone has one pilot: start the lobby with only P1 joined
@@ -108,6 +119,7 @@ new GameLoop({
     music.setMood(states.currentName);
     music.tick();
     input.endStep();
+    mouse.endStep();
   },
   render(time) {
     worldRenderer.render(time);

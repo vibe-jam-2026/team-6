@@ -39,7 +39,7 @@ export class UpgradeState {
   #handle(pick) {
     const controller = pick.ship.controller;
     if (this.upgrades.move(pick, controller.stepPressed())) this.bus.emit(EVENTS.MENU_ACTION);
-    if (controller.togglePressed() && this.upgrades.confirm(pick)) {
+    if (controller.confirmPressed() && this.upgrades.confirm(pick)) {
       this.bus.emit(EVENTS.UPGRADE_CHOSEN, { ship: pick.ship, upgrade: pick.chosen });
     }
   }

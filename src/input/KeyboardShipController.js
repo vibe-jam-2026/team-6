@@ -1,10 +1,16 @@
 // Turns one player's keys into an abstract control intent. Ships only depend on
 // the { thrust, turn, fire } shape, so another controller (gamepad, AI, network)
 // can be swapped in without touching Ship.
+//
+// soloFire is an extra fire key (Space) that only counts while `solo` is set,
+// i.e. when this player flies alone and no one else needs the key.
 export class KeyboardShipController {
-  constructor(input, keys) {
+  solo = false;
+
+  constructor(input, keys, soloFire = 'Space') {
     this.input = input;
     this.keys = keys;
+    this.soloFire = soloFire;
   }
 
   read() {
@@ -12,7 +18,7 @@ export class KeyboardShipController {
     return {
       thrust: input.isDown(keys.thrust),
       turn: (input.isDown(keys.right) ? 1 : 0) - (input.isDown(keys.left) ? 1 : 0),
-      fire: input.isDown(keys.fire),
+      fire: input.isDown(keys.fire) || (this.solo && input.isDown(this.soloFire)),
     };
   }
 
@@ -26,8 +32,13 @@ export class KeyboardShipController {
     return this.input.wasPressed(this.keys.selfDestruct);
   }
 
-  // used by the lobby to join or leave, and to confirm an upgrade
+  // used by the lobby to join or leave
   togglePressed() {
     return this.input.wasPressed(this.keys.fire);
+  }
+
+  // takes the highlighted upgrade between waves
+  confirmPressed() {
+    return this.togglePressed() || (this.solo && this.input.wasPressed(this.soloFire));
   }
 }

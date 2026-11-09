@@ -1,4 +1,4 @@
-import { PLAYERS } from '../../../config.js';
+import { PLAYERS, MOUSE_LABELS } from '../../../config.js';
 import { lobbyLayout } from '../lobbyLayout.js';
 
 export class LobbyView {
@@ -20,7 +20,9 @@ export class LobbyView {
         stroke: on ? p.color : '#2a2f3d', lineWidth: on ? 2 : 1, glowColor: on ? p.color : null,
       });
       o.text(p.name + (on ? '  READY' : ''), c.x + c.w / 2, c.y + 82, 16, on ? p.color : '#7d8496', 'center');
-      if (!layout.short) p.labels.forEach((t, k) => o.text(t, c.x + c.w / 2, c.y + 104 + k * 15, 11, '#9aa1b2', 'center'));
+      const mouse = !tap && session.mouseOwner === i;
+      const labels = mouse ? MOUSE_LABELS : p.labels;
+      if (!layout.short) labels.forEach((t, k) => o.text(t, c.x + c.w / 2, c.y + 104 + k * 15, 11, mouse ? p.color : '#9aa1b2', 'center'));
     });
 
     const by = layout.footerY;
@@ -34,9 +36,13 @@ export class LobbyView {
       o.text('nobody has joined yet', W / 2, layout.startY, 16, '#7d8496', 'center');
     }
     if (!tap) {
-      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game`, W / 2, by + 100, 12, '#545a6a', 'center');
+      const owner = session.mouseOwner === null ? 'nobody (keyboard only)' : PLAYERS[session.mouseOwner].name;
+      o.text(`C  mouse control: ${owner}`, W / 2, by + 96, 13,
+        session.mouseOwner === null ? '#9aa1b2' : PLAYERS[session.mouseOwner].color, 'center');
+      if (session.joinedCount === 1) o.text('flying solo: SPACE fires too', W / 2, by + 114, 11, '#7d8496', 'center');
+      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game`, W / 2, by + 134, 12, '#545a6a', 'center');
       o.text(`testing: G invincible ${session.invincible ? 'ON' : 'off'}  ·  1-9/0 start at wave${session.invincible ? '  ·  B start at boss' : ''}`,
-        W / 2, by + 120, 12, session.invincible ? '#ffd23f' : '#545a6a', 'center');
+        W / 2, by + 154, 12, session.invincible ? '#ffd23f' : '#545a6a', 'center');
     }
   }
 }

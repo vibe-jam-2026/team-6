@@ -22,7 +22,7 @@ export class Ship {
   constructor(index, player, controller) {
     this.index = index;
     this.player = player;          // { name, color, ... }
-    this.controller = controller;  // anything with read() -> { thrust, turn, fire }
+    this.controller = controller;  // anything with read(ship) -> { thrust, turn, fire }
     this.x = 0; this.y = 0; this.vx = 0; this.vy = 0;
     this.angle = FACING_UP;
     this.bank = 0;                 // visual roll, eased towards the turn input
@@ -91,7 +91,7 @@ export class Ship {
   }
 
   update(dt, bounds) {
-    const c = this.controller.read();
+    const c = this.controller.read(this);
     this.bank += (c.turn * 0.75 - this.bank) * Math.min(1, dt * 8);
     const st = this.stats;
     this.angle += c.turn * st.turnSpeed * dt;
