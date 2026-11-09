@@ -52,3 +52,12 @@ export const RULES = {
 };
 
 export const DEFAULT_JOINED = [true, true, false, false];
+
+// The landscape below the arena changes with every wave and cycles through
+// this list. The lobby shows the first one.
+export const SCENERY = [
+  { key: 'forest', title: 'Swedish forest' },
+  { key: 'coast', title: 'City coastline' },
+  { key: 'alps', title: 'The Alps' },
+];
+export const sceneryForWave = wave => SCENERY[(Math.max(1, wave) - 1) % SCENERY.length];

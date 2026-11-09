@@ -31,6 +31,8 @@ then open http://localhost:8000.
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
 - Bombers, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
+- The landscape below changes every wave: a Swedish forest of pines, lakes and red
+  cottages, a harbour city along a rocky coastline, then the snowy Alps, and round again.
 
 Note: some keyboards can't register many simultaneous keys ("ghosting"), so with
 4 players on one keyboard a few key combinations may drop out.
@@ -55,8 +57,9 @@ src/
   game/Session.js         lobby choices, wave banner and final result
   states/                 LobbyState, PlayState, PausedState, GameOverState
   effects/                ParticleSystem (data) and EffectsDirector (events -> particles)
-  render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting, Starfield,
+  render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting,
                           EntityViewSync + views/ (ShipView, AsteroidView, BulletView, ParticleView)
+                          + scenery/ (Scenery, terrain helpers, noise, forest / coast / alps themes)
   render/overlay/         2D HUD and menus: Overlay2D primitives, OverlayRenderer, views/
 ```
 

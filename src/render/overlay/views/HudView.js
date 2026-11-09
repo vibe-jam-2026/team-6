@@ -4,6 +4,8 @@ const MAX_LIFE_ICONS = 8;
 export class HudView {
   draw(o, { world, waves, session, audio }) {
     const { width: W, height: H } = o;
+    o.edgeShade('top', 90);
+    o.edgeShade('bottom', 90);
     const corners = [
       { x: 18, y: 22, align: 'left' }, { x: W - 18, y: 22, align: 'right' },
       { x: 18, y: H - 40, align: 'left' }, { x: W - 18, y: H - 40, align: 'right' },
@@ -19,7 +21,7 @@ export class HudView {
         if (s.isOut) o.text('OUT', c.x, c.y + 22, 14, s.color, c.align);
       });
     }
-    o.text(`WAVE ${waves.wave}  ·  ${session.mode.title}`, W / 2, 22, 13, '#7d8496', 'center');
-    o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'}`, W / 2, H - 16, 11, '#545a6a', 'center');
+    o.text(`WAVE ${waves.wave}  ·  ${session.mode.title}`, W / 2, 22, 13, '#c3cad8', 'center');
+    o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'}`, W / 2, H - 16, 11, '#9aa1b2', 'center');
   }
 }

@@ -1,4 +1,4 @@
-import { DEFAULT_JOINED, PLAYERS } from '../config.js';
+import { DEFAULT_JOINED, PLAYERS, sceneryForWave } from '../config.js';
 import { EVENTS } from '../core/EventBus.js';
 import { GAME_MODES } from '../modes/index.js';
 import { Ship } from '../world/entities/Ship.js';
@@ -14,7 +14,7 @@ export class Session {
   constructor(bus, controllers, modes = GAME_MODES) {
     this.controllers = controllers;
     this.modes = modes;
-    bus.on(EVENTS.WAVE_STARTED, ({ wave }) => this.announce(`WAVE ${wave}`));
+    bus.on(EVENTS.WAVE_STARTED, ({ wave }) => this.announce(`WAVE ${wave}  ·  ${sceneryForWave(wave).title.toUpperCase()}`));
   }
 
   get mode() { return this.modes[this.#modeIndex]; }
