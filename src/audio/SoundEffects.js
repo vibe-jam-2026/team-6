@@ -11,6 +11,16 @@ export class SoundEffects {
     });
     bus.on(EVENTS.SHIPS_BUMPED, () => synth.tone(140, 90, 0.08, 'triangle', 0.12));
     bus.on(EVENTS.EXTRA_LIFE, () => [523, 659, 784, 1046].forEach((f, k) => synth.tone(f, f, 0.12, 'triangle', 0.12, k * 0.09)));
+    bus.on(EVENTS.WAVE_STARTED, ({ boss }) => {
+      if (boss) for (let k = 0; k < 3; k++) synth.tone(440, 220, 0.4, 'sawtooth', 0.09, k * 0.45);
+    });
+    bus.on(EVENTS.BOSS_FIRED, () => synth.tone(200, 90, 0.18, 'square', 0.05));
+    bus.on(EVENTS.BOSS_HIT, () => synth.tone(1400, 700, 0.05, 'triangle', 0.06));
+    bus.on(EVENTS.BOSS_DESTROYED, () => {
+      synth.noise(2.2, 0.7, 3000);
+      [392, 330, 262, 196].forEach((f, k) => synth.tone(f, f / 2, 0.5, 'sawtooth', 0.12, k * 0.18));
+    });
+    bus.on(EVENTS.TEST_TOGGLED, ({ invincible }) => synth.tone(invincible ? 440 : 880, invincible ? 880 : 440, 0.15, 'triangle', 0.1));
     bus.on(EVENTS.MENU_ACTION, () => synth.tone(660, 660, 0.06, 'triangle', 0.1));
   }
 }

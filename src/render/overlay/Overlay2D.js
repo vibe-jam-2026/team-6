@@ -97,6 +97,22 @@ export class Overlay2D {
     ctx.shadowBlur = 0;
   }
 
+  // boss health bar centred on x, with its name above
+  bossBar(boss, x, y, w) {
+    const ctx = this.ctx, h = 8, left = x - w / 2;
+    this.text(boss.entering ? 'WARNING · BOSS INCOMING' : `BOSS ${'I'.repeat(Math.min(boss.level, 5))}`,
+      x, y, 12, boss.color, 'center', boss.color);
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(left, y + 12, w, h);
+    ctx.fillStyle = boss.color;
+    this.glow(boss.color, 12);
+    ctx.fillRect(left, y + 12, w * (boss.entering ? boss.entryProgress : boss.health), h);
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#2a2f3d';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(left + 0.5, y + 12.5, w - 1, h - 1);
+  }
+
   // small ship outline, used as a lives icon
   shipIcon(x, y, angle, color, scale = 1) {
     const ctx = this.ctx;

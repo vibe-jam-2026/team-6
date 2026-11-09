@@ -22,6 +22,10 @@ export const EVENTS = {
   SHIP_DESTROYED: 'shipDestroyed',     // { ship, by }
   SHIPS_BUMPED: 'shipsBumped',         // { a, b }
   EXTRA_LIFE: 'extraLife',             // { ship }
-  WAVE_STARTED: 'waveStarted',         // { wave }
+  WAVE_STARTED: 'waveStarted',         // { wave, boss }
+  BOSS_FIRED: 'bossFired',             // { boss }
+  BOSS_HIT: 'bossHit',                 // { boss, by, x, y }
+  BOSS_DESTROYED: 'bossDestroyed',     // { boss, by }
+  TEST_TOGGLED: 'testToggled',         // { invincible }
   MENU_ACTION: 'menuAction',           // {}
 };

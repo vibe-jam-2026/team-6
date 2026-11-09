@@ -13,6 +13,8 @@ export class EffectsDirector {
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid: a }) =>
       particles.burst(a.x, a.y, a.size === 1 ? FEATHERS : PLANE_DEBRIS, 8 + a.size * 6, 90 + a.size * 30, 0.9));
     bus.on(EVENTS.SHIP_DESTROYED, ({ ship }) => this.#shipExplosion(ship));
+    bus.on(EVENTS.BOSS_HIT, ({ boss, x, y }) => particles.burst(x, y, boss.color, 6, 140, 0.4));
+    bus.on(EVENTS.BOSS_DESTROYED, ({ boss }) => this.#bossExplosion(boss));
   }
 
   update(dt, world) {
@@ -28,6 +30,16 @@ export class EffectsDirector {
       const a = rand(0, TAU), sp = rand(30, 110);
       this.particles.add({ x: s.x, y: s.y, vx: Math.cos(a) * sp + s.vx * 0.3, vy: Math.sin(a) * sp + s.vy * 0.3,
         vz: rand(-40, 120), life: 1.6, color: s.color });
+    }
+  }
+
+  #bossExplosion(b) {
+    this.particles.burst(b.x, b.y, b.color, 220, 420, 2.2);
+    this.particles.burst(b.x, b.y, FLAME, 140, 300, 1.8);
+    this.particles.burst(b.x, b.y, '#ffffff', 80, 220, 1.2);
+    for (let i = 0; i < 6; i++) {
+      const a = rand(0, TAU), r = rand(10, b.radius);
+      this.particles.burst(b.x + Math.cos(a) * r, b.y + Math.sin(a) * r, ROCK_DUST, 25, 180, 1.5);
     }
   }
 

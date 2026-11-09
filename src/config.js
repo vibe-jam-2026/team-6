@@ -19,6 +19,15 @@ export const MENU_KEYS = {
   quit: 'KeyQ',
 };
 
+// Testing shortcuts: G toggles invincibility (lobby or in game),
+// 1–9 / 0 jump straight to wave 1–9 / 10, N skips to the next wave, B jumps to the next boss.
+export const TEST_KEYS = {
+  invincible: 'KeyG',
+  nextWave: 'KeyN',
+  nextBoss: 'KeyB',
+  waves: ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'],
+};
+
 export const SHIP = {
   turnSpeed: 4.4,        // rad/s
   thrust: 320,           // px/s^2
@@ -36,6 +45,21 @@ export const ASTEROID_TYPES = {
   3: { radius: 46, speed: [35, 75],  score: 20 },
   2: { radius: 25, speed: [65, 120], score: 50 },
   1: { radius: 13, speed: [95, 175], score: 100 },
+};
+
+// The boss arrives on every `every`-th wave (wave 5, 10, ... - i.e. right after wave 4).
+export const BOSS = {
+  every: 5,
+  radius: 64,
+  baseHp: 45,           // hit points for a single pilot...
+  hpPerShip: 25,        // ...plus this per extra pilot
+  hpGrowth: 0.5,        // each later boss gets 50 % more
+  speed: 70,
+  entryTime: 1.6,       // seconds it warps in, untouchable
+  hitScore: 10,         // per bullet that lands
+  killScore: 3000,      // to the pilot landing the final blow
+  bullet: { speed: 230, life: 3.2, radius: 5 },
+  color: '#ff3b5c',
 };
 
 export const RULES = {

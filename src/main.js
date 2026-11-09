@@ -1,12 +1,14 @@
 // Composition root: creates every object and wires them together.
 // This is the only file that knows the concrete classes of everything.
-import { PLAYERS, MENU_KEYS } from './config.js';
+import { PLAYERS, MENU_KEYS, TEST_KEYS } from './config.js';
 import { EventBus } from './core/EventBus.js';
 import { Viewport } from './core/Viewport.js';
 import { GameLoop } from './core/GameLoop.js';
 import { StateMachine } from './core/StateMachine.js';
 import { KeyboardInput } from './input/KeyboardInput.js';
 import { KeyboardShipController } from './input/KeyboardShipController.js';
+import { TestControls } from './input/TestControls.js';
+import { TouchControls } from './input/TouchControls.js';
 import { SynthAudio } from './audio/SynthAudio.js';
 import { SoundEffects } from './audio/SoundEffects.js';
 import { MusicPlayer } from './audio/MusicPlayer.js';
@@ -15,6 +17,7 @@ import { Session } from './game/Session.js';
 import { ShipSystem } from './systems/ShipSystem.js';
 import { BulletSystem } from './systems/BulletSystem.js';
 import { CollisionSystem } from './systems/CollisionSystem.js';
+import { BossSystem } from './systems/BossSystem.js';
 import { SpawnPlanner } from './systems/SpawnPlanner.js';
 import { WaveSpawner } from './systems/WaveSpawner.js';
 import { ScoreKeeper } from './systems/ScoreKeeper.js';
@@ -47,6 +50,8 @@ const music = new MusicPlayer(audio, bus);
 const controllers = PLAYERS.map(p => new KeyboardShipController(input, p.keys));
 const world = new World(viewport, bus);
 const session = new Session(bus, controllers);
+// a phone has one pilot: start the lobby with only P1 joined
+if (TouchControls.likelyTouch()) session.joined = session.joined.map((_, i) => i === 0);
 const waves = new WaveSpawner(bus);
 const particles = new ParticleSystem();
 const effects = new EffectsDirector(bus, particles);
@@ -54,6 +59,7 @@ new ScoreKeeper(bus);
 const systems = {
   ships: new ShipSystem(bus, new SpawnPlanner()),
   bullets: new BulletSystem(),
+  boss: new BossSystem(bus),
   collisions: new CollisionSystem(bus),
 };
 
@@ -65,6 +71,7 @@ states
   .register('playing', new PlayState(deps))
   .register('paused', new PausedState(deps))
   .register('gameover', new GameOverState(deps));
+const testControls = new TestControls(deps);
 
 // --- presentation ---
 const worldRenderer = new WorldRenderer({
@@ -78,12 +85,15 @@ const overlay = new OverlayRenderer(
   .register('paused', [hud, new PauseView()])
   .register('gameover', [hud, new GameOverView()]);
 const footer = document.getElementById('foot');
+const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
+overlay.context.touch = touch;
 
 // --- run ---
 states.change('lobby');
 new GameLoop({
   update(dt) {
     if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
+    testControls.update();
     states.update(dt);
     music.setMood(states.currentName);
     music.tick();
@@ -92,9 +102,10 @@ new GameLoop({
   render(time) {
     worldRenderer.render(time);
     overlay.render(time);
+    touch.sync();
     footer.style.display = states.currentName === 'lobby' ? '' : 'none';
   },
 }).start();
 
 // handle for debugging from the browser console
-window.game = { states, world, session, bus };
+window.game = { states, world, session, bus, waves };

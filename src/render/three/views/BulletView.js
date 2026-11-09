@@ -21,9 +21,22 @@ const tipMaterialFor = color => {
   return tipMaterials.get(color);
 };
 
+const orbGeometry = new THREE.SphereGeometry(3, 12, 10);
+const orbMaterials = new Map();
+const orbMaterialFor = color => {
+  if (!orbMaterials.has(color)) orbMaterials.set(color, new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(3) }));
+  return orbMaterials.get(color);
+};
+
 // A small rocket in the shooter's colour, aligned with its flight direction.
 export class BulletView {
   constructor(bullet) {
+    if (bullet.hostile) {
+      // the boss fires glowing energy orbs instead of rockets
+      this.object = new THREE.Mesh(orbGeometry, orbMaterialFor(bullet.owner.color));
+      this.object.scale.setScalar(bullet.radius / 3 * 1.6);
+      return;
+    }
     const tip = tipMaterialFor(bullet.owner.color);
     this.object = new THREE.Group();
     this.object.scale.setScalar(1.4);
@@ -40,6 +53,7 @@ export class BulletView {
 
   update(b, { t, bounds }) {
     this.object.position.set(toSceneX(bounds, b.x), toSceneY(bounds, b.y), 4);
+    if (b.hostile) return;
     // Game y points down, scene y points up, so the heading flips sign.
     this.object.rotation.set(t * 12, 0, Math.atan2(-b.vy, b.vx));
     this.flame.scale.set(6 + Math.random() * 5, 1, 1);
