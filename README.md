@@ -32,7 +32,9 @@ then open http://localhost:8000.
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
 - Bombers, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
 - The landscape below changes every wave: a Swedish forest of pines, lakes and red
-  cottages, a harbour city along a rocky coastline, then the snowy Alps, and round again.
+  cottages, a harbour city along a rocky coastline, the snowy Alps, then a high-fantasy
+  realm (red-rock warlands with spiked war camps and a glowing portal, a lava rift, and an
+  enchanted violet forest with mana crystals and a blue-roofed keep), and round again.
 - **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
   It warps in, drifts around the arena and fires rings, aimed fans and spirals; below half
   health it gets faster and angrier. Its bullets hit everyone and fly through the other enemies, and ramming

@@ -83,5 +83,6 @@ export const SCENERY = [
   { key: 'forest', title: 'Swedish forest' },
   { key: 'coast', title: 'City coastline' },
   { key: 'alps', title: 'The Alps' },
+  { key: 'realm', title: 'Fantasy realm' },
 ];
 export const sceneryForWave = wave => SCENERY[(Math.max(1, wave) - 1) % SCENERY.length];
