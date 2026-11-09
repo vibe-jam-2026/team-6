@@ -26,7 +26,7 @@ then open http://localhost:8000.
 | P2 (blue)   | ↑       | ← / →       | ↓       | /             | Right Shift   |
 
 - **Weapons:** every jet carries three guns and the switch-weapon key cycles through them
-  (the current one is shown under your lives). **Rockets** are the all-rounder, the
+  (the HUD lists all three under your lives and boxes the active one). **Rockets** are the all-rounder, the
   **Blaster** fires fast, small, short-range bolts and **Scatter** is a slow five-shot
   shotgun blast. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 

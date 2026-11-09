@@ -1,8 +1,11 @@
 const MAX_LIFE_ICONS = 8;
+const SWITCH_PULSE_MS = 500; // how long the active weapon tag flares after a switch
 
-// Score and lives in each player's corner, plus wave and mode at the top.
+// Score, lives and weapons in each player's corner, plus wave and mode at the top.
 export class HudView {
-  draw(o, { world, waves, session, audio, touch }) {
+  #lastWeapon = new WeakMap(); // ship -> { weapon, at } to flare the tag on a switch
+
+  draw(o, { world, waves, session, audio, touch, time = 0 }) {
     const { width: W, height: H } = o;
     o.edgeShade('top', 90);
     o.edgeShade('bottom', 90);
@@ -19,7 +22,9 @@ export class HudView {
           o.shipIcon(c.x + dir * (8 + i * 18), c.y + 22, -Math.PI / 2, s.color, 0.55);
         }
         if (s.isOut) o.text('OUT', c.x, c.y + 22, 14, s.color, c.align);
-        else if (s.weapons.length > 1) o.text(s.weapon.name, c.x, c.y + (c.y < H / 2 ? 44 : -22), 11, s.weapon.color, c.align);
+        else if (s.weapons.length > 1) {
+          o.weaponStrip(s.weapons, s.weapon, c.x, c.y + (c.y < H / 2 ? 46 : -24), c.align, this.#pulse(s, time));
+        }
       });
     }
     o.text(`WAVE ${waves.wave}  ·  ${session.mode.title}`, W / 2, 22, 13, '#c3cad8', 'center');
@@ -29,5 +34,13 @@ export class HudView {
       o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · G invincible · 1-9 wave${session.invincible ? ' · N next · B boss' : ''}`,
         W / 2, H - 16, 11, '#9aa1b2', 'center');
     }
+  }
+
+  // 1 right after the ship switched weapon, fading to 0
+  #pulse(ship, time) {
+    const last = this.#lastWeapon.get(ship);
+    if (!last) { this.#lastWeapon.set(ship, { weapon: ship.weapon, at: -Infinity }); return 0; }
+    if (last.weapon !== ship.weapon) Object.assign(last, { weapon: ship.weapon, at: time });
+    return Math.max(0, 1 - (time - last.at) / SWITCH_PULSE_MS);
   }
 }
