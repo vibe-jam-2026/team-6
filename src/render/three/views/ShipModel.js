@@ -1,26 +1,5 @@
 import * as THREE from 'three';
-
-// Model space: nose points +x, wings span ±y, +z is up (towards the camera).
-
-// Merges geometries into one flat-shaded, non-indexed position-only geometry.
-function mergeFlat(geometries) {
-  const parts = geometries.map(g => (g.index ? g.toNonIndexed() : g).getAttribute('position').array);
-  const merged = new THREE.BufferGeometry();
-  const positions = new Float32Array(parts.reduce((n, p) => n + p.length, 0));
-  let offset = 0;
-  for (const p of parts) { positions.set(p, offset); offset += p.length; }
-  merged.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  merged.computeVertexNormals();
-  return merged;
-}
-
-// A flat plate in the xy plane from a polygon outline, `thickness` deep, centred on z = 0.
-const plate = (points, thickness) => new THREE.ExtrudeGeometry(
-  new THREE.Shape(points.map(([x, y]) => new THREE.Vector2(x, y))), { depth: thickness, bevelEnabled: false },
-).translate(0, 0, -thickness / 2);
-
-// Cylinder/cone along +x (its "top" ends up pointing at the nose).
-const alongX = g => g.rotateZ(-Math.PI / 2);
+import { mergeFlat, plate, alongX } from '../geometry.js';
 
 // Shared geometry for every ship: a low-poly Saab JAS 39 Gripen E —
 // close-coupled canard delta with a single fin and a single engine.

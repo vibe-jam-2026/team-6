@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { toSceneX, toSceneY } from '../coords.js';
+import { alongX } from '../geometry.js';
 
 // Model space matches the ships: the rocket points along +x.
-const alongX = g => g.rotateZ(-Math.PI / 2);
 const bodyGeometry = alongX(new THREE.CylinderGeometry(0.9, 0.9, 7, 8)).translate(-1, 0, 0);
 const noseGeometry = alongX(new THREE.ConeGeometry(0.9, 2.6, 8)).translate(3.8, 0, 0);
 const finGeometry = new THREE.BoxGeometry(2.2, 3.6, 0.25).translate(-3.6, 0, 0);
