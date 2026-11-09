@@ -22,6 +22,15 @@ export class World {
     this.speedScale = 1;
   }
 
+  // When a wave's time is up the enemies still flying turn back: no score,
+  // no money, just gone (effects can show them leaving).
+  retreatEnemies() {
+    const leaving = this.asteroids;
+    this.asteroids = [];
+    this.bullets = [];
+    if (leaving.length) this.bus.emit(EVENTS.ENEMIES_RETREATED, { enemies: leaving });
+  }
+
   // removes everything hostile: rocks, the boss and its bullets (used when jumping waves)
   clearField() {
     this.asteroids = [];
@@ -36,11 +45,19 @@ export class World {
     for (const a of this.asteroids) a.update(dt, this.bounds);
   }
 
+  // A bullet lands on an enemy: tougher types (planes, zeppelins) take a few hits.
+  hitEnemy(enemy, by = null, damage = 1) {
+    if (!this.asteroids.includes(enemy)) return;
+    if (enemy.takeHit(damage)) this.destroyAsteroid(enemy, by);
+    else this.bus.emit(EVENTS.ENEMY_HIT, { enemy, by });
+  }
+
+  // gone for good: enemies no longer split into smaller ones
   destroyAsteroid(asteroid, by = null) {
     const i = this.asteroids.indexOf(asteroid);
     if (i < 0) return;
     this.asteroids.splice(i, 1);
-    this.asteroids.push(...asteroid.split(this.speedScale));
+    asteroid.hp = 0;
     this.bus.emit(EVENTS.ASTEROID_DESTROYED, { asteroid, by });
   }
 
@@ -74,7 +91,7 @@ export class World {
     this.bus.emit(EVENTS.BOSS_DESTROYED, { boss, by, inBlast: true });
   }
 
-  // gone completely, without splitting into smaller rocks
+  // caught in a self-destruct blast
   obliterateAsteroid(asteroid, by = null) {
     const i = this.asteroids.indexOf(asteroid);
     if (i < 0) return;

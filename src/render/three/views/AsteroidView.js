@@ -4,10 +4,10 @@ import { toSceneX, toSceneY } from '../coords.js';
 import { mergeFlat, plate, alongX } from '../geometry.js';
 
 // The "asteroids" are skinned as enemy airships, aircraft and drones (over the fantasy
-// realm all of them become fish-folk). Gameplay is
-// unchanged: large ones are zeppelins, medium ones fighters, small ones drones,
-// and they still split when shot. Models are built at unit size (about 2 long)
-// and scaled up to the hit radius.
+// realm all of them become fish-folk). Large ones are zeppelins (they launch
+// drones), medium ones fighters (they turn and shoot), small ones drones (they
+// fly straight). Models face the direction of travel, are built at unit size
+// (about 2 long) and are scaled up to the hit radius.
 
 const mirrorY = pts => [...pts, ...pts.slice().reverse().map(([x, y]) => [x, -y])];
 

@@ -3,8 +3,13 @@ import { forest } from './forest.js';
 import { coast } from './coast.js';
 import { alps } from './alps.js';
 import { realm } from './realm.js';
+import { desert } from './desert.js';
+import { volcano } from './volcano.js';
+import { arctic } from './arctic.js';
+import { neon } from './neon.js';
+import { moon } from './moon.js';
 
-const THEMES = { forest, coast, alps, realm };
+const THEMES = { forest, coast, alps, realm, desert, volcano, arctic, neon, moon };
 
 // The landscape the dogfight happens above. show(key) switches theme (the
 // renderer picks one per wave); fit() rebuilds it when the window resizes.

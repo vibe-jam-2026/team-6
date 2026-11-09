@@ -27,9 +27,11 @@ export const MENU_KEYS = {
 };
 
 // Testing shortcuts: G toggles invincibility (lobby or in game),
-// 1–9 / 0 jump straight to wave 1–9 / 10, N skips to the next wave, B jumps to the next boss.
+// 1–5 jump straight to that wave (higher digits stop at the final wave),
+// N skips to the next wave, B jumps to the boss, K gives every pilot money.
 export const TEST_KEYS = {
   invincible: 'KeyG',
+  addMoney: 'KeyK',
   nextWave: 'KeyN',
   nextBoss: 'KeyB',
   waves: ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0'],
@@ -72,15 +74,33 @@ export const WEAPONS = [
 // angle either side of the missile's heading count
 export const HOMING = { range: 520, cone: 1.4 };
 
-export const ASTEROID_TYPES = {
-  3: { radius: 46, speed: [35, 75],  score: 20 },
-  2: { radius: 25, speed: [65, 120], score: 50 },
-  1: { radius: 13, speed: [95, 175], score: 100 },
+// The three enemy types, keyed by size (the code still calls enemies
+// "asteroids"). They no longer split: each type is spawned on its own.
+//   hp: hits it takes; score: points; bounty: money for the pilot who destroys it
+//   drone (1):    flies straight ahead
+//   plane (2):    turns towards the nearest jet and fires at it
+//   zeppelin (3): drifts slowly and launches drones
+export const ENEMY_TYPES = {
+  1: { kind: 'drone', radius: 13, speed: [95, 175], hp: 1, score: 50, bounty: 5, color: '#8fd0ff' },
+  2: { kind: 'plane', radius: 25, speed: [115, 150], hp: 2, score: 100, bounty: 15, color: '#ff8a3a',
+    turnRate: 1.5,             // rad/s it can turn towards its target
+    fireEvery: [1.8, 3.2],     // seconds between shots
+    fireRange: 430,            // only fires at jets this close...
+    fireCone: 0.35,            // ...and within this many radians of its nose
+    bullet: { speed: 300, life: 2.2, radius: 4 } },
+  3: { kind: 'zeppelin', radius: 46, speed: [25, 45], hp: 5, score: 200, bounty: 30, color: '#ff4a3a',
+    launchEvery: [3.5, 5.5],   // seconds between drone launches
+    maxDrones: 3,              // drones of its own in the air at once
+    launchSpread: 0.6 },       // radians either side of the nearest jet it aims drones
 };
+
+// how likely each type is when a wave spawns an enemy: [drone, plane, zeppelin] weights,
+// sliding from the first wave to the last timed wave
+export const ENEMY_MIX = { first: [6, 3, 1], last: [3, 4, 2] };
 
 // The boss arrives on every `every`-th wave (wave 5, 10, ... - i.e. right after wave 4).
 export const BOSS = {
-  every: 5,
+  every: 5,             // must match WAVES.final: the boss is the final wave
   radius: 64,
   baseHp: 45,           // hit points for a single pilot...
   hpPerShip: 25,        // ...plus this per extra pilot
@@ -88,9 +108,30 @@ export const BOSS = {
   speed: 70,
   entryTime: 1.6,       // seconds it warps in, untouchable
   hitScore: 10,         // per bullet that lands
+  hitBounty: 2,         // money per bullet that lands
   killScore: 3000,      // to the pilot landing the final blow
   bullet: { speed: 230, life: 3.2, radius: 5 },
   color: '#ff3b5c',
+};
+
+// The final boss on the last wave: a huge carrier that hides behind a
+// rotating shield, launches fighters, sweeps the arena with bullet walls and
+// fires heavy cannon salvos. It is a separate kind from the wave-5 boss.
+export const MOTHERSHIP = {
+  radius: 92,
+  baseHp: 140,          // for a single pilot...
+  hpPerShip: 70,        // ...plus this per extra pilot
+  speed: 45,
+  entryTime: 2.4,
+  hitScore: 15,
+  hitBounty: 3,
+  killScore: 10000,
+  color: '#b46bff',
+  launchEvery: 7,       // seconds between fighter launches (5 when enraged)
+  fighters: 2,          // fighters per launch (3 when enraged)
+  maxFighters: 6,       // its own fighters in the air at once
+  bullet: { speed: 210, life: 4, radius: 5 },
+  shell: { speed: 160, life: 5, radius: 11 },   // the slow heavy cannon rounds
 };
 
 export const RULES = {
@@ -99,25 +140,52 @@ export const RULES = {
   invulnTime: 2.6,
   extraLifeEvery: 10000,
   killScore: 250,
-  waveDelay: 1.5,
-  maxWaveSize: 14,
+  maxWaveSize: 14,      // enemies at the start of a wave (more keep arriving)
   speedGrowthPerWave: 0.04,
   gameOverDelay: 1.6,
   lobbyDemoRocks: 6,
-  upgradeChoices: 3,     // upgrades offered to each player between waves
-  upgradeInputLock: 0.6, // seconds before a pick counts, so held fire keys don't auto-pick
+  startMoney: 0,
+  killBounty: 50,        // money for shooting down another jet (free-for-all)
+  victoryDelay: 4.5,     // seconds of fireworks over the arena before the results
+  shopInputLock: 0.6,    // seconds before shop presses count, so held fire keys don't buy
+  devMoney: 1000,        // what the K testing key gives every pilot
   shieldHitInvuln: 1.2,  // grace time after the deflector absorbs a hit
+};
+
+// Waves last a fixed time while enemies keep arriving from the edges. When the
+// time is up the survivors retreat and the shop opens. Boss waves (every
+// BOSS.every-th) have no clock: wave 5's boss opens the shop when it falls,
+// and the final wave is the Mothership - beating it wins the game.
+export const WAVES = {
+  duration: 60,          // seconds per wave
+  final: 10,             // the Mothership's wave, which ends the game
+  bossClearDelay: 2.5,   // seconds after a mid-game boss falls before the shop opens
+  opening: 5,            // enemies at the start of wave 1...
+  openingPerWave: 2,     // ...and this many more each wave after (capped by RULES.maxWaveSize)
+  interval: 3.5,         // seconds between reinforcements on wave 1...
+  intervalPerWave: -0.5, // ...this much shorter each wave after
+  minInterval: 1.5,
+  groupPerWave: 0.35,    // reinforcements arrive in groups of 1 + wave * this (rounded down)
+  maxEnemies: 22,        // no reinforcements while this many enemies are up (launched drones included)
+  maxZeppelins: 3,       // never more zeppelins than this at once
+  quietEnd: 4,           // no reinforcements in the last seconds of a wave
 };
 
 export const DEFAULT_JOINED = [true, true];
 
-// The landscape below the arena changes with every wave and cycles through
-// this list. The lobby shows the first one.
+// The landscape below the arena for each wave, in order (it cycles if there
+// are ever more waves than entries). The lobby shows the first one.
 export const SCENERY = [
   { key: 'forest', title: 'Swedish forest' },
   { key: 'coast', title: 'City coastline' },
   { key: 'alps', title: 'The Alps' },
   { key: 'realm', title: 'Fantasy realm' },
+  { key: 'forest', title: 'Swedish forest' },   // wave 5: the first boss, back over home ground
+  { key: 'desert', title: 'Sahara dunes' },
+  { key: 'volcano', title: 'Volcanic isles' },
+  { key: 'arctic', title: 'Arctic pack ice' },
+  { key: 'neon', title: 'Neon city' },
+  { key: 'moon', title: 'The Moon' },         // wave 10: the Mothership
 ];
 export const sceneryForWave = wave => SCENERY[(Math.max(1, wave) - 1) % SCENERY.length];
 

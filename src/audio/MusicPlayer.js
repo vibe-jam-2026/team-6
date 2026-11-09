@@ -4,7 +4,7 @@ import { EVENTS } from '../core/EventBus.js';
 // AudioContext. No sound files. Call tick() every update; it schedules notes a
 // little ahead of time so playback stays steady even when frames hitch.
 //
-// setMood(name) picks the track ('lobby', 'playing', 'paused', 'upgrade', 'gameover');
+// setMood(name) picks the track ('lobby', 'playing', 'paused', 'shop', 'gameover');
 // setIntensity(n) adds layers as the waves go up.
 
 const LOOKAHEAD = 0.15;   // seconds of music scheduled in advance
@@ -107,8 +107,8 @@ export class MusicPlayer {
     if (name === this.#mood) return;
     const from = this.#mood;
     this.#mood = name;
-    // pausing and picking upgrades between waves keep the match tune, muffled
-    const breather = n => n === 'paused' || n === 'upgrade';
+    // pausing and shopping between waves keep the match tune, muffled
+    const breather = n => n === 'paused' || n === 'shop';
     if (breather(name)) { this.#muffle(true); return; }
     this.#muffle(false);
     if (name === 'playing' && breather(from)) return; // resume the same tune
@@ -167,7 +167,7 @@ export class MusicPlayer {
     this.#noise = ctx.createBuffer(1, len, ctx.sampleRate);
     const data = this.#noise.getChannelData(0);
     for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-    if (this.#mood === 'paused' || this.#mood === 'upgrade') this.#muffle(true);
+    if (this.#mood === 'paused' || this.#mood === 'shop') this.#muffle(true);
   }
 
   #muffle(on) {

@@ -5,15 +5,15 @@
 //   2. otherwise turns to lead the best target and fires when lined up,
 //   3. closes in with short bursts of thrust when the target is out of range,
 //   4. picks a weapon for the range: scatter up close, blaster, then rockets.
-// Between waves it browses the upgrades for a moment and takes one.
+// Between waves it spends its money in the shop (see pickPurchase).
 
 const TURN_GAIN = 5;          // turn input per radian off the wanted heading
 const LOOKAHEAD = 0.9;        // s: how far ahead to look for collisions
 const SAFETY_MARGIN = 26;     // px of clearance it wants around threats
 const CRUISE_SPEED = 230;     // it only thrusts towards targets below this speed
 const SHIP_PENALTY = 120;     // px: prefers rocks a little over enemy jets
-const MENU_BROWSE_FRAMES = 25;
-const MENU_PICK_FRAMES = 55;
+// how much the computer likes each upgrade when shopping (default 1)
+const SHOP_TASTE = { rapidFire: 2, spread: 2, railRounds: 1.5, deflector: 1.5, spareShip: 0.8 };
 const WEAPON_SWITCH_FRAMES = 90; // waits this long between weapon changes so it doesn't flap
 
 const clamp = v => Math.max(-1, Math.min(1, v));
@@ -25,7 +25,6 @@ export class ComputerShipController {
   isComputer = true;
   solo = false;       // set by the Session like the other controllers; unused
   useMouse = false;
-  #menuFrames = 0;
   #wantedWeapon = null;
   #weaponFrames = 0;
   #ship = null;
@@ -152,19 +151,19 @@ export class ComputerShipController {
     return { x: wrapDelta(o.x - ship.x, width), y: wrapDelta(o.y - ship.y, height) };
   }
 
-  // --- menus ---
+  // --- shop ---
 
-  // between waves: look at the offers for a moment, maybe move once, then take one
-  stepPressed() {
-    this.#menuFrames++;
-    return this.#menuFrames === MENU_BROWSE_FRAMES ? Math.floor(Math.random() * 3) - 1 : 0;
+  // Between waves the shop asks, one purchase at a time, what to buy from what
+  // it can afford; null means done. It favours guns, then whatever is cheap.
+  pickPurchase(affordable) {
+    if (!affordable.length) return null;
+    const scored = affordable.map(u => ({ u, w: (SHOP_TASTE[u.id] ?? 1) * (0.5 + Math.random()) }));
+    return scored.reduce((best, c) => c.w > best.w ? c : best).u;
   }
 
-  confirmPressed() {
-    if (this.#menuFrames < MENU_PICK_FRAMES) return false;
-    this.#menuFrames = 0;
-    return true;
-  }
+  // the shop drives a computer pilot through pickPurchase, never through key presses
+  stepPressed() { return 0; }
+  confirmPressed() { return false; }
 
   selfDestructPressed() { return false; }
   togglePressed() { return false; }

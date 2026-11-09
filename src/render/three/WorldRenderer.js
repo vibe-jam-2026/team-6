@@ -11,6 +11,7 @@ import { ShipView } from './views/ShipView.js';
 import { AsteroidView } from './views/AsteroidView.js';
 import { BulletView } from './views/BulletView.js';
 import { BossView } from './views/BossView.js';
+import { MothershipView } from './views/MothershipView.js';
 import { ParticleView } from './views/ParticleView.js';
 import { LobbyShowcase } from './LobbyShowcase.js';
 import { BlastView } from './BlastView.js';
@@ -33,7 +34,7 @@ export class WorldRenderer {
     this.asteroidViews = new EntityViewSync(scene, a => new AsteroidView(a, this.sceneryKey));
     this.shipViews = new EntityViewSync(scene, s => new ShipView(s));
     this.bulletViews = new EntityViewSync(scene, b => new BulletView(b));
-    this.bossViews = new EntityViewSync(scene, b => new BossView(b));
+    this.bossViews = new EntityViewSync(scene, b => b.kind === 'mothership' ? new MothershipView(b) : new BossView(b));
     this.particleView = new ParticleView(dot);
     scene.add(this.particleView.object);
     this.lobby = new LobbyShowcase(scene, this.cameraRig);

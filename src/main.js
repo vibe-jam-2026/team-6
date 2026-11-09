@@ -25,6 +25,8 @@ import { BossSystem } from './systems/BossSystem.js';
 import { SpawnPlanner } from './systems/SpawnPlanner.js';
 import { WaveSpawner } from './systems/WaveSpawner.js';
 import { ScoreKeeper } from './systems/ScoreKeeper.js';
+import { Paymaster } from './systems/Paymaster.js';
+import { EnemySystem } from './systems/EnemySystem.js';
 import { SelfDestructSystem } from './systems/SelfDestructSystem.js';
 import { ParticleSystem } from './effects/ParticleSystem.js';
 import { EffectsDirector } from './effects/EffectsDirector.js';
@@ -32,8 +34,8 @@ import { LobbyState } from './states/LobbyState.js';
 import { PlayState } from './states/PlayState.js';
 import { PausedState } from './states/PausedState.js';
 import { GameOverState } from './states/GameOverState.js';
-import { UpgradeState } from './states/UpgradeState.js';
-import { UpgradeDraft } from './upgrades/UpgradeDraft.js';
+import { ShopState } from './states/ShopState.js';
+import { Shop } from './upgrades/Shop.js';
 import { WorldRenderer } from './render/three/WorldRenderer.js';
 import { Overlay2D } from './render/overlay/Overlay2D.js';
 import { OverlayRenderer } from './render/overlay/OverlayRenderer.js';
@@ -42,8 +44,10 @@ import { HudView } from './render/overlay/views/HudView.js';
 import { BannerView } from './render/overlay/views/BannerView.js';
 import { PauseView } from './render/overlay/views/PauseView.js';
 import { GameOverView } from './render/overlay/views/GameOverView.js';
-import { UpgradeView } from './render/overlay/views/UpgradeView.js';
+import { ShopView } from './render/overlay/views/ShopView.js';
 import { FlashView } from './render/overlay/views/FlashView.js';
+import { FireworksView } from './render/overlay/views/FireworksView.js';
+import { Fireworks } from './effects/Fireworks.js';
 
 // --- infrastructure ---
 const bus = new EventBus();
@@ -71,13 +75,16 @@ const session = new Session(bus, controllers, undefined, computers);
 // a phone has one pilot: start the lobby with only P1 joined
 if (TouchControls.likelyTouch()) session.joined = session.joined.map((_, i) => i === 0);
 const waves = new WaveSpawner(bus);
-const upgrades = new UpgradeDraft();
+const shop = new Shop();
 const particles = new ParticleSystem();
 const effects = new EffectsDirector(bus, particles);
+const fireworks = new Fireworks(bus, viewport);
 new ScoreKeeper(bus);
+new Paymaster(bus);
 const systems = {
   ships: new ShipSystem(bus, new SpawnPlanner()),
   bullets: new BulletSystem(),
+  enemies: new EnemySystem(bus),
   boss: new BossSystem(bus),
   collisions: new CollisionSystem(bus),
   selfDestruct: new SelfDestructSystem(bus),
@@ -85,12 +92,12 @@ const systems = {
 
 // --- states ---
 const states = new StateMachine();
-const deps = { input, bus, world, session, waves, effects, states, systems, upgrades };
+const deps = { input, bus, world, session, waves, effects, states, systems, shop };
 states
   .register('lobby', new LobbyState(deps))
   .register('playing', new PlayState(deps))
   .register('paused', new PausedState(deps))
-  .register('upgrade', new UpgradeState(deps))
+  .register('shop', new ShopState(deps))
   .register('gameover', new GameOverState(deps));
 const testControls = new TestControls(deps);
 
@@ -100,13 +107,14 @@ const worldRenderer = new WorldRenderer({
 });
 const hud = new HudView();
 const flash = new FlashView(bus);
+const fireworksView = new FireworksView(fireworks);
 const overlay = new OverlayRenderer(
-  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, upgrades })
+  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, shop })
   .register('lobby', [new LobbyView()])
-  .register('playing', [hud, new BannerView(), flash])
+  .register('playing', [fireworksView, hud, new BannerView(), flash])
   .register('paused', [hud, new PauseView()])
-  .register('upgrade', [flash, hud, new UpgradeView()])
-  .register('gameover', [flash, hud, new GameOverView()]);
+  .register('shop', [flash, hud, new ShopView()])
+  .register('gameover', [fireworksView, flash, hud, new GameOverView()]);
 const footer = document.getElementById('foot');
 const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
 overlay.context.touch = touch;
@@ -118,6 +126,8 @@ new GameLoop({
     if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
     testControls.update();
     states.update(dt);
+    // the victory fireworks run from the final boss's fall until the players leave the results
+    fireworks.update(dt, session.victory && ['playing', 'gameover'].includes(states.currentName));
     music.setMood(states.currentName);
     music.tick();
     input.endStep();
@@ -132,4 +142,5 @@ new GameLoop({
 }).start();
 
 // handle for debugging from the browser console
-window.game = { states, world, session, bus, waves };
+// game.addMoney(500) gives every pilot $500; game.addMoney(500, 0) only P1
+window.game = { states, world, session, bus, waves, shop, fireworks, addMoney: (amount, player) => testControls.addMoney(amount, player) };

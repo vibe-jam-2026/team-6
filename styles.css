@@ -14,10 +14,10 @@ html, body { touch-action: none; -webkit-user-select: none; user-select: none; -
 #touch > div { position: absolute; display: none; gap: 14px; }
 #touch[data-state="playing"] .pad, #touch[data-state="playing"] .menu.play { display: flex; }
 #touch[data-state="paused"] .menu.paused { display: flex; }
-/* between waves the pad only browses (◀ ▶) and picks (●) upgrades */
-#touch[data-state="upgrade"] .pad { display: flex; }
-#touch[data-state="upgrade"] .pad .thrust, #touch[data-state="upgrade"] .pad .boom,
-#touch[data-state="upgrade"] .pad .weapon { visibility: hidden; }
+/* between waves the pad only browses (◀ ▶) and buys (●) in the shop */
+#touch[data-state="shop"] .pad { display: flex; }
+#touch[data-state="shop"] .pad .thrust, #touch[data-state="shop"] .pad .boom,
+#touch[data-state="shop"] .pad .weapon { visibility: hidden; }
 #touch button {
   pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent;
   width: 76px; height: 76px; border-radius: 50%; padding: 0;

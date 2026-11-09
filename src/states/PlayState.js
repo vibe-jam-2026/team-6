@@ -26,29 +26,35 @@ export class PlayState {
     const { world, session, systems } = this;
     systems.ships.update(dt, world);
     systems.bullets.update(dt, world, session.mode);
-    world.updateAsteroids(dt);
+    systems.enemies.update(dt, world);
     systems.boss.update(dt, world);
     systems.selfDestruct.update(world, session.mode);
     systems.collisions.update(world, session.mode, { invincible: session.invincible });
     systems.bullets.removeSpent(world);
     this.effects.update(dt, world);
-    const waveCleared = this.waves.update(dt, world);
+    const timeUp = this.waves.update(dt, world);
     session.tickBanner(dt);
     if (this.#checkGameOver(dt)) return;
-    if (waveCleared) {
+    if (timeUp) {
+      world.retreatEnemies();
       this.bus.emit(EVENTS.WAVE_CLEARED, { wave: this.waves.wave });
-      this.states.change('upgrade');
+      this.states.change('shop');
     }
   }
 
-  // true while the match is ending (so no upgrade screen interrupts it)
+  // True while the match is ending (so the shop can't interrupt it). It ends
+  // when the mode says so or when the final boss goes down.
   #checkGameOver(dt) {
-    if (!this.session.mode.isOver(this.world.ships)) return false;
+    const { session, world, waves } = this;
+    const won = waves.bossBeaten(world) && !session.detonatedBy;
+    if (!won && !session.mode.isOver(world.ships)) return false;
+    // the moment the final boss falls: celebrate (fireworks start right away)
+    if (won && this.#overTimer === null) this.bus.emit(EVENTS.VICTORY);
     // let the last explosion play out for a moment
-    this.#overTimer ??= RULES.gameOverDelay;
+    this.#overTimer ??= won ? RULES.victoryDelay : RULES.gameOverDelay;
     this.#overTimer -= dt;
     if (this.#overTimer > 0) return true;
-    this.session.finish(this.world.ships, this.waves.wave);
+    session.finish(world.ships, waves.wave, { won });
     this.states.change('gameover');
     return true;
   }
