@@ -3,6 +3,7 @@ import { rand, TAU } from '../core/math.js';
 
 const ROCK_DUST = '#c9cfdc';
 const FLAME = '#ffb347';
+const ROCKET_SMOKE = '#6b707a';
 
 // Turns game events into particle effects: explosions, debris and engine trails.
 export class EffectsDirector {
@@ -15,6 +16,7 @@ export class EffectsDirector {
 
   update(dt, world) {
     for (const s of world.ships) if (s.alive && s.thrusting && Math.random() < 0.7) this.#engineTrail(s);
+    for (const b of world.bullets) if (Math.random() < 0.6) this.#rocketTrail(b);
     this.particles.update(dt);
   }
 
@@ -29,9 +31,15 @@ export class EffectsDirector {
   }
 
   #engineTrail(s) {
-    const bx = s.x - Math.cos(s.angle) * 12, by = s.y - Math.sin(s.angle) * 12;
+    const bx = s.x - Math.cos(s.angle) * 16, by = s.y - Math.sin(s.angle) * 16;
     const sp = rand(80, 160), ang = s.angle + Math.PI + rand(-0.35, 0.35);
     this.particles.add({ x: bx, y: by, vx: s.vx + Math.cos(ang) * sp, vy: s.vy + Math.sin(ang) * sp,
       life: rand(0.15, 0.35), max: 0.35, color: Math.random() < 0.5 ? FLAME : s.color });
+  }
+
+  #rocketTrail(b) {
+    const sp = Math.hypot(b.vx, b.vy) || 1, ux = b.vx / sp, uy = b.vy / sp;
+    this.particles.add({ x: b.x - ux * 6, y: b.y - uy * 6, z: 4, vx: -ux * 40 + rand(-15, 15), vy: -uy * 40 + rand(-15, 15),
+      vz: rand(0, 20), life: rand(0.2, 0.4), max: 0.4, color: Math.random() < 0.3 ? FLAME : ROCKET_SMOKE });
   }
 }
