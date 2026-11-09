@@ -7,6 +7,7 @@ import { GameLoop } from './core/GameLoop.js';
 import { StateMachine } from './core/StateMachine.js';
 import { KeyboardInput } from './input/KeyboardInput.js';
 import { KeyboardShipController } from './input/KeyboardShipController.js';
+import { TouchControls } from './input/TouchControls.js';
 import { SynthAudio } from './audio/SynthAudio.js';
 import { SoundEffects } from './audio/SoundEffects.js';
 import { MusicPlayer } from './audio/MusicPlayer.js';
@@ -47,6 +48,8 @@ const music = new MusicPlayer(audio, bus);
 const controllers = PLAYERS.map(p => new KeyboardShipController(input, p.keys));
 const world = new World(viewport, bus);
 const session = new Session(bus, controllers);
+// a phone has one pilot: start the lobby with only P1 joined
+if (TouchControls.likelyTouch()) session.joined = session.joined.map((_, i) => i === 0);
 const waves = new WaveSpawner(bus);
 const particles = new ParticleSystem();
 const effects = new EffectsDirector(bus, particles);
@@ -78,6 +81,8 @@ const overlay = new OverlayRenderer(
   .register('paused', [hud, new PauseView()])
   .register('gameover', [hud, new GameOverView()]);
 const footer = document.getElementById('foot');
+const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
+overlay.context.touch = touch;
 
 // --- run ---
 states.change('lobby');
@@ -92,6 +97,7 @@ new GameLoop({
   render(time) {
     worldRenderer.render(time);
     overlay.render(time);
+    touch.sync();
     footer.style.display = states.currentName === 'lobby' ? '' : 'none';
   },
 }).start();
