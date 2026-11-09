@@ -3,7 +3,8 @@ import { rand, TAU } from '../../../core/math.js';
 import { toSceneX, toSceneY } from '../coords.js';
 import { mergeFlat, plate, alongX } from '../geometry.js';
 
-// The "asteroids" are skinned as enemy aircraft and birds. Gameplay is
+// The "asteroids" are skinned as enemy aircraft and birds (over the fantasy
+// realm the aircraft become fish-folk). Gameplay is
 // unchanged: large ones are bombers, medium ones fighters, small ones birds,
 // and they still split when shot. Models are built at unit size (about 2 long)
 // and scaled up to the hit radius.
@@ -87,16 +88,63 @@ function createBird() {
   return { body, exhausts: [], wings };
 }
 
+// Fish-folk raiders that take the planes' place above the fantasy realm: a
+// scaly body with bulging eyes, a back fin, a tail fluke and fin-arms that
+// paddle through the air like wings. Original design, nose along +x.
+const fishBodyGeometry = mergeFlat([
+  new THREE.SphereGeometry(1, 10, 7).scale(0.5, 0.26, 0.22),
+  new THREE.SphereGeometry(0.27, 10, 7).scale(1, 1.05, 0.85).translate(0.5, 0, 0.04),
+  ...[-1, 1].map(s => alongX(new THREE.CylinderGeometry(0.035, 0.05, 0.4, 5)).translate(-0.62, s * 0.12, -0.04)),
+]);
+const fishFinGeometry = mergeFlat([
+  plate([[-0.38, 0], [0.32, 0], [0.12, 0.2], [-0.05, 0.3], [-0.25, 0.22]], 0.03).rotateX(Math.PI / 2).translate(0, 0, 0.14),
+  plate(mirrorY([[-0.42, 0], [-0.98, 0.34], [-0.86, 0.06]]), 0.03),
+  ...[-1, 1].map(s => plate(mirrorY([[-0.8, 0.02], [-0.98, 0.1], [-0.95, 0.02]]), 0.02).translate(0, s * 0.12, -0.04)),
+]);
+const fishEyeGeometry = mergeFlat([-1, 1].map(s => new THREE.SphereGeometry(0.095, 8, 6).translate(0.62, s * 0.15, 0.17)));
+const fishPupilGeometry = mergeFlat([-1, 1].map(s => new THREE.SphereGeometry(0.045, 6, 5).translate(0.69, s * 0.17, 0.22)));
+const fishMouthGeometry = plate(mirrorY([[0.78, 0], [0.66, 0.13], [0.62, 0.12]]), 0.03).translate(0, 0, -0.02);
+const fishArmGeometry = plate([[0.16, 0], [0.1, 0.45], [0.02, 0.7], [-0.12, 0.62], [-0.2, 0.36], [-0.16, 0]], 0.03);
+
+const scaleMaterial = new THREE.MeshStandardMaterial({ color: 0x2f6aa8, emissive: 0x061428, roughness: 0.5, metalness: 0.1, flatShading: true });
+const finMaterial = new THREE.MeshStandardMaterial({ color: 0xf0b030, roughness: 0.6, flatShading: true, side: THREE.DoubleSide });
+const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0xf4f2e8, roughness: 0.3 });
+const darkMaterial = new THREE.MeshStandardMaterial({ color: 0x14080c, roughness: 0.5, side: THREE.DoubleSide });
+
+function createFishFolk() {
+  const body = new THREE.Mesh(fishBodyGeometry, scaleMaterial);
+  body.castShadow = true;
+  for (const [g, m] of [[fishFinGeometry, finMaterial], [fishEyeGeometry, eyeMaterial], [fishPupilGeometry, darkMaterial], [fishMouthGeometry, darkMaterial]]) {
+    const part = new THREE.Mesh(g, m);
+    part.castShadow = true;
+    body.add(part);
+  }
+  const wings = [1, -1].map(side => {
+    const hinge = new THREE.Group();
+    hinge.position.set(0.12, side * 0.2, 0);
+    hinge.scale.y = side;
+    hinge.userData.side = side;
+    const arm = new THREE.Mesh(fishArmGeometry, finMaterial);
+    arm.castShadow = true;
+    hinge.add(arm);
+    body.add(hinge);
+    return hinge;
+  });
+  return { body, exhausts: [], wings };
+}
+
 export class AsteroidView {
-  constructor(asteroid) {
-    const model = asteroid.size === 1 ? createBird() : createPlane(asteroid.size);
+  constructor(asteroid, scenery) {
+    const model = asteroid.size === 1 ? createBird()
+      : scenery === 'realm' ? createFishFolk()
+        : createPlane(asteroid.size);
     Object.assign(this, model);
     this.object = new THREE.Group();
     this.object.rotation.order = 'ZYX'; // yaw to the flight direction, then bank
     this.object.add(this.body);
     this.object.scale.setScalar(asteroid.radius * (asteroid.size === 1 ? 1.1 : 1));
     this.phase = rand(0, TAU);
-    this.flapSpeed = rand(9, 13);
+    this.flapSpeed = asteroid.size === 1 ? rand(9, 13) : rand(5, 7);
   }
 
   update(a, { t, bounds }) {
