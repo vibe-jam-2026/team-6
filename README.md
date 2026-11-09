@@ -48,7 +48,7 @@ then open http://localhost:8000.
 | **N** | skip to the next wave (hint shown only while invincible) |
 | **B** | jump to the next boss wave (from the lobby: start at the first boss; hint shown only while invincible) |
 
-Jumping clears the field (rocks, boss and its bullets) and starts the chosen wave at once.
+Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
 touch. ◀ ▶ turn, ▲ thrusts and ● fires (they fly P1). In the lobby, tap a pilot's card
