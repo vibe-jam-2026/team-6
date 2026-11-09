@@ -37,7 +37,7 @@ then open http://localhost:8000.
 - Zeppelins, fighters and drones score 20 / 50 / 100; extra life every 10 000 points.
 - The landscape below changes every wave: a Swedish forest of pines, lakes and red
   cottages, a harbour city along a rocky coastline, the snowy Alps, then a high-fantasy
-  realm (red-rock warlands with spiked war camps and a glowing portal, a lava rift, and an
+  realm (red-rock warlands with spiked war camps and a glowing portal, and an
   enchanted violet forest with mana crystals and a blue-roofed keep, where the zeppelins,
   fighters and drones are replaced by flapping fish-folk raiders), and round again.
 - **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
