@@ -22,10 +22,14 @@ export const EVENTS = {
   SHIP_DESTROYED: 'shipDestroyed',     // { ship, by, inBlast }
   SHIPS_BUMPED: 'shipsBumped',         // { a, b }
   EXTRA_LIFE: 'extraLife',             // { ship }
-  WAVE_STARTED: 'waveStarted',         // { wave }
+  WAVE_STARTED: 'waveStarted',         // { wave, boss }
   WAVE_CLEARED: 'waveCleared',         // { wave }
   SELF_DESTRUCT: 'selfDestruct',       // { ship, x, y } after everything in the blast is gone
   SHIELD_HIT: 'shieldHit',             // { ship, by }
   UPGRADE_CHOSEN: 'upgradeChosen',     // { ship, upgrade }
+  BOSS_FIRED: 'bossFired',             // { boss }
+  BOSS_HIT: 'bossHit',                 // { boss, by, x, y }
+  BOSS_DESTROYED: 'bossDestroyed',     // { boss, by, inBlast }
+  TEST_TOGGLED: 'testToggled',         // { invincible }
   MENU_ACTION: 'menuAction',           // {}
 };

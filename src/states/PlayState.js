@@ -27,8 +27,9 @@ export class PlayState {
     systems.ships.update(dt, world);
     systems.bullets.update(dt, world);
     world.updateAsteroids(dt);
+    systems.boss.update(dt, world);
     systems.selfDestruct.update(world, session.mode);
-    systems.collisions.update(world, session.mode);
+    systems.collisions.update(world, session.mode, { invincible: session.invincible });
     systems.bullets.removeSpent(world);
     this.effects.update(dt, world);
     const waveCleared = this.waves.update(dt, world);

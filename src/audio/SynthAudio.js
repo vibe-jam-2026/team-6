@@ -27,6 +27,9 @@ export class SynthAudio {
     if (this.#master) this.#master.gain.value = this.muted ? 0 : VOLUME;
   }
 
+  // Node other audio sources (e.g. music) connect to; follows mute and volume.
+  get output() { return this.#master; }
+
   get #ready() { return this.ctx && !this.muted; }
 
   tone(freq, endFreq, dur, type = 'square', vol = 0.15, delay = 0) {

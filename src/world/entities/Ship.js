@@ -124,7 +124,7 @@ export class Ship {
       const nx = Math.cos(a), ny = Math.sin(a);
       bullets.push(new Bullet(this,
         this.x + nx * SHIP.muzzleOffset, this.y + ny * SHIP.muzzleOffset,
-        this.vx + nx * st.bulletSpeed, this.vy + ny * st.bulletSpeed, st.bulletLife));
+        this.vx + nx * st.bulletSpeed, this.vy + ny * st.bulletSpeed, { life: st.bulletLife }));
     }
     return bullets;
   }

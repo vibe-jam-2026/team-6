@@ -3,7 +3,9 @@ Vibe Jam 2026 – lag 6
 
 ## Rock Rumble
 
-A local multiplayer asteroid shooter for 2 players sharing one keyboard.
+A local multiplayer asteroid shooter for 2 players sharing one keyboard,
+flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy bombers,
+fighters and birds (large / medium / small targets).
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
 (tilted camera, lit low-poly rocks, shadows, bloom glow). Play it at
@@ -23,13 +25,17 @@ then open http://localhost:8000.
 | P2 (blue)   | ↑       | ← / →       | ↓       | Right Shift   |
 
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **Enter** starts.
-- **Modes:** *Free-for-all* (bullets hit other ships, 250 pts per kill, last ship flying wins)
+- **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
-- **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound.
-- Asteroids score 20 / 50 / 100 by size; extra life every 10 000 points.
-- **Self-destruct:** blows your ship up in a massive blast that wipes out every rock, bullet
-  and ship on screen, shields or not, and **ends the game**. You still score every rock
-  (and, in free-for-all, every kill) before the final scores are shown.
+- **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
+- Bombers, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
+- **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
+  It warps in, drifts around the arena and fires rings, aimed fans and spirals; below half
+  health it gets faster and angrier. Its bullets hit everyone and fly through the other enemies, and ramming
+  it is fatal. 10 points per hit, 3 000 for the final blow.
+- **Self-destruct:** blows your jet up in a massive blast that wipes out every enemy, bullet,
+  jet and the boss, shields or not, and **ends the game**. You still score everything the
+  blast takes out (and, in free-for-all, every kill) before the final scores are shown.
 - **Upgrades:** after each cleared wave, every player still in the game is offered three
   random upgrades. Browse with your turn keys and take one with your fire key; the next
   wave starts once everyone has picked. Upgrades stack up to a level cap:
@@ -45,6 +51,25 @@ then open http://localhost:8000.
   | Deflector | blocks one hit per wave (faint bubble while charged) | 2 |
   | Spare Ship | +1 life | – |
 
+### Testing shortcuts
+
+| Key | Effect |
+|-----|--------|
+| **G** | toggle invincible mode (lobby or in game) – ships can't be destroyed |
+| **1–9**, **0** | jump to wave 1–9 / 10 (from the lobby: start the match at that wave) |
+| **N** | skip to the next wave (hint shown only while invincible) |
+| **B** | jump to the next boss wave (from the lobby: start at the first boss; hint shown only while invincible) |
+
+Jumping clears the field (rocks, boss and its bullets) and starts the chosen wave at once.
+
+**Touch screens:** on a phone or tablet, on-screen controls appear after the first
+touch. ◀ ▶ turn, ▲ thrusts, ● fires and ✸ self-destructs (they fly P1). In the lobby, tap a pilot's card
+to join or leave, tap the mode line to switch mode and the start line to start. Between
+waves, ◀ ▶ browse the upgrades and ● takes one. In
+game there are pause and sound buttons at the bottom; on the game-over screen, tap
+anywhere to go back to the lobby. Add `?touch=1` to the URL to force the controls on
+(for example with a mouse), or `?touch=0` to keep them off.
+
 ## Code structure
 
 `index.html` only holds the two canvases and loads `src/main.js`. The code is
@@ -55,18 +80,21 @@ src/
   main.js                 composition root: builds every object and wires them together
   config.js               all tunable data (players, keys, physics, rules) – no behaviour
   core/                   EventBus, GameLoop (fixed timestep), StateMachine, Viewport, math
-  input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent)
-  audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds)
-  world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet
-  systems/                ShipSystem, BulletSystem, CollisionSystem, WaveSpawner,
-                          SpawnPlanner, ScoreKeeper
+  input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent),
+                          TestControls (invincible mode and wave jumps),
+                          TouchControls (on-screen buttons that press the same key codes)
+  audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),
+                          MusicPlayer (procedural soundtrack per game state)
+  world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet, Boss
+  systems/                ShipSystem, BulletSystem, BossSystem, CollisionSystem, WaveSpawner,
+                          SpawnPlanner, ScoreKeeper, SelfDestructSystem
   modes/                  GameMode base class, FreeForAllMode, CoopMode
   game/Session.js         lobby choices, wave banner and final result
   upgrades/               catalog (every upgrade and its effect), UpgradeDraft (deal + pick)
   states/                 LobbyState, PlayState, PausedState, UpgradeState, GameOverState
   effects/                ParticleSystem (data) and EffectsDirector (events -> particles)
   render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting, Starfield,
-                          EntityViewSync + views/ (ShipView, AsteroidView, BulletView, ParticleView)
+                          EntityViewSync + views/ (ShipView, AsteroidView, BulletView, BossView, ParticleView)
   render/overlay/         2D HUD and menus: Overlay2D primitives, OverlayRenderer, views/
 ```
 

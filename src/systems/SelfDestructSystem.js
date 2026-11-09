@@ -1,7 +1,7 @@
 import { EVENTS } from '../core/EventBus.js';
 
 // A pilot's last resort: their ship goes up in a blast that wipes out every
-// rock, bullet and ship on screen and ends the match. Shields and spawn
+// rock, bullet and ship on screen (the boss too) and ends the match. Shields and spawn
 // protection don't help. The pilot still scores the rocks, and in modes with
 // friendly fire also the kills.
 export class SelfDestructSystem {
@@ -21,6 +21,7 @@ export class SelfDestructSystem {
       if (ship.alive) world.destroyShip(ship, mode.friendlyFire ? bomber : null, { force: true, inBlast: true });
     }
     for (const rock of [...world.asteroids]) world.obliterateAsteroid(rock, bomber);
+    world.obliterateBoss(bomber);
     world.bullets = [];
     for (const ship of world.ships) ship.eliminate(); // nobody respawns: game over
     // announced last, so the blast's big camera shake isn't overridden by the smaller ones

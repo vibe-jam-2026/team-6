@@ -6,6 +6,7 @@ export class World {
   ships = [];
   asteroids = [];
   bullets = [];
+  boss = null;
   speedScale = 1; // set by the wave spawner, applied to new rocks
 
   constructor(bounds, bus) {
@@ -17,7 +18,15 @@ export class World {
     this.ships = ships;
     this.asteroids = [];
     this.bullets = [];
+    this.boss = null;
     this.speedScale = 1;
+  }
+
+  // removes everything hostile: rocks, the boss and its bullets (used when jumping waves)
+  clearField() {
+    this.asteroids = [];
+    this.boss = null;
+    this.bullets = [];
   }
 
   get width() { return this.bounds.width; }
@@ -35,6 +44,17 @@ export class World {
     this.bus.emit(EVENTS.ASTEROID_DESTROYED, { asteroid, by });
   }
 
+  hitBoss(by, at) {
+    const boss = this.boss;
+    if (!boss?.vulnerable) return;
+    boss.takeHit(1);
+    this.bus.emit(EVENTS.BOSS_HIT, { boss, by, x: at.x, y: at.y });
+    if (boss.alive) return;
+    this.boss = null;
+    for (const b of this.bullets) if (b.hostile) b.expire();
+    this.bus.emit(EVENTS.BOSS_DESTROYED, { boss, by });
+  }
+
   // force: ignore the deflector (a self-destruct blast); inBlast: part of one
   destroyShip(ship, by = null, { force = false, inBlast = false } = {}) {
     if (!ship.alive) return;
@@ -44,6 +64,14 @@ export class World {
     }
     ship.destroy();
     this.bus.emit(EVENTS.SHIP_DESTROYED, { ship, by, inBlast });
+  }
+
+  // the boss caught in a self-destruct blast, whatever health it had left
+  obliterateBoss(by = null) {
+    const boss = this.boss;
+    if (!boss) return;
+    this.boss = null;
+    this.bus.emit(EVENTS.BOSS_DESTROYED, { boss, by, inBlast: true });
   }
 
   // gone completely, without splitting into smaller rocks

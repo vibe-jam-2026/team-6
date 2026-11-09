@@ -3,16 +3,20 @@ import { EVENTS } from '../core/EventBus.js';
 
 // Detects contacts and resolves them through World. Whether bullets hurt
 // other ships is the game mode's decision, not this system's.
+// With `invincible` (a testing aid) nothing can destroy a ship.
 export class CollisionSystem {
   constructor(bus) {
     this.bus = bus;
   }
 
-  update(world, mode) {
+  update(world, mode, { invincible = false } = {}) {
+    const canHit = s => s.vulnerable && !invincible;
     this.#bumpShips(world);
     this.#bulletsVsAsteroids(world);
-    if (mode.friendlyFire) this.#bulletsVsShips(world);
-    this.#shipsVsAsteroids(world);
+    this.#bulletsVsBoss(world);
+    this.#bulletsVsShips(world, mode.friendlyFire, canHit);
+    this.#shipsVsAsteroids(world, canHit);
+    this.#shipsVsBoss(world, canHit);
   }
 
   #bumpShips(world) {
@@ -30,27 +34,49 @@ export class CollisionSystem {
     }
   }
 
+  // the boss's bullets fly through rocks
   #bulletsVsAsteroids(world) {
     for (const b of world.bullets) {
-      if (b.dead) continue;
+      if (b.dead || b.hostile) continue;
       const rock = world.asteroids.find(a => circlesOverlap(b, b.radius, a, a.radius * 0.92));
       if (rock) { b.expire(); world.destroyAsteroid(rock, b.owner); }
     }
   }
 
-  #bulletsVsShips(world) {
+  #bulletsVsBoss(world) {
     for (const b of world.bullets) {
-      if (b.dead) continue;
-      const target = world.ships.find(s => s !== b.owner && s.vulnerable && circlesOverlap(b, b.radius, s, s.radius));
-      if (target) { b.expire(); world.destroyShip(target, b.owner); }
+      const boss = world.boss;
+      if (!boss?.vulnerable) return;
+      if (b.dead || b.hostile || !circlesOverlap(b, b.radius, boss, boss.radius * 0.9)) continue;
+      b.expire();
+      world.hitBoss(b.owner, b);
     }
   }
 
-  #shipsVsAsteroids(world) {
+  #bulletsVsShips(world, friendlyFire, canHit) {
+    for (const b of world.bullets) {
+      if (b.dead || (!b.hostile && !friendlyFire)) continue;
+      const target = world.ships.find(s => s !== b.owner && canHit(s) && circlesOverlap(b, b.radius, s, s.radius));
+      if (!target) continue;
+      b.expire();
+      world.destroyShip(target, b.hostile ? null : b.owner);
+    }
+  }
+
+  #shipsVsAsteroids(world, canHit) {
     for (const s of world.ships) {
-      if (!s.vulnerable) continue;
+      if (!canHit(s)) continue;
       const rock = world.asteroids.find(a => circlesOverlap(s, s.radius * 0.8, a, a.radius * 0.9));
       if (rock) { world.destroyShip(s); world.destroyAsteroid(rock); }
+    }
+  }
+
+  // ramming the boss is fatal (but it is harmless while still warping in)
+  #shipsVsBoss(world, canHit) {
+    const boss = world.boss;
+    if (!boss?.vulnerable) return;
+    for (const s of world.ships) {
+      if (canHit(s) && circlesOverlap(s, s.radius * 0.8, boss, boss.radius * 0.85)) world.destroyShip(s);
     }
   }
 }
