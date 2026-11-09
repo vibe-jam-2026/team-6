@@ -4,6 +4,7 @@ import { rand, TAU } from '../core/math.js';
 const PLANE_DEBRIS = '#ff7a3a';
 const FEATHERS = '#f2efe6';
 const FLAME = '#ffb347';
+const SHIELD = '#9fe4ff';
 const ROCKET_SMOKE = '#6b707a';
 
 // Turns game events into particle effects: explosions, debris and engine trails.
@@ -13,6 +14,8 @@ export class EffectsDirector {
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid: a }) =>
       particles.burst(a.x, a.y, a.size === 1 ? FEATHERS : PLANE_DEBRIS, 8 + a.size * 6, 90 + a.size * 30, 0.9));
     bus.on(EVENTS.SHIP_DESTROYED, ({ ship }) => this.#shipExplosion(ship));
+    bus.on(EVENTS.SELF_DESTRUCT, e => this.#selfDestruct(e));
+    bus.on(EVENTS.SHIELD_HIT, ({ ship: s }) => particles.burst(s.x, s.y, SHIELD, 28, 200, 0.6));
     bus.on(EVENTS.BOSS_HIT, ({ boss, x, y }) => particles.burst(x, y, boss.color, 6, 140, 0.4));
     bus.on(EVENTS.BOSS_DESTROYED, ({ boss }) => this.#bossExplosion(boss));
   }
@@ -33,13 +36,29 @@ export class EffectsDirector {
     }
   }
 
+  // a fireball, a fast shockwave ring that sweeps the arena, and lots of debris
+  #selfDestruct({ ship, x, y }) {
+    const p = this.particles;
+    p.burst(x, y, '#ffffff', 120, 520, 1.2);
+    p.burst(x, y, FLAME, 220, 700, 1.8);
+    p.burst(x, y, ship.color, 160, 420, 2.2);
+    for (let i = 0; i < 260; i++) {
+      const a = (i / 260) * TAU, sp = rand(1300, 1500);
+      p.add({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1.3, color: i % 3 ? '#ffe2a8' : ship.color });
+    }
+    for (let i = 0; i < 40; i++) {
+      const a = rand(0, TAU), sp = rand(60, 260);
+      p.add({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, vz: rand(50, 300), life: rand(2, 3.2), color: ship.color });
+    }
+  }
+
   #bossExplosion(b) {
     this.particles.burst(b.x, b.y, b.color, 220, 420, 2.2);
     this.particles.burst(b.x, b.y, FLAME, 140, 300, 1.8);
     this.particles.burst(b.x, b.y, '#ffffff', 80, 220, 1.2);
     for (let i = 0; i < 6; i++) {
       const a = rand(0, TAU), r = rand(10, b.radius);
-      this.particles.burst(b.x + Math.cos(a) * r, b.y + Math.sin(a) * r, ROCK_DUST, 25, 180, 1.5);
+      this.particles.burst(b.x + Math.cos(a) * r, b.y + Math.sin(a) * r, PLANE_DEBRIS, 25, 180, 1.5);
     }
   }
 

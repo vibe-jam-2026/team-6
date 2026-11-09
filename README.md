@@ -3,7 +3,7 @@ Vibe Jam 2026 – lag 6
 
 ## Rock Rumble
 
-A local multiplayer asteroid shooter for up to 4 players sharing one keyboard,
+A local multiplayer asteroid shooter for 2 players sharing one keyboard,
 flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy bombers,
 fighters and birds (large / medium / small targets).
 It is a static site with no server: `index.html` plus a vendored copy of
@@ -19,12 +19,10 @@ python3 -m http.server 8000
 
 then open http://localhost:8000.
 
-| Player | Thrust | Turn | Fire |
-|--------|--------|------|------|
-| P1 (red)    | W       | A / D       | S       |
-| P2 (blue)   | ↑       | ← / →       | ↓       |
-| P3 (green)  | I       | J / L       | K       |
-| P4 (yellow) | Num 8   | Num 4 / 6   | Num 5   |
+| Player | Thrust | Turn | Fire | Self-destruct |
+|--------|--------|------|------|---------------|
+| P1 (red)    | W       | A / D       | S       | E             |
+| P2 (blue)   | ↑       | ← / →       | ↓       | Right Shift   |
 
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **Enter** starts.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
@@ -37,6 +35,23 @@ then open http://localhost:8000.
   It warps in, drifts around the arena and fires rings, aimed fans and spirals; below half
   health it gets faster and angrier. Its bullets hit everyone and fly through the other enemies, and ramming
   it is fatal. 10 points per hit, 3 000 for the final blow.
+- **Self-destruct:** blows your jet up in a massive blast that wipes out every enemy, bullet,
+  jet and the boss, shields or not, and **ends the game**. You still score everything the
+  blast takes out (and, in free-for-all, every kill) before the final scores are shown.
+- **Upgrades:** after each cleared wave, every player still in the game is offered three
+  random upgrades. Browse with your turn keys and take one with your fire key; the next
+  wave starts once everyone has picked. Upgrades stack up to a level cap:
+
+  | Upgrade | Effect | Max |
+  |---------|--------|-----|
+  | Rapid Fire | fire rate +25% | 4 |
+  | Afterburner | thrust +20%, top speed +12% | 4 |
+  | Gyro Thrusters | turn speed +20% | 3 |
+  | Big Magazine | +2 shots in the air | 3 |
+  | Rail Rounds | shot speed +20%, range +15% | 3 |
+  | Spread Shot | +1 bullet per shot | 2 |
+  | Deflector | blocks one hit per wave (faint bubble while charged) | 2 |
+  | Spare Ship | +1 life | – |
 
 ### Testing shortcuts
 
@@ -50,14 +65,12 @@ then open http://localhost:8000.
 Jumping clears the field (rocks, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
-touch. ◀ ▶ turn, ▲ thrusts and ● fires (they fly P1). In the lobby, tap a pilot's card
-to join or leave, tap the mode line to switch mode and the start line to start. In
+touch. ◀ ▶ turn, ▲ thrusts, ● fires and ✸ self-destructs (they fly P1). In the lobby, tap a pilot's card
+to join or leave, tap the mode line to switch mode and the start line to start. Between
+waves, ◀ ▶ browse the upgrades and ● takes one. In
 game there are pause and sound buttons at the bottom; on the game-over screen, tap
 anywhere to go back to the lobby. Add `?touch=1` to the URL to force the controls on
 (for example with a mouse), or `?touch=0` to keep them off.
-
-Note: some keyboards can't register many simultaneous keys ("ghosting"), so with
-4 players on one keyboard a few key combinations may drop out.
 
 ## Code structure
 
@@ -76,10 +89,11 @@ src/
                           MusicPlayer (procedural soundtrack per game state)
   world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet, Boss
   systems/                ShipSystem, BulletSystem, BossSystem, CollisionSystem, WaveSpawner,
-                          SpawnPlanner, ScoreKeeper
+                          SpawnPlanner, ScoreKeeper, SelfDestructSystem
   modes/                  GameMode base class, FreeForAllMode, CoopMode
   game/Session.js         lobby choices, wave banner and final result
-  states/                 LobbyState, PlayState, PausedState, GameOverState
+  upgrades/               catalog (every upgrade and its effect), UpgradeDraft (deal + pick)
+  states/                 LobbyState, PlayState, PausedState, UpgradeState, GameOverState
   effects/                ParticleSystem (data) and EffectsDirector (events -> particles)
   render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting,
                           EntityViewSync + views/ (ShipView, AsteroidView, BulletView, BossView, ParticleView)
@@ -91,7 +105,7 @@ How the SOLID principles show up:
 
 - **Single responsibility** – simulation, scoring, sound, particles, 3D and 2D drawing
   live in separate classes. Renderers only read game state.
-- **Open/closed** – add a game mode by subclassing `GameMode` and listing it in
+- **Open/closed** – add an upgrade by appending it to `upgrades/catalog.js`; add a game mode by subclassing `GameMode` and listing it in
   `modes/index.js`; add a screen by registering a view in `main.js`; add an entity type
   with a new `EntityViewSync`. Existing classes don't change.
 - **Liskov substitution** – every `GameMode` answers the same questions

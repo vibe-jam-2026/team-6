@@ -28,21 +28,28 @@ export class PlayState {
     systems.bullets.update(dt, world);
     world.updateAsteroids(dt);
     systems.boss.update(dt, world);
+    systems.selfDestruct.update(world, session.mode);
     systems.collisions.update(world, session.mode, { invincible: session.invincible });
     systems.bullets.removeSpent(world);
     this.effects.update(dt, world);
-    this.waves.update(dt, world);
+    const waveCleared = this.waves.update(dt, world);
     session.tickBanner(dt);
-    this.#checkGameOver(dt);
+    if (this.#checkGameOver(dt)) return;
+    if (waveCleared) {
+      this.bus.emit(EVENTS.WAVE_CLEARED, { wave: this.waves.wave });
+      this.states.change('upgrade');
+    }
   }
 
+  // true while the match is ending (so no upgrade screen interrupts it)
   #checkGameOver(dt) {
-    if (!this.session.mode.isOver(this.world.ships)) return;
+    if (!this.session.mode.isOver(this.world.ships)) return false;
     // let the last explosion play out for a moment
     this.#overTimer ??= RULES.gameOverDelay;
     this.#overTimer -= dt;
-    if (this.#overTimer > 0) return;
+    if (this.#overTimer > 0) return true;
     this.session.finish(this.world.ships, this.waves.wave);
     this.states.change('gameover');
+    return true;
   }
 }

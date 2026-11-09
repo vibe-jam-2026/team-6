@@ -55,9 +55,30 @@ export class World {
     this.bus.emit(EVENTS.BOSS_DESTROYED, { boss, by });
   }
 
-  destroyShip(ship, by = null) {
+  // force: ignore the deflector (a self-destruct blast); inBlast: part of one
+  destroyShip(ship, by = null, { force = false, inBlast = false } = {}) {
     if (!ship.alive) return;
+    if (!force && ship.absorbHit()) {
+      this.bus.emit(EVENTS.SHIELD_HIT, { ship, by });
+      return;
+    }
     ship.destroy();
-    this.bus.emit(EVENTS.SHIP_DESTROYED, { ship, by });
+    this.bus.emit(EVENTS.SHIP_DESTROYED, { ship, by, inBlast });
+  }
+
+  // the boss caught in a self-destruct blast, whatever health it had left
+  obliterateBoss(by = null) {
+    const boss = this.boss;
+    if (!boss) return;
+    this.boss = null;
+    this.bus.emit(EVENTS.BOSS_DESTROYED, { boss, by, inBlast: true });
+  }
+
+  // gone completely, without splitting into smaller rocks
+  obliterateAsteroid(asteroid, by = null) {
+    const i = this.asteroids.indexOf(asteroid);
+    if (i < 0) return;
+    this.asteroids.splice(i, 1);
+    this.bus.emit(EVENTS.ASTEROID_DESTROYED, { asteroid, by, inBlast: true });
   }
 }
