@@ -25,10 +25,11 @@ then open http://localhost:8000.
 | P1 (red)    | W       | A / D       | S       | Q             | E             |
 | P2 (blue)   | ↑       | ← / →       | ↓       | /             | Right Shift   |
 
-- **Weapons:** every jet carries three guns and the switch-weapon key cycles through them
-  (the HUD lists all three under your lives and boxes the active one). **Rockets** are the all-rounder, the
-  **Blaster** fires fast, small, short-range bolts and **Scatter** is a slow five-shot
-  shotgun blast. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
+- **Weapons:** every jet carries four guns and the switch-weapon key cycles through them
+  (the HUD lists them all under your lives and boxes the active one). **Rockets** are the all-rounder, the
+  **Blaster** fires fast, small, short-range bolts, **Scatter** is a slow five-shot
+  shotgun blast and **Homing** fires slow, heavy missiles that lock on to the nearest enemy
+  ahead (in free-for-all also other jets) and take 3 hits off the boss. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 
 - **Flying solo:** with only one pilot joined, **Space** fires too (and takes an upgrade between waves).
 - **Mouse control:** in the lobby, **C** hands the mouse to nobody → P1 → P2. That pilot's jet turns its

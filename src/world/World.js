@@ -47,7 +47,7 @@ export class World {
   hitBoss(by, at) {
     const boss = this.boss;
     if (!boss?.vulnerable) return;
-    boss.takeHit(1);
+    boss.takeHit(at.weapon?.damage ?? 1);
     this.bus.emit(EVENTS.BOSS_HIT, { boss, by, x: at.x, y: at.y });
     if (boss.alive) return;
     this.boss = null;

@@ -9,6 +9,7 @@ export class Bullet {
     this.radius = radius;
     this.hostile = hostile;
     this.weapon = weapon; // the ship weapon that fired it (null for the boss)
+    this.target = null;   // what a homing missile is chasing
   }
 
   get dead() { return this.life <= 0; }
