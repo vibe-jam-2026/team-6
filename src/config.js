@@ -114,6 +114,26 @@ export const BOSS = {
   color: '#ff3b5c',
 };
 
+// The final boss on the last wave: a huge carrier that hides behind a
+// rotating shield, launches fighters, sweeps the arena with bullet walls and
+// fires heavy cannon salvos. It is a separate kind from the wave-5 boss.
+export const MOTHERSHIP = {
+  radius: 92,
+  baseHp: 140,          // for a single pilot...
+  hpPerShip: 70,        // ...plus this per extra pilot
+  speed: 45,
+  entryTime: 2.4,
+  hitScore: 15,
+  hitBounty: 3,
+  killScore: 10000,
+  color: '#b46bff',
+  launchEvery: 7,       // seconds between fighter launches (5 when enraged)
+  fighters: 2,          // fighters per launch (3 when enraged)
+  maxFighters: 6,       // its own fighters in the air at once
+  bullet: { speed: 210, life: 4, radius: 5 },
+  shell: { speed: 160, life: 5, radius: 11 },   // the slow heavy cannon rounds
+};
+
 export const RULES = {
   lives: 3,
   respawnDelay: 1.8,
@@ -126,24 +146,26 @@ export const RULES = {
   lobbyDemoRocks: 6,
   startMoney: 0,
   killBounty: 50,        // money for shooting down another jet (free-for-all)
-  victoryDelay: 3,       // seconds the final boss explosion plays before the results
+  victoryDelay: 4.5,     // seconds of fireworks over the arena before the results
   shopInputLock: 0.6,    // seconds before shop presses count, so held fire keys don't buy
   devMoney: 1000,        // what the K testing key gives every pilot
   shieldHitInvuln: 1.2,  // grace time after the deflector absorbs a hit
 };
 
 // Waves last a fixed time while enemies keep arriving from the edges. When the
-// time is up the survivors retreat and the shop opens. The final wave is the
-// boss fight; it has no clock and beating the boss wins the game.
+// time is up the survivors retreat and the shop opens. Boss waves (every
+// BOSS.every-th) have no clock: wave 5's boss opens the shop when it falls,
+// and the final wave is the Mothership - beating it wins the game.
 export const WAVES = {
   duration: 60,          // seconds per wave
-  final: 5,              // the boss wave that ends the game
+  final: 10,             // the Mothership's wave, which ends the game
+  bossClearDelay: 2.5,   // seconds after a mid-game boss falls before the shop opens
   opening: 5,            // enemies at the start of wave 1...
   openingPerWave: 2,     // ...and this many more each wave after (capped by RULES.maxWaveSize)
   interval: 3.5,         // seconds between reinforcements on wave 1...
   intervalPerWave: -0.5, // ...this much shorter each wave after
   minInterval: 1.5,
-  groupPerWave: 0.5,     // reinforcements arrive in groups of 1 + wave * this (rounded down)
+  groupPerWave: 0.35,    // reinforcements arrive in groups of 1 + wave * this (rounded down)
   maxEnemies: 22,        // no reinforcements while this many enemies are up (launched drones included)
   maxZeppelins: 3,       // never more zeppelins than this at once
   quietEnd: 4,           // no reinforcements in the last seconds of a wave
@@ -151,12 +173,18 @@ export const WAVES = {
 
 export const DEFAULT_JOINED = [true, true];
 
-// The landscape below the arena changes with every wave and cycles through
-// this list. The lobby shows the first one.
+// The landscape below the arena for each wave, in order (it cycles if there
+// are ever more waves than entries). The lobby shows the first one.
 export const SCENERY = [
   { key: 'forest', title: 'Swedish forest' },
   { key: 'coast', title: 'City coastline' },
   { key: 'alps', title: 'The Alps' },
   { key: 'realm', title: 'Fantasy realm' },
+  { key: 'forest', title: 'Swedish forest' },   // wave 5: the first boss, back over home ground
+  { key: 'desert', title: 'Sahara dunes' },
+  { key: 'volcano', title: 'Volcanic isles' },
+  { key: 'arctic', title: 'Arctic pack ice' },
+  { key: 'neon', title: 'Neon city' },
+  { key: 'moon', title: 'The Moon' },         // wave 10: the Mothership
 ];
 export const sceneryForWave = wave => SCENERY[(Math.max(1, wave) - 1) % SCENERY.length];

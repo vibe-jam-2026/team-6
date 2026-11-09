@@ -1,21 +1,24 @@
-import { BOSS, ENEMY_MIX, RULES, WAVES } from '../config.js';
+import { BOSS, ENEMY_MIX, MOTHERSHIP, RULES, WAVES } from '../config.js';
 import { dist2, rand } from '../core/math.js';
 import { EVENTS } from '../core/EventBus.js';
 import { Asteroid } from '../world/entities/Asteroid.js';
 import { Boss } from '../world/entities/Boss.js';
+import { Mothership } from '../world/entities/Mothership.js';
 
 const EDGE_BAND = 60;
 const SAFE_DISTANCE = 200;
 
 // Runs the waves. A normal wave lasts WAVES.duration seconds: it opens with a
 // group of enemies and keeps sending reinforcements from the edges, more and
-// more often as the waves go on. The final wave (WAVES.final) is the boss
-// fight and has no clock. update() reports when a timed wave is over; whoever
-// runs the match decides what happens next (the shop) and calls startNext().
+// more often as the waves go on. Boss waves have no clock: a mid-game boss
+// (wave 5) ends its wave when it falls; the final wave (WAVES.final) brings
+// the Mothership. update() reports when a wave is over; whoever runs the
+// match decides what happens next (the shop) and calls startNext().
 export class WaveSpawner {
   wave = 0;
   timeLeft = 0;      // seconds left in the current timed wave
   #spawnTimer = 0;
+  #bossClear = 0;    // counts down after a mid-game boss falls
 
   constructor(bus) {
     this.bus = bus;
@@ -30,9 +33,14 @@ export class WaveSpawner {
   get isFinalWave() { return this.wave >= WAVES.final; }
   get isTimed() { return !this.isBossWave(); }
 
-  // true once a timed wave has run out of time
+  // true once a timed wave has run out of time, or a mid-game boss has fallen
+  // (after a moment for its explosion); never for the final wave
   update(dt, world) {
-    if (!this.isTimed) return false;
+    if (!this.isTimed) {
+      if (this.isFinalWave || world.boss) return false;
+      this.#bossClear -= dt;
+      return this.#bossClear <= 0;
+    }
     this.timeLeft = Math.max(0, this.timeLeft - dt);
     if (this.timeLeft <= 0) return true;
     this.#reinforce(dt, world);
@@ -58,6 +66,7 @@ export class WaveSpawner {
     this.wave++;
     this.timeLeft = WAVES.duration;
     this.#spawnTimer = this.#interval();
+    this.#bossClear = WAVES.bossClearDelay;
     for (const ship of world.ships) ship.prepareForWave();
     world.speedScale = 1 + this.wave * RULES.speedGrowthPerWave;
     if (this.isBossWave()) return this.#spawnBoss(world);
@@ -101,13 +110,19 @@ export class WaveSpawner {
     return 1;
   }
 
+  // the wave-5 style boss mid-game, the Mothership on the final wave
   #spawnBoss(world) {
-    const level = this.wave / BOSS.every;
     const pilots = Math.max(1, world.ships.length);
-    const hp = Math.round((BOSS.baseHp + BOSS.hpPerShip * (pilots - 1)) * (1 + BOSS.hpGrowth * (level - 1)));
     const p = this.#bossPoint(world);
-    world.boss = new Boss(p.x, p.y, hp, level);
-    this.bus.emit(EVENTS.WAVE_STARTED, { wave: this.wave, boss: true });
+    const final = this.isFinalWave;
+    if (final) {
+      world.boss = new Mothership(p.x, p.y, MOTHERSHIP.baseHp + MOTHERSHIP.hpPerShip * (pilots - 1));
+    } else {
+      const level = this.wave / BOSS.every;
+      const hp = Math.round((BOSS.baseHp + BOSS.hpPerShip * (pilots - 1)) * (1 + BOSS.hpGrowth * (level - 1)));
+      world.boss = new Boss(p.x, p.y, hp, level);
+    }
+    this.bus.emit(EVENTS.WAVE_STARTED, { wave: this.wave, boss: true, final });
   }
 
   // the candidate spot furthest from every living ship

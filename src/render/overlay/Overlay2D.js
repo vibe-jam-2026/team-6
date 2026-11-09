@@ -45,6 +45,21 @@ export class Overlay2D {
     return this.ctx.measureText(str).width;
   }
 
+  // glowing dots added on top of each other (fireworks): [{ x, y, size, alpha, color }]
+  sparks(points) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (const p of points) {
+      ctx.globalAlpha = p.alpha * 0.35;
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
   fillScreen(color) {
     this.ctx.fillStyle = color;
     this.ctx.fillRect(0, 0, this.width, this.height);
@@ -111,7 +126,7 @@ export class Overlay2D {
   // boss health bar centred on x, with its name above
   bossBar(boss, x, y, w) {
     const ctx = this.ctx, h = 8, left = x - w / 2;
-    this.text(boss.entering ? 'WARNING · BOSS INCOMING' : `BOSS ${'I'.repeat(Math.min(boss.level, 5))}`,
+    this.text(boss.entering ? `WARNING · ${boss.title ?? 'BOSS'} INCOMING` : (boss.title ?? `BOSS ${'I'.repeat(Math.min(boss.level, 5))}`),
       x, y, 12, boss.color, 'center', boss.color);
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
     ctx.fillRect(left, y + 12, w, h);

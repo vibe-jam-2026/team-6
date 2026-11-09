@@ -46,6 +46,8 @@ import { PauseView } from './render/overlay/views/PauseView.js';
 import { GameOverView } from './render/overlay/views/GameOverView.js';
 import { ShopView } from './render/overlay/views/ShopView.js';
 import { FlashView } from './render/overlay/views/FlashView.js';
+import { FireworksView } from './render/overlay/views/FireworksView.js';
+import { Fireworks } from './effects/Fireworks.js';
 
 // --- infrastructure ---
 const bus = new EventBus();
@@ -76,6 +78,7 @@ const waves = new WaveSpawner(bus);
 const shop = new Shop();
 const particles = new ParticleSystem();
 const effects = new EffectsDirector(bus, particles);
+const fireworks = new Fireworks(bus, viewport);
 new ScoreKeeper(bus);
 new Paymaster(bus);
 const systems = {
@@ -104,13 +107,14 @@ const worldRenderer = new WorldRenderer({
 });
 const hud = new HudView();
 const flash = new FlashView(bus);
+const fireworksView = new FireworksView(fireworks);
 const overlay = new OverlayRenderer(
   new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, shop })
   .register('lobby', [new LobbyView()])
-  .register('playing', [hud, new BannerView(), flash])
+  .register('playing', [fireworksView, hud, new BannerView(), flash])
   .register('paused', [hud, new PauseView()])
   .register('shop', [flash, hud, new ShopView()])
-  .register('gameover', [flash, hud, new GameOverView()]);
+  .register('gameover', [fireworksView, flash, hud, new GameOverView()]);
 const footer = document.getElementById('foot');
 const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
 overlay.context.touch = touch;
@@ -122,6 +126,8 @@ new GameLoop({
     if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
     testControls.update();
     states.update(dt);
+    // the victory fireworks run from the final boss's fall until the players leave the results
+    fireworks.update(dt, session.victory && ['playing', 'gameover'].includes(states.currentName));
     music.setMood(states.currentName);
     music.tick();
     input.endStep();
@@ -137,4 +143,4 @@ new GameLoop({
 
 // handle for debugging from the browser console
 // game.addMoney(500) gives every pilot $500; game.addMoney(500, 0) only P1
-window.game = { states, world, session, bus, waves, shop, addMoney: (amount, player) => testControls.addMoney(amount, player) };
+window.game = { states, world, session, bus, waves, shop, fireworks, addMoney: (amount, player) => testControls.addMoney(amount, player) };

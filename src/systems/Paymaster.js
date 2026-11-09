@@ -7,7 +7,7 @@ export class Paymaster {
   constructor(bus) {
     this.bus = bus;
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid, by }) => by && this.pay(by, asteroid.bounty));
-    bus.on(EVENTS.BOSS_HIT, ({ by }) => by && this.pay(by, BOSS.hitBounty));
+    bus.on(EVENTS.BOSS_HIT, ({ boss, by }) => by && this.pay(by, boss.hitBounty ?? BOSS.hitBounty));
     bus.on(EVENTS.SHIP_DESTROYED, ({ ship, by }) => by && by !== ship && this.pay(by, RULES.killBounty));
   }
 

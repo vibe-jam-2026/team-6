@@ -1,4 +1,5 @@
 import { READY } from '../../../upgrades/Shop.js';
+import { WAVES } from '../../../config.js';
 
 const MONEY = '#ffd23f';
 const TOO_DEAR = '#c45a66';
@@ -21,13 +22,14 @@ export class ShopView {
     o.text('turn keys browse · fire buys · pick READY when done', W / 2, y + 54, 12, '#9aa1b2', 'center');
 
     const colW = (pw - 32 - COL_GAP * (entries.length - 1)) / entries.length;
-    const nextIsBoss = waves.isBossWave(waves.wave + 1);
+    const next = waves.wave + 1;
+    const nextLabel = !waves.isBossWave(next) ? 'NEXT WAVE' : next >= WAVES.final ? 'FINAL BOSS' : 'BOSS';
     entries.forEach((entry, i) => this.#column(o, shop, entry, {
-      x: x + 16 + i * (colW + COL_GAP), y: y + 76, w: colW, rowH, time, nextIsBoss,
+      x: x + 16 + i * (colW + COL_GAP), y: y + 76, w: colW, rowH, time, nextLabel,
     }));
   }
 
-  #column(o, shop, entry, { x, y, w, rowH, time, nextIsBoss }) {
+  #column(o, shop, entry, { x, y, w, rowH, time, nextLabel }) {
     const { ship, cursor, ready, notice } = entry;
     const pulse = 0.5 + 0.5 * Math.sin(time / 140);
     o.text(ship.name, x + 4, y + 10, 18, ship.color, 'left', ship.color);
@@ -46,7 +48,7 @@ export class ShopView {
       }
       const cy = ry + (rowH - 3) / 2;
       if (item === READY) {
-        const label = nextIsBoss ? 'READY ▸ FINAL BOSS' : 'READY ▸ NEXT WAVE';
+        const label = `READY ▸ ${nextLabel}`;
         o.text(ready ? `✓ ${label}` : label, x + w / 2, cy, 13, ready ? ship.color : '#e8ecf4', 'center');
         return;
       }

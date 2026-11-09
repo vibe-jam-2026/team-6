@@ -11,6 +11,7 @@ export class Session {
   banner = { text: '', timeLeft: 0 };
   result = null;
   detonatedBy = null; // the ship that self-destructed and ended the match, if any
+  victory = false;    // the final boss is down: the celebration is on
   invincible = false; // testing aid: ships cannot be destroyed
   mouseOwner = null;  // index of the player flying with the mouse, or null
   computer = [];      // computer[i]: player i is flown by the computer
@@ -20,12 +21,14 @@ export class Session {
     this.controllers = controllers;
     this.computers = computers;
     this.modes = modes;
-    bus.on(EVENTS.WAVE_STARTED, ({ wave, boss }) => {
+    bus.on(EVENTS.WAVE_STARTED, ({ wave, boss, final }) => {
       const place = sceneryForWave(wave).title.toUpperCase();
-      this.announce(boss ? `WAVE ${wave} · FINAL BOSS · ${place}` : `WAVE ${wave}  ·  ${place}`, boss ? 3 : 2);
+      const what = final ? 'FINAL BOSS' : boss ? 'BOSS' : null;
+      this.announce(what ? `WAVE ${wave} · ${what} · ${place}` : `WAVE ${wave}  ·  ${place}`, boss ? 3 : 2);
     });
     bus.on(EVENTS.SELF_DESTRUCT, ({ ship }) => { this.detonatedBy = ship; });
     bus.on(EVENTS.BOSS_DESTROYED, () => this.announce('BOSS DESTROYED', 3));
+    bus.on(EVENTS.VICTORY, () => { this.victory = true; this.announce('VICTORY!', 5); });
   }
 
   get mode() { return this.modes[this.#modeIndex]; }
@@ -55,6 +58,7 @@ export class Session {
 
   createShips() {
     this.detonatedBy = null;
+    this.victory = false;
     const solo = this.humanCount === 1;
     this.controllers.forEach((c, i) => {
       c.solo = solo;               // a lone pilot can also fire with Space
@@ -75,7 +79,7 @@ export class Session {
     won = won && !this.detonatedBy;
     let headline = mode.headline(ships, wave);
     if (this.detonatedBy) headline = `${this.detonatedBy.name} blew everything up · wave ${wave}`;
-    else if (won) headline = ships.length > 1 ? `boss defeated · ${ranked[0].name} tops the score` : `boss defeated · final score ${ranked[0].score}`;
+    else if (won) headline = ships.length > 1 ? `the Mothership is down · ${ranked[0].name} tops the score` : `the Mothership is down · final score ${ranked[0].score}`;
     this.result = {
       won,
       ranked,

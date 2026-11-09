@@ -23,6 +23,14 @@ export class SoundEffects {
     bus.on(EVENTS.WAVE_CLEARED, () => [392, 523, 659].forEach((f, k) => synth.tone(f, f, 0.14, 'triangle', 0.1, k * 0.08)));
     bus.on(EVENTS.UPGRADE_BOUGHT, ({ ship }) => [660, 990, 1320].forEach((f, k) => synth.tone(f + ship.index * 40, f * 1.5, 0.1, 'square', 0.07, k * 0.06)));
     bus.on(EVENTS.PURCHASE_DENIED, () => synth.tone(150, 110, 0.18, 'sawtooth', 0.09));
+    // victory: a fanfare, then a pop and crackle for every firework
+    bus.on(EVENTS.VICTORY, () => [523, 659, 784, 1046, 784, 1046, 1318].forEach((f, k) =>
+      synth.tone(f, f, k < 4 ? 0.16 : 0.32, 'triangle', 0.13, k * 0.14 + (k > 3 ? 0.1 : 0))));
+    bus.on(EVENTS.FIREWORK_BURST, () => {
+      synth.noise(0.7, 0.3, 2600);
+      for (let k = 0; k < 4; k++) synth.tone(2400 + k * 300, 1800, 0.03, 'square', 0.025, 0.12 + k * 0.07 + Math.random() * 0.05);
+    });
+    bus.on(EVENTS.SHIELD_BLOCKED, () => synth.tone(900, 1300, 0.06, 'sine', 0.06));
     bus.on(EVENTS.ENEMY_HIT, () => synth.tone(1100, 600, 0.05, 'triangle', 0.05));
     bus.on(EVENTS.ENEMY_FIRED, () => synth.tone(320, 160, 0.1, 'square', 0.03));
     bus.on(EVENTS.DRONE_LAUNCHED, () => synth.tone(500, 1000, 0.12, 'sine', 0.04));

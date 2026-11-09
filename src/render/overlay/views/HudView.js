@@ -36,14 +36,14 @@ export class HudView {
     if (world.boss) o.bossBar(world.boss, W / 2, 46, Math.min(420, W * 0.4));
     if (session.invincible) o.text('INVINCIBLE · G to turn off', W / 2, H - 34, 12, '#ffd23f', 'center', '#ffd23f');
     if (!touch?.enabled) {
-      o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · G invincible · 1-5 wave · K +$${RULES.devMoney}${session.invincible ? ' · N next · B boss' : ''}`,
+      o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · G invincible · 1-9/0 wave · K +$${RULES.devMoney}${session.invincible ? ' · N next · B boss' : ''}`,
         W / 2, H - 16, 11, '#9aa1b2', 'center');
     }
   }
 
   // "WAVE 2 · 0:43", or the boss fight
   #waveText(waves) {
-    if (!waves.isTimed) return `WAVE ${waves.wave}  ·  FINAL BOSS`;
+    if (!waves.isTimed) return `WAVE ${waves.wave}  ·  ${waves.isFinalWave ? 'FINAL BOSS' : 'BOSS'}`;
     const t = Math.ceil(waves.timeLeft);
     return `WAVE ${waves.wave}  ·  ${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
   }

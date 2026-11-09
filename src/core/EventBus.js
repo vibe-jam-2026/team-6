@@ -27,6 +27,9 @@ export const EVENTS = {
   WAVE_CLEARED: 'waveCleared',         // { wave }
   SELF_DESTRUCT: 'selfDestruct',       // { ship, x, y } after everything in the blast is gone
   SHIELD_HIT: 'shieldHit',             // { ship, by }
+  SHIELD_BLOCKED: 'shieldBlocked',     // { boss, x, y } a shot hit the Mothership's shield
+  VICTORY: 'victory',                  // {} the final boss is down: the game is won
+  FIREWORK_BURST: 'fireworkBurst',     // { x, y } a victory firework went off (screen pixels)
   UPGRADE_BOUGHT: 'upgradeBought',     // { ship, upgrade, price }
   PURCHASE_DENIED: 'purchaseDenied',   // { ship, reason: 'money' | 'maxed' }
   MONEY_EARNED: 'moneyEarned',         // { ship, amount }

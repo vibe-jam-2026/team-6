@@ -49,7 +49,9 @@ export class CollisionSystem {
       if (!boss?.vulnerable) return;
       if (b.dead || b.hostile || !circlesOverlap(b, b.radius, boss, boss.radius * 0.9)) continue;
       b.expire();
-      world.hitBoss(b.owner, b);
+      // the Mothership's shield soaks up shots from the side it is facing
+      if (boss.deflects?.(b)) this.bus.emit(EVENTS.SHIELD_BLOCKED, { boss, x: b.x, y: b.y });
+      else world.hitBoss(b.owner, b);
     }
   }
 

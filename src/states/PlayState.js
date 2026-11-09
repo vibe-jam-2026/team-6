@@ -46,8 +46,10 @@ export class PlayState {
   // when the mode says so or when the final boss goes down.
   #checkGameOver(dt) {
     const { session, world, waves } = this;
-    const won = waves.bossBeaten(world);
+    const won = waves.bossBeaten(world) && !session.detonatedBy;
     if (!won && !session.mode.isOver(world.ships)) return false;
+    // the moment the final boss falls: celebrate (fireworks start right away)
+    if (won && this.#overTimer === null) this.bus.emit(EVENTS.VICTORY);
     // let the last explosion play out for a moment
     this.#overTimer ??= won ? RULES.victoryDelay : RULES.gameOverDelay;
     this.#overTimer -= dt;

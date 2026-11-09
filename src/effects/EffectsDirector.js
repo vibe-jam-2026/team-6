@@ -19,6 +19,8 @@ export class EffectsDirector {
     bus.on(EVENTS.BOSS_HIT, ({ boss, x, y }) => particles.burst(x, y, boss.color, 6, 140, 0.4));
     bus.on(EVENTS.BOSS_DESTROYED, ({ boss }) => this.#bossExplosion(boss));
     // a plane or zeppelin that takes a hit but keeps flying throws sparks
+    // shots splashing on the Mothership's shield
+    bus.on(EVENTS.SHIELD_BLOCKED, ({ x, y }) => particles.burst(x, y, '#7ae8ff', 6, 120, 0.3));
     bus.on(EVENTS.ENEMY_HIT, ({ enemy: e }) => particles.burst(e.x, e.y, PLANE_DEBRIS, 6 + e.size * 2, 120, 0.4));
     bus.on(EVENTS.DRONE_LAUNCHED, ({ drone: d }) => particles.burst(d.x, d.y, DRONE_SPARKS, 8, 70, 0.35));
     // when a wave's time runs out, each enemy still flying leaves with a pale puff
