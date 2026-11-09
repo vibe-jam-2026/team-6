@@ -5,7 +5,7 @@ Vibe Jam 2026 – lag 6
 
 A local multiplayer fighter-jet shooter for 2 players sharing one keyboard.
 Scramble your low-poly Saab JAS 39 Gripen E, go *schnell*, and fire rockets at
-waves of enemy zeppelins, fighters and birds (large / medium / small targets),
+waves of enemy zeppelins, fighters and drones (large / medium / small targets),
 then at bosses. Fly with your wingman in co-op, or fight them in free-for-all.
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
@@ -29,7 +29,7 @@ then open http://localhost:8000.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
-- Zeppelins, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
+- Zeppelins, fighters and drones score 20 / 50 / 100; extra life every 10 000 points.
 - The landscape below changes every wave: a Swedish forest of pines, lakes and red
   cottages, a harbour city along a rocky coastline, then the snowy Alps, and round again.
 - **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
