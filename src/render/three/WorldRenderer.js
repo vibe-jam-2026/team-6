@@ -28,7 +28,7 @@ export class WorldRenderer {
     this.lighting = new Lighting(scene);
     this.arena = new ArenaView(scene);
     this.cameraRig = new CameraRig(camera, bus);
-    this.scenery = new Scenery(scene, this.lighting);
+    this.scenery = new Scenery(scene, this.lighting, this.stage.bloom);
     this.wave = 1;
     bus.on(EVENTS.WAVE_STARTED, ({ wave }) => { this.wave = wave; });
     this.asteroidViews = new EntityViewSync(scene, a => new AsteroidView(a, this.sceneryKey));

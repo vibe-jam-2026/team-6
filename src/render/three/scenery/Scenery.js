@@ -17,9 +17,11 @@ export class Scenery {
   #key = null;
   #viewport = null;
 
-  constructor(scene, lighting) {
+  constructor(scene, lighting, bloom) {
     this.scene = scene;
     this.lighting = lighting;
+    this.bloom = bloom;
+    this.bloomDefaults = bloom && { strength: bloom.strength, radius: bloom.radius, threshold: bloom.threshold };
     this.group = new THREE.Group();
     scene.add(this.group);
   }
@@ -53,5 +55,7 @@ export class Scenery {
     this.scene.background = new THREE.Color(sky);
     this.scene.fog = new THREE.Fog(sky, this.cameraDistance * 1.15, this.cameraDistance * 2.6);
     this.lighting.setMood(theme.mood);
+    // themes may crank the bloom up (e.g. the neon city); others get the default glow
+    if (this.bloom) Object.assign(this.bloom, this.bloomDefaults, theme.mood.bloom);
   }
 }
