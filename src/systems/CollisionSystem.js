@@ -34,12 +34,12 @@ export class CollisionSystem {
     }
   }
 
-  // the boss's bullets fly through rocks
+  // enemy bullets (boss and planes) fly through the other enemies
   #bulletsVsAsteroids(world) {
     for (const b of world.bullets) {
       if (b.dead || b.hostile) continue;
-      const rock = world.asteroids.find(a => circlesOverlap(b, b.radius, a, a.radius * 0.92));
-      if (rock) { b.expire(); world.destroyAsteroid(rock, b.owner); }
+      const enemy = world.asteroids.find(a => circlesOverlap(b, b.radius, a, a.radius * 0.92));
+      if (enemy) { b.expire(); world.hitEnemy(enemy, b.owner); }
     }
   }
 
@@ -67,7 +67,8 @@ export class CollisionSystem {
     for (const s of world.ships) {
       if (!canHit(s)) continue;
       const rock = world.asteroids.find(a => circlesOverlap(s, s.radius * 0.8, a, a.radius * 0.9));
-      if (rock) { world.destroyShip(s); world.destroyAsteroid(rock); }
+      // a collision costs the jet and counts as one (unpaid) hit on the enemy
+      if (rock) { world.destroyShip(s); world.hitEnemy(rock); }
     }
   }
 

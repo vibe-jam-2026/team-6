@@ -26,6 +26,7 @@ import { SpawnPlanner } from './systems/SpawnPlanner.js';
 import { WaveSpawner } from './systems/WaveSpawner.js';
 import { ScoreKeeper } from './systems/ScoreKeeper.js';
 import { Paymaster } from './systems/Paymaster.js';
+import { EnemySystem } from './systems/EnemySystem.js';
 import { SelfDestructSystem } from './systems/SelfDestructSystem.js';
 import { ParticleSystem } from './effects/ParticleSystem.js';
 import { EffectsDirector } from './effects/EffectsDirector.js';
@@ -80,6 +81,7 @@ new Paymaster(bus);
 const systems = {
   ships: new ShipSystem(bus, new SpawnPlanner()),
   bullets: new BulletSystem(),
+  enemies: new EnemySystem(bus),
   boss: new BossSystem(bus),
   collisions: new CollisionSystem(bus),
   selfDestruct: new SelfDestructSystem(bus),

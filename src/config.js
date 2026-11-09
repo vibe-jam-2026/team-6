@@ -65,12 +65,29 @@ export const WEAPONS = [
     cooldown: 2.1, speed: 0.9, life: 0.5, shots: 4, spread: 1.6, magazine: 8, size: 0.85 },
 ];
 
-// bounty: money paid to the pilot who destroys one (smaller, faster ones pay more)
-export const ASTEROID_TYPES = {
-  3: { radius: 46, speed: [35, 75],  score: 20,  bounty: 5 },
-  2: { radius: 25, speed: [65, 120], score: 50,  bounty: 10 },
-  1: { radius: 13, speed: [95, 175], score: 100, bounty: 15 },
+// The three enemy types, keyed by size (the code still calls enemies
+// "asteroids"). They no longer split: each type is spawned on its own.
+//   hp: hits it takes; score: points; bounty: money for the pilot who destroys it
+//   drone (1):    flies straight ahead
+//   plane (2):    turns towards the nearest jet and fires at it
+//   zeppelin (3): drifts slowly and launches drones
+export const ENEMY_TYPES = {
+  1: { kind: 'drone', radius: 13, speed: [95, 175], hp: 1, score: 50, bounty: 5, color: '#8fd0ff' },
+  2: { kind: 'plane', radius: 25, speed: [115, 150], hp: 2, score: 100, bounty: 15, color: '#ff8a3a',
+    turnRate: 1.5,             // rad/s it can turn towards its target
+    fireEvery: [1.8, 3.2],     // seconds between shots
+    fireRange: 430,            // only fires at jets this close...
+    fireCone: 0.35,            // ...and within this many radians of its nose
+    bullet: { speed: 300, life: 2.2, radius: 4 } },
+  3: { kind: 'zeppelin', radius: 46, speed: [25, 45], hp: 5, score: 200, bounty: 30, color: '#ff4a3a',
+    launchEvery: [3.5, 5.5],   // seconds between drone launches
+    maxDrones: 3,              // drones of its own in the air at once
+    launchSpread: 0.6 },       // radians either side of the nearest jet it aims drones
 };
+
+// how likely each type is when a wave spawns an enemy: [drone, plane, zeppelin] weights,
+// sliding from the first wave to the last timed wave
+export const ENEMY_MIX = { first: [6, 3, 1], last: [3, 4, 2] };
 
 // The boss arrives on every `every`-th wave (wave 5, 10, ... - i.e. right after wave 4).
 export const BOSS = {
@@ -112,11 +129,14 @@ export const RULES = {
 export const WAVES = {
   duration: 60,          // seconds per wave
   final: 5,              // the boss wave that ends the game
-  interval: 5.5,         // seconds between reinforcements on wave 1...
-  intervalPerWave: -0.8, // ...this much shorter each wave after
-  minInterval: 2,
+  opening: 5,            // enemies at the start of wave 1...
+  openingPerWave: 2,     // ...and this many more each wave after (capped by RULES.maxWaveSize)
+  interval: 3.5,         // seconds between reinforcements on wave 1...
+  intervalPerWave: -0.5, // ...this much shorter each wave after
+  minInterval: 1.5,
   groupPerWave: 0.5,     // reinforcements arrive in groups of 1 + wave * this (rounded down)
-  maxEnemies: 28,        // no reinforcements while this many enemies (any size) are up
+  maxEnemies: 22,        // no reinforcements while this many enemies are up (launched drones included)
+  maxZeppelins: 3,       // never more zeppelins than this at once
   quietEnd: 4,           // no reinforcements in the last seconds of a wave
 };
 

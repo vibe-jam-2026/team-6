@@ -1,4 +1,4 @@
-import { BOSS, RULES, WAVES } from '../config.js';
+import { BOSS, ENEMY_MIX, RULES, WAVES } from '../config.js';
 import { dist2, rand } from '../core/math.js';
 import { EVENTS } from '../core/EventBus.js';
 import { Asteroid } from '../world/entities/Asteroid.js';
@@ -61,7 +61,7 @@ export class WaveSpawner {
     for (const ship of world.ships) ship.prepareForWave();
     world.speedScale = 1 + this.wave * RULES.speedGrowthPerWave;
     if (this.isBossWave()) return this.#spawnBoss(world);
-    const count = Math.min(3 + this.wave + Math.floor(world.ships.length / 2), RULES.maxWaveSize);
+    const count = Math.min(WAVES.opening + (this.wave - 1) * WAVES.openingPerWave + Math.floor(world.ships.length / 2), RULES.maxWaveSize);
     this.#spawn(world, count);
     this.bus.emit(EVENTS.WAVE_STARTED, { wave: this.wave, boss: false });
   }
@@ -80,11 +80,25 @@ export class WaveSpawner {
     return Math.max(WAVES.minInterval, WAVES.interval + (this.wave - 1) * WAVES.intervalPerWave);
   }
 
+  // Enemies enter at the edges heading roughly into the arena. Each one is a
+  // drone, plane or zeppelin, picked by this wave's ENEMY_MIX weights.
   #spawn(world, count) {
     for (let i = 0; i < count; i++) {
       const p = this.#edgePoint(world);
-      world.asteroids.push(new Asteroid(3, p.x, p.y, world.speedScale));
+      const size = this.#pickType(world);
+      const heading = Math.atan2(world.height / 2 - p.y, world.width / 2 - p.x) + rand(-0.8, 0.8);
+      world.asteroids.push(new Asteroid(size, p.x, p.y, world.speedScale, { heading }));
     }
+  }
+
+  // 1 drone, 2 plane, 3 zeppelin; the mix slides from ENEMY_MIX.first to .last over the timed waves
+  #pickType(world) {
+    const k = Math.min(1, Math.max(0, (this.wave - 1) / Math.max(1, WAVES.final - 2)));
+    const weights = ENEMY_MIX.first.map((w, i) => w + (ENEMY_MIX.last[i] - w) * k);
+    if (world.asteroids.filter(a => a.kind === 'zeppelin').length >= WAVES.maxZeppelins) weights[2] = 0;
+    let r = rand(0, weights.reduce((a, b) => a + b));
+    for (let i = 0; i < weights.length; i++) if ((r -= weights[i]) < 0) return i + 1;
+    return 1;
   }
 
   #spawnBoss(world) {

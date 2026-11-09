@@ -31,6 +31,9 @@ export const EVENTS = {
   PURCHASE_DENIED: 'purchaseDenied',   // { ship, reason: 'money' | 'maxed' }
   MONEY_EARNED: 'moneyEarned',         // { ship, amount }
   ENEMIES_RETREATED: 'enemiesRetreated', // { enemies } when a wave's time runs out
+  ENEMY_HIT: 'enemyHit',               // { enemy, by } a hit that didn't destroy it
+  ENEMY_FIRED: 'enemyFired',           // { enemy } a plane shot
+  DRONE_LAUNCHED: 'droneLaunched',     // { from, drone } a zeppelin launched a drone
   BOSS_FIRED: 'bossFired',             // { boss }
   BOSS_HIT: 'bossHit',                 // { boss, by, x, y }
   BOSS_DESTROYED: 'bossDestroyed',     // { boss, by, inBlast }

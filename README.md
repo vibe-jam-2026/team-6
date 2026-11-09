@@ -48,9 +48,19 @@ then open http://localhost:8000.
   arriving from the edges (more often and in bigger groups each wave); the HUD shows the clock.
   When time is up the survivors retreat and the shop opens. **Wave 5 is the final boss** —
   beat it and the game ends in **VICTORY**.
-- Zeppelins, fighters and drones score 20 / 50 / 100 and pay **$5 / $10 / $15**; shooting down
-  another jet in free-for-all pays $50 and every hit on the boss $2. Each pilot's money is shown
-  in gold next to their score. Extra life every 10 000 points.
+- **Enemies** come in three types that spawn on their own (nothing splits when shot); later
+  waves bring more planes and zeppelins:
+
+  | Enemy | Behaviour | Hits | Score | Money |
+  |-------|-----------|------|-------|-------|
+  | Drone | flies straight ahead | 1 | 50 | $5 |
+  | Plane | turns towards the nearest jet and fires at it | 2 | 100 | $15 |
+  | Zeppelin | drifts slowly and launches drones at you (up to 3 of its own at a time) | 5 | 200 | $30 |
+
+  Plane bullets, like the boss's, fly through the other enemies. Flying into an enemy costs
+  your jet and counts as one hit on it. Shooting down another jet in free-for-all pays $50 and
+  every hit on the boss $2. Each pilot's money is shown in gold next to their score. Extra life
+  every 10 000 points.
 - The landscape below changes every wave: a Swedish forest of pines, lakes and red
   cottages, a harbour city along a rocky coastline, the snowy Alps, then a high-fantasy
   realm (red-rock warlands with spiked war camps and a glowing portal, and an
@@ -121,7 +131,8 @@ src/
   audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),
                           MusicPlayer (procedural soundtrack per game state)
   world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet, Boss
-  systems/                ShipSystem, BulletSystem, BossSystem, CollisionSystem, WaveSpawner,
+  systems/                ShipSystem, BulletSystem, EnemySystem (planes shoot, zeppelins launch drones),
+                          BossSystem, CollisionSystem, WaveSpawner,
                           SpawnPlanner, ScoreKeeper, Paymaster (money), SelfDestructSystem
   modes/                  GameMode base class, FreeForAllMode, CoopMode
   game/Session.js         lobby choices, wave banner and final result
