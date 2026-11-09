@@ -9,6 +9,7 @@ import { KeyboardInput } from './input/KeyboardInput.js';
 import { KeyboardShipController } from './input/KeyboardShipController.js';
 import { SynthAudio } from './audio/SynthAudio.js';
 import { SoundEffects } from './audio/SoundEffects.js';
+import { MusicPlayer } from './audio/MusicPlayer.js';
 import { World } from './world/World.js';
 import { Session } from './game/Session.js';
 import { ShipSystem } from './systems/ShipSystem.js';
@@ -40,6 +41,7 @@ const input = new KeyboardInput(window, capturedKeys);
 const audio = new SynthAudio();
 input.onKeyDown(() => audio.unlock());
 new SoundEffects(bus, audio);
+const music = new MusicPlayer(audio, bus);
 
 // --- game model ---
 const controllers = PLAYERS.map(p => new KeyboardShipController(input, p.keys));
@@ -83,6 +85,8 @@ new GameLoop({
   update(dt) {
     if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
     states.update(dt);
+    music.setMood(states.currentName);
+    music.tick();
     input.endStep();
   },
   render(time) {

@@ -29,7 +29,7 @@ then open http://localhost:8000.
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **Enter** starts.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
-- **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound.
+- **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
 - Bombers, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
 
 Note: some keyboards can't register many simultaneous keys ("ghosting"), so with
@@ -46,7 +46,8 @@ src/
   config.js               all tunable data (players, keys, physics, rules) – no behaviour
   core/                   EventBus, GameLoop (fixed timestep), StateMachine, Viewport, math
   input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent)
-  audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds)
+  audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),
+                          MusicPlayer (procedural soundtrack per game state)
   world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet
   systems/                ShipSystem, BulletSystem, CollisionSystem, WaveSpawner,
                           SpawnPlanner, ScoreKeeper
