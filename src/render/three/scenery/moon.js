@@ -26,7 +26,7 @@ export const moon = {
         if (d > 1.6) continue;
         const depth = c.r * 0.16;
         dz += d < 1 ? -depth * (1 - d * d) : 0;
-        dz += depth * 0.45 * Math.exp(-((d - 1) / 0.22) ** 2);
+        dz += depth * 0.45 * Math.exp(-(((d - 1) / 0.22) ** 2));
       }
       return dz;
     };
