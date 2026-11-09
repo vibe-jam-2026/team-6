@@ -77,6 +77,9 @@ then open http://localhost:8000.
   | 8 | arctic pack ice: cracked floes, icebergs and a red research station |
   | 9 | a neon city at night: dark towers, glowing rooftops and streets traced in light |
   | 10 | the Moon: grey craters under a black sky and a small moon base |
+- **Shaky camera:** every 9–18 seconds of play the camera swings to a random new 3D angle
+  around the arena (turned up to ~35° either way, from almost straight down to a low, steep view),
+  always refitted so the whole arena stays on screen. It settles back to the normal view in the lobby.
 - **Boss fight (wave 5):** it warps in, drifts around the arena and fires rings, aimed fans and
   spirals; below half health it gets faster and angrier. Its bullets hit everyone and fly through
   the other enemies, and ramming it is fatal. 10 points per hit, 3 000 for the final blow.

@@ -64,7 +64,9 @@ export class WorldRenderer {
     this.bossViews.sync(!inLobby && this.world.boss ? [this.world.boss] : [], frame);
     this.particleView.update(this.particles.particles, this.viewport);
     this.blasts.update(t, this.viewport);
-    this.cameraRig.update(dt, t, { drift: inLobby });
+    const state = this.states.currentName;
+    this.cameraRig.update(dt, t, { drift: inLobby, spin: state === 'playing', frozen: state !== 'playing' && !inLobby });
+    this.scenery.setCameraDistance(this.cameraRig.distance);
     this.lobby.update(inLobby, frame);
     this.stage.render();
   }

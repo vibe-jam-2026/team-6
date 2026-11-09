@@ -188,3 +188,9 @@ export const SCENERY = [
   { key: 'moon', title: 'The Moon' },         // wave 10: the Mothership
 ];
 export const sceneryForWave = wave => SCENERY[(Math.max(1, wave) - 1) % SCENERY.length];
+
+// Every so often during play the camera swings to a random new angle around the
+// arena (refitted so the whole arena stays on screen) to shake things up.
+//   interval: seconds between swings (random in range), duration: seconds a swing takes
+//   yaw: max turn around the vertical axis (radians, either way), tilt: range from straight down
+export const CAMERA_SPIN = { interval: [9, 18], duration: 2.4, yaw: 0.65, tilt: [0.15, 0.85] };
