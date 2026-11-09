@@ -1,4 +1,4 @@
-import { MENU_KEYS } from '../config.js';
+import { MENU_KEYS, COMPUTER_PLAYER } from '../config.js';
 import { lobbyLayout } from '../render/overlay/lobbyLayout.js';
 
 const GAMEOVER_TAP_DELAY = 800; // ms, so a late FIRE tap doesn't skip the results
@@ -149,6 +149,8 @@ export class TouchControls {
     const { innerWidth: W, innerHeight: H } = this.win;
     const layout = lobbyLayout(W, H);
     const card = layout.cards.findIndex(c => x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h);
+    // the touch pad flies P1 only, so tapping P2's card hands that jet to the computer
+    if (card === COMPUTER_PLAYER) return this.#tapKey(MENU_KEYS.computer);
     if (card >= 0) return this.#tapKey(this.players[card].keys.fire);
     const near = (lineY) => Math.abs(y - lineY) < 18 && Math.abs(x - W / 2) < W * 0.45;
     if (near(layout.modeY)) this.#tapKey(MENU_KEYS.switchMode);

@@ -1,4 +1,4 @@
-import { MENU_KEYS, RULES } from '../config.js';
+import { MENU_KEYS, RULES, COMPUTER_PLAYER } from '../config.js';
 import { EVENTS } from '../core/EventBus.js';
 import { rand } from '../core/math.js';
 import { Asteroid } from '../world/entities/Asteroid.js';
@@ -22,6 +22,7 @@ export class LobbyState {
       if (c.togglePressed()) { session.toggleJoined(i); this.#click(); }
     });
     if (input.wasPressed(MENU_KEYS.mouse)) { session.cycleMouseOwner(); this.#click(); }
+    if (input.wasPressed(MENU_KEYS.computer)) { session.toggleComputer(COMPUTER_PLAYER); this.#click(); }
     if (input.wasPressed(MENU_KEYS.switchMode)) { session.nextMode(); this.#click(); }
     if (input.wasPressed(MENU_KEYS.start) && session.joinedCount > 0) {
       this.#click();

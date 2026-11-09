@@ -13,9 +13,12 @@ export class Session {
   detonatedBy = null; // the ship that self-destructed and ended the match, if any
   invincible = false; // testing aid: ships cannot be destroyed
   mouseOwner = null;  // index of the player flying with the mouse, or null
+  computer = [];      // computer[i]: player i is flown by the computer
 
-  constructor(bus, controllers, modes = GAME_MODES) {
+  // controllers: one human controller per player; computers: one computer pilot per player
+  constructor(bus, controllers, modes = GAME_MODES, computers = []) {
     this.controllers = controllers;
+    this.computers = computers;
     this.modes = modes;
     bus.on(EVENTS.WAVE_STARTED, ({ wave, boss }) => {
       const place = sceneryForWave(wave).title.toUpperCase();
@@ -27,8 +30,20 @@ export class Session {
 
   get mode() { return this.modes[this.#modeIndex]; }
   get joinedCount() { return this.joined.filter(Boolean).length; }
+  get humanCount() { return this.joined.filter((on, i) => on && !this.computer[i]).length; }
 
-  toggleJoined(i) { this.joined[i] = !this.joined[i]; }
+  // a human joining or leaving also takes the seat back from the computer
+  toggleJoined(i) {
+    this.joined[i] = this.computer[i] ? true : !this.joined[i];
+    this.computer[i] = false;
+  }
+
+  // hand player i to the computer (joining them), or take them back out
+  toggleComputer(i) {
+    if (!this.computers[i]) return;
+    this.computer[i] = !this.computer[i];
+    this.joined[i] = this.computer[i];
+  }
   toggleInvincible() { this.invincible = !this.invincible; }
   // nobody -> P1 -> P2 -> ... -> nobody
   cycleMouseOwner() {
@@ -40,13 +55,13 @@ export class Session {
 
   createShips() {
     this.detonatedBy = null;
-    const solo = this.joinedCount === 1;
+    const solo = this.humanCount === 1;
     this.controllers.forEach((c, i) => {
       c.solo = solo;               // a lone pilot can also fire with Space
       c.useMouse = i === this.mouseOwner;
     });
     return PLAYERS
-      .map((player, i) => this.joined[i] ? new Ship(i, player, this.controllers[i]) : null)
+      .map((player, i) => this.joined[i] ? new Ship(i, player, this.computer[i] ? this.computers[i] : this.controllers[i]) : null)
       .filter(Boolean);
   }
 

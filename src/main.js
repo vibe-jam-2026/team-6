@@ -10,6 +10,7 @@ import { KeyboardShipController } from './input/KeyboardShipController.js';
 import { MouseInput } from './input/MouseInput.js';
 import { MouseShipController } from './input/MouseShipController.js';
 import { PlayerController } from './input/PlayerController.js';
+import { ComputerShipController } from './input/ComputerShipController.js';
 import { TestControls } from './input/TestControls.js';
 import { TouchControls } from './input/TouchControls.js';
 import { SynthAudio } from './audio/SynthAudio.js';
@@ -65,7 +66,8 @@ const screenToWorld = (px, py) => {
 const mouseController = new MouseShipController(mouse, screenToWorld);
 const controllers = PLAYERS.map(p => new PlayerController(new KeyboardShipController(input, p.keys), mouseController));
 const world = new World(viewport, bus);
-const session = new Session(bus, controllers);
+const computers = PLAYERS.map(() => new ComputerShipController(world, () => session.mode));
+const session = new Session(bus, controllers, undefined, computers);
 // a phone has one pilot: start the lobby with only P1 joined
 if (TouchControls.likelyTouch()) session.joined = session.joined.map((_, i) => i === 0);
 const waves = new WaveSpawner(bus);
