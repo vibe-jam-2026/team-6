@@ -34,7 +34,7 @@ const outline = (x, y, z, w, d, t, color, list) => {
 // Neon city at night: a grid of dark towers traced in neon, with glowing
 // rooftops, window bands, light strips and beacons, and avenues of light.
 export const neon = {
-  mood: { sky: 0x140a2e, hemiSky: 0x8a5cff, hemiGround: 0x2a0a30, hemi: 0.75, sun: 0xc070ff, sunIntensity: 0.6, bloom: { strength: 0.65, radius: 0.1, threshold: 0.7 } },
+  mood: { sky: 0x140a2e, hemiSky: 0x8a5cff, hemiGround: 0x2a0a30, hemi: 0.75, sun: 0xc070ff, sunIntensity: 0.6, bloom: { strength: 0.85, radius: 0.18, threshold: 0.65 } },
 
   build(w, h) {
     const districts = valueNoise(91), rng = seededRandom(9), pick = list => list[Math.floor(rng() * list.length)];
