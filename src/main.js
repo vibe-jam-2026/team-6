@@ -127,8 +127,8 @@ overlay.context.touch = touch;
 states.change('lobby');
 new GameLoop({
   update(dt) {
-    if (session.demo && activity.active) {
-      // any key, click or touch ends the demo; that input is used up here
+    if (session.demo && input.wasPressed(MENU_KEYS.exitDemo)) {
+      // only Esc ends the demo; that press is used up here
       bus.emit(EVENTS.MENU_ACTION);
       states.change('lobby');
     } else {
@@ -142,7 +142,6 @@ new GameLoop({
     music.tick();
     input.endStep();
     mouse.endStep();
-    activity.endStep();
   },
   render(time) {
     worldRenderer.render(time);
