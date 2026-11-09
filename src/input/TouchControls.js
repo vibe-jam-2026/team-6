@@ -70,6 +70,7 @@ export class TouchControls {
         <button data-code="${k.right}" data-hold aria-label="turn right">▶</button>
       </div>
       <div class="pad right">
+        <button data-code="${k.selfDestruct}" class="boom" aria-label="self-destruct">✸</button>
         <button data-code="${k.thrust}" data-hold class="thrust" aria-label="thrust">▲</button>
         <button data-code="${k.fire}" data-hold class="fire" aria-label="fire">●</button>
       </div>

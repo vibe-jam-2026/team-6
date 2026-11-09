@@ -1,14 +1,10 @@
 // All tunable data lives here. Nothing in this file has behaviour.
 
 export const PLAYERS = [
-  { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS' },
-    labels: ['W thrust', 'A/D turn', 'S fire'] },
-  { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown' },
-    labels: ['↑ thrust', '←/→ turn', '↓ fire'] },
-  { name: 'P3', color: '#9dff5c', keys: { thrust: 'KeyI', left: 'KeyJ', right: 'KeyL', fire: 'KeyK' },
-    labels: ['I thrust', 'J/L turn', 'K fire'] },
-  { name: 'P4', color: '#ffd23f', keys: { thrust: 'Numpad8', left: 'Numpad4', right: 'Numpad6', fire: 'Numpad5' },
-    labels: ['Num8 thrust', 'Num4/6 turn', 'Num5 fire'] },
+  { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS', selfDestruct: 'KeyE' },
+    labels: ['W thrust', 'A/D turn', 'S fire', 'E self-destruct'] },
+  { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown', selfDestruct: 'ShiftRight' },
+    labels: ['↑ thrust', '←/→ turn', '↓ fire', 'R-Shift self-destruct'] },
 ];
 
 export const MENU_KEYS = {
@@ -40,6 +36,7 @@ export const SHIP = {
 };
 
 export const BULLET = { speed: 560, life: 0.95, radius: 2 };
+export const SPREAD_ANGLE = 0.14; // radians between bullets of a spread shot
 
 export const ASTEROID_TYPES = {
   3: { radius: 46, speed: [35, 75],  score: 20 },
@@ -73,9 +70,12 @@ export const RULES = {
   speedGrowthPerWave: 0.04,
   gameOverDelay: 1.6,
   lobbyDemoRocks: 6,
+  upgradeChoices: 3,     // upgrades offered to each player between waves
+  upgradeInputLock: 0.6, // seconds before a pick counts, so held fire keys don't auto-pick
+  shieldHitInvuln: 1.2,  // grace time after the deflector absorbs a hit
 };
 
-export const DEFAULT_JOINED = [true, true, false, false];
+export const DEFAULT_JOINED = [true, true];
 
 // The landscape below the arena changes with every wave and cycles through
 // this list. The lobby shows the first one.

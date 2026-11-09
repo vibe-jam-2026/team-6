@@ -21,12 +21,15 @@ import { BossSystem } from './systems/BossSystem.js';
 import { SpawnPlanner } from './systems/SpawnPlanner.js';
 import { WaveSpawner } from './systems/WaveSpawner.js';
 import { ScoreKeeper } from './systems/ScoreKeeper.js';
+import { SelfDestructSystem } from './systems/SelfDestructSystem.js';
 import { ParticleSystem } from './effects/ParticleSystem.js';
 import { EffectsDirector } from './effects/EffectsDirector.js';
 import { LobbyState } from './states/LobbyState.js';
 import { PlayState } from './states/PlayState.js';
 import { PausedState } from './states/PausedState.js';
 import { GameOverState } from './states/GameOverState.js';
+import { UpgradeState } from './states/UpgradeState.js';
+import { UpgradeDraft } from './upgrades/UpgradeDraft.js';
 import { WorldRenderer } from './render/three/WorldRenderer.js';
 import { Overlay2D } from './render/overlay/Overlay2D.js';
 import { OverlayRenderer } from './render/overlay/OverlayRenderer.js';
@@ -35,6 +38,8 @@ import { HudView } from './render/overlay/views/HudView.js';
 import { BannerView } from './render/overlay/views/BannerView.js';
 import { PauseView } from './render/overlay/views/PauseView.js';
 import { GameOverView } from './render/overlay/views/GameOverView.js';
+import { UpgradeView } from './render/overlay/views/UpgradeView.js';
+import { FlashView } from './render/overlay/views/FlashView.js';
 
 // --- infrastructure ---
 const bus = new EventBus();
@@ -53,6 +58,7 @@ const session = new Session(bus, controllers);
 // a phone has one pilot: start the lobby with only P1 joined
 if (TouchControls.likelyTouch()) session.joined = session.joined.map((_, i) => i === 0);
 const waves = new WaveSpawner(bus);
+const upgrades = new UpgradeDraft();
 const particles = new ParticleSystem();
 const effects = new EffectsDirector(bus, particles);
 new ScoreKeeper(bus);
@@ -61,15 +67,17 @@ const systems = {
   bullets: new BulletSystem(),
   boss: new BossSystem(bus),
   collisions: new CollisionSystem(bus),
+  selfDestruct: new SelfDestructSystem(bus),
 };
 
 // --- states ---
 const states = new StateMachine();
-const deps = { input, bus, world, session, waves, effects, states, systems };
+const deps = { input, bus, world, session, waves, effects, states, systems, upgrades };
 states
   .register('lobby', new LobbyState(deps))
   .register('playing', new PlayState(deps))
   .register('paused', new PausedState(deps))
+  .register('upgrade', new UpgradeState(deps))
   .register('gameover', new GameOverState(deps));
 const testControls = new TestControls(deps);
 
@@ -78,12 +86,14 @@ const worldRenderer = new WorldRenderer({
   canvas: document.getElementById('gl'), viewport, bus, world, particles, session, states,
 });
 const hud = new HudView();
+const flash = new FlashView(bus);
 const overlay = new OverlayRenderer(
-  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio })
+  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, upgrades })
   .register('lobby', [new LobbyView()])
-  .register('playing', [hud, new BannerView()])
+  .register('playing', [hud, new BannerView(), flash])
   .register('paused', [hud, new PauseView()])
-  .register('gameover', [hud, new GameOverView()]);
+  .register('upgrade', [flash, hud, new UpgradeView()])
+  .register('gameover', [flash, hud, new GameOverView()]);
 const footer = document.getElementById('foot');
 const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
 overlay.context.touch = touch;

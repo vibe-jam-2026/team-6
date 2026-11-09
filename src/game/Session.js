@@ -10,6 +10,7 @@ export class Session {
   #modeIndex = 0;
   banner = { text: '', timeLeft: 0 };
   result = null;
+  detonatedBy = null; // the ship that self-destructed and ended the match, if any
   invincible = false; // testing aid: ships cannot be destroyed
 
   constructor(bus, controllers, modes = GAME_MODES) {
@@ -19,6 +20,7 @@ export class Session {
       const place = sceneryForWave(wave).title.toUpperCase();
       this.announce(boss ? `WAVE ${wave} · BOSS · ${place}` : `WAVE ${wave}  ·  ${place}`, boss ? 3 : 2);
     });
+    bus.on(EVENTS.SELF_DESTRUCT, ({ ship }) => { this.detonatedBy = ship; });
     bus.on(EVENTS.BOSS_DESTROYED, () => this.announce('BOSS DESTROYED', 3));
   }
 
@@ -30,6 +32,7 @@ export class Session {
   nextMode() { this.#modeIndex = (this.#modeIndex + 1) % this.modes.length; }
 
   createShips() {
+    this.detonatedBy = null;
     return PLAYERS
       .map((player, i) => this.joined[i] ? new Ship(i, player, this.controllers[i]) : null)
       .filter(Boolean);
@@ -42,7 +45,9 @@ export class Session {
     const mode = this.mode;
     this.result = {
       ranked: [...ships].sort((a, b) => b.score - a.score),
-      headline: mode.headline(ships, wave),
+      headline: this.detonatedBy
+        ? `${this.detonatedBy.name} blew everything up · wave ${wave}`
+        : mode.headline(ships, wave),
       showKills: mode.showKills(ships),
       multiplayer: ships.length > 1,
     };
