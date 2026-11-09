@@ -1,4 +1,4 @@
-import { PLAYERS, MOUSE_LABELS, COMPUTER_LABELS, COMPUTER_PLAYER } from '../../../config.js';
+import { PLAYERS, MOUSE_LABELS, COMPUTER_LABELS, COMPUTER_PLAYER, DEMO } from '../../../config.js';
 import { lobbyLayout } from '../lobbyLayout.js';
 
 export class LobbyView {
@@ -44,7 +44,7 @@ export class LobbyView {
       o.text(`C  mouse control: ${owner}`, W / 2, by + 114, 13,
         session.mouseOwner === null ? '#9aa1b2' : PLAYERS[session.mouseOwner].color, 'center');
       if (session.humanCount === 1) o.text('flying solo: SPACE fires too', W / 2, by + 132, 11, '#7d8496', 'center');
-      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game`, W / 2, by + 152, 12, '#545a6a', 'center');
+      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game  ·  X  demo (starts by itself after ${DEMO.idleTime} s idle)`, W / 2, by + 152, 12, '#545a6a', 'center');
       o.text(`testing: G invincible ${session.invincible ? 'ON' : 'off'}  ·  1-9/0 start at wave${session.invincible ? '  ·  B start at boss' : ''}`,
         W / 2, by + 172, 12, session.invincible ? '#ffd23f' : '#545a6a', 'center');
     }

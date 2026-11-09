@@ -15,6 +15,8 @@ export class Session {
   invincible = false; // testing aid: ships cannot be destroyed
   mouseOwner = null;  // index of the player flying with the mouse, or null
   computer = [];      // computer[i]: player i is flown by the computer
+  demo = false;       // demo mode: the computer flies every jet
+  #beforeDemo = null; // the lobby setup to put back when the demo ends
 
   // controllers: one human controller per player; computers: one computer pilot per player
   constructor(bus, controllers, modes = GAME_MODES, computers = []) {
@@ -47,6 +49,25 @@ export class Session {
     this.computer[i] = !this.computer[i];
     this.joined[i] = this.computer[i];
   }
+  // demo mode: every jet joins and is flown by the computer; endDemo puts the
+  // lobby back the way the players left it
+  startDemo() {
+    if (!this.demo) this.#beforeDemo = { joined: [...this.joined], computer: [...this.computer] };
+    this.demo = true;
+    PLAYERS.forEach((_, i) => {
+      this.joined[i] = Boolean(this.computers[i]);
+      this.computer[i] = Boolean(this.computers[i]);
+    });
+  }
+
+  endDemo() {
+    if (!this.demo) return;
+    this.demo = false;
+    this.joined = this.#beforeDemo.joined;
+    this.computer = this.#beforeDemo.computer;
+    this.#beforeDemo = null;
+  }
+
   toggleInvincible() { this.invincible = !this.invincible; }
   // nobody -> P1 -> P2 -> ... -> nobody
   cycleMouseOwner() {

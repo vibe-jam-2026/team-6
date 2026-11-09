@@ -1,8 +1,9 @@
 // Composition root: creates every object and wires them together.
 // This is the only file that knows the concrete classes of everything.
 import { PLAYERS, MENU_KEYS, TEST_KEYS } from './config.js';
-import { EventBus } from './core/EventBus.js';
+import { EventBus, EVENTS } from './core/EventBus.js';
 import { Viewport } from './core/Viewport.js';
+import { ActivityMonitor } from './core/ActivityMonitor.js';
 import { GameLoop } from './core/GameLoop.js';
 import { StateMachine } from './core/StateMachine.js';
 import { KeyboardInput } from './input/KeyboardInput.js';
@@ -47,11 +48,13 @@ import { GameOverView } from './render/overlay/views/GameOverView.js';
 import { ShopView } from './render/overlay/views/ShopView.js';
 import { FlashView } from './render/overlay/views/FlashView.js';
 import { FireworksView } from './render/overlay/views/FireworksView.js';
+import { DemoView } from './render/overlay/views/DemoView.js';
 import { Fireworks } from './effects/Fireworks.js';
 
 // --- infrastructure ---
 const bus = new EventBus();
 const viewport = new Viewport(window);
+const activity = new ActivityMonitor(window);
 const capturedKeys = [...PLAYERS.flatMap(p => Object.values(p.keys)), MENU_KEYS.start, MENU_KEYS.switchMode, 'Space'];
 const input = new KeyboardInput(window, capturedKeys);
 const audio = new SynthAudio();
@@ -92,7 +95,7 @@ const systems = {
 
 // --- states ---
 const states = new StateMachine();
-const deps = { input, bus, world, session, waves, effects, states, systems, shop };
+const deps = { input, bus, world, session, waves, effects, states, systems, shop, activity };
 states
   .register('lobby', new LobbyState(deps))
   .register('playing', new PlayState(deps))
@@ -108,13 +111,14 @@ const worldRenderer = new WorldRenderer({
 const hud = new HudView();
 const flash = new FlashView(bus);
 const fireworksView = new FireworksView(fireworks);
+const demoView = new DemoView();
 const overlay = new OverlayRenderer(
   new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, shop })
   .register('lobby', [new LobbyView()])
-  .register('playing', [fireworksView, hud, new BannerView(), flash])
+  .register('playing', [fireworksView, hud, new BannerView(), flash, demoView])
   .register('paused', [hud, new PauseView()])
-  .register('shop', [flash, hud, new ShopView()])
-  .register('gameover', [fireworksView, flash, hud, new GameOverView()]);
+  .register('shop', [flash, hud, new ShopView(), demoView])
+  .register('gameover', [fireworksView, flash, hud, new GameOverView(), demoView]);
 const footer = document.getElementById('foot');
 const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
 overlay.context.touch = touch;
@@ -123,15 +127,22 @@ overlay.context.touch = touch;
 states.change('lobby');
 new GameLoop({
   update(dt) {
-    if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
-    testControls.update();
-    states.update(dt);
+    if (session.demo && activity.active) {
+      // any key, click or touch ends the demo; that input is used up here
+      bus.emit(EVENTS.MENU_ACTION);
+      states.change('lobby');
+    } else {
+      if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
+      testControls.update();
+      states.update(dt);
+    }
     // the victory fireworks run from the final boss's fall until the players leave the results
     fireworks.update(dt, session.victory && ['playing', 'gameover'].includes(states.currentName));
     music.setMood(states.currentName);
     music.tick();
     input.endStep();
     mouse.endStep();
+    activity.endStep();
   },
   render(time) {
     worldRenderer.render(time);
