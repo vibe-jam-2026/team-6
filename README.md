@@ -3,7 +3,7 @@ Vibe Jam 2026 – lag 6
 
 ## Rock Rumble
 
-A local multiplayer asteroid shooter for up to 4 players sharing one keyboard.
+A local multiplayer asteroid shooter for 2 players sharing one keyboard.
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
 (tilted camera, lit low-poly rocks, shadows, bloom glow). Play it at
@@ -21,8 +21,6 @@ then open http://localhost:8000.
 |--------|--------|------|------|
 | P1 (red)    | W       | A / D       | S       |
 | P2 (blue)   | ↑       | ← / →       | ↓       |
-| P3 (green)  | I       | J / L       | K       |
-| P4 (yellow) | Num 8   | Num 4 / 6   | Num 5   |
 
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **Enter** starts.
 - **Modes:** *Free-for-all* (bullets hit other ships, 250 pts per kill, last ship flying wins)
@@ -43,9 +41,6 @@ then open http://localhost:8000.
   | Spread Shot | +1 bullet per shot | 2 |
   | Deflector | blocks one hit per wave (faint bubble while charged) | 2 |
   | Spare Ship | +1 life | – |
-
-Note: some keyboards can't register many simultaneous keys ("ghosting"), so with
-4 players on one keyboard a few key combinations may drop out.
 
 ## Code structure
 

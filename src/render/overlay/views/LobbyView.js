@@ -7,7 +7,7 @@ export class LobbyView {
     const layout = lobbyLayout(W, H);
     const small = layout.small;
     o.text('ROCK RUMBLE', W / 2, H * 0.16, small ? 40 : 64, '#e8ecf4', 'center', '#7aa7ff');
-    o.text('local multiplayer asteroid shooter · up to 4 pilots on one keyboard',
+    o.text('local multiplayer asteroid shooter · 2 pilots on one keyboard',
       W / 2, H * 0.16 + (small ? 36 : 52), small ? 12 : 15, '#7d8496', 'center');
 
     PLAYERS.forEach((p, i) => {

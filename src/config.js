@@ -5,10 +5,6 @@ export const PLAYERS = [
     labels: ['W thrust', 'A/D turn', 'S fire'] },
   { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown' },
     labels: ['↑ thrust', '←/→ turn', '↓ fire'] },
-  { name: 'P3', color: '#9dff5c', keys: { thrust: 'KeyI', left: 'KeyJ', right: 'KeyL', fire: 'KeyK' },
-    labels: ['I thrust', 'J/L turn', 'K fire'] },
-  { name: 'P4', color: '#ffd23f', keys: { thrust: 'Numpad8', left: 'Numpad4', right: 'Numpad6', fire: 'Numpad5' },
-    labels: ['Num8 thrust', 'Num4/6 turn', 'Num5 fire'] },
 ];
 
 export const MENU_KEYS = {
@@ -55,4 +51,4 @@ export const RULES = {
   shieldHitInvuln: 1.2,  // grace time after the deflector absorbs a hit
 };
 
-export const DEFAULT_JOINED = [true, true, false, false];
+export const DEFAULT_JOINED = [true, true];
