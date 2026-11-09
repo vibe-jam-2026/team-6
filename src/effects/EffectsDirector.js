@@ -2,7 +2,7 @@ import { EVENTS } from '../core/EventBus.js';
 import { rand, TAU } from '../core/math.js';
 
 const PLANE_DEBRIS = '#ff7a3a';
-const FEATHERS = '#f2efe6';
+const DRONE_SPARKS = '#8fd0ff';
 const FLAME = '#ffb347';
 const SHIELD = '#9fe4ff';
 const ROCKET_SMOKE = '#6b707a';
@@ -12,7 +12,7 @@ export class EffectsDirector {
   constructor(bus, particles) {
     this.particles = particles;
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid: a }) =>
-      particles.burst(a.x, a.y, a.size === 1 ? FEATHERS : PLANE_DEBRIS, 8 + a.size * 6, 90 + a.size * 30, 0.9));
+      particles.burst(a.x, a.y, a.size === 1 ? DRONE_SPARKS : PLANE_DEBRIS, 8 + a.size * 6, 90 + a.size * 30, 0.9));
     bus.on(EVENTS.SHIP_DESTROYED, ({ ship }) => this.#shipExplosion(ship));
     bus.on(EVENTS.SELF_DESTRUCT, e => this.#selfDestruct(e));
     bus.on(EVENTS.SHIELD_HIT, ({ ship: s }) => particles.burst(s.x, s.y, SHIELD, 28, 200, 0.6));
