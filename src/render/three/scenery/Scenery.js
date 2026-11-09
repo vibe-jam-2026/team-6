@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { forest } from './forest.js';
 import { coast } from './coast.js';
 import { alps } from './alps.js';
+import { realm } from './realm.js';
 
-const THEMES = { forest, coast, alps };
+const THEMES = { forest, coast, alps, realm };
 
 // The landscape the dogfight happens above. show(key) switches theme (the
 // renderer picks one per wave); fit() rebuilds it when the window resizes.

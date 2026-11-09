@@ -30,7 +30,7 @@ export class WorldRenderer {
     this.scenery = new Scenery(scene, this.lighting);
     this.wave = 1;
     bus.on(EVENTS.WAVE_STARTED, ({ wave }) => { this.wave = wave; });
-    this.asteroidViews = new EntityViewSync(scene, a => new AsteroidView(a));
+    this.asteroidViews = new EntityViewSync(scene, a => new AsteroidView(a, this.sceneryKey));
     this.shipViews = new EntityViewSync(scene, s => new ShipView(s));
     this.bulletViews = new EntityViewSync(scene, b => new BulletView(b));
     this.bossViews = new EntityViewSync(scene, b => new BossView(b));
@@ -53,7 +53,8 @@ export class WorldRenderer {
     const dt = this.#lastTime === null ? 0 : Math.min(0.1, t - this.#lastTime);
     this.#lastTime = t;
     const inLobby = this.states.currentName === 'lobby';
-    this.scenery.show(inLobby ? SCENERY[0].key : sceneryForWave(this.wave).key);
+    this.sceneryKey = inLobby ? SCENERY[0].key : sceneryForWave(this.wave).key;
+    this.scenery.show(this.sceneryKey);
     const frame = { t, bounds: this.viewport, session: this.session };
 
     this.asteroidViews.sync(this.world.asteroids, frame);
