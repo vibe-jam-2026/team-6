@@ -1,0 +1,8 @@
+:root { --bg: #05060a; --fg: #e8ecf4; --mut: #7d8496; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+body { font: 16px/1.4 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; color: var(--fg); }
+canvas { display: block; position: fixed; inset: 0; width: 100vw; height: 100vh; }
+#hud { pointer-events: none; }
+a { color: var(--mut); }
+#foot { position: fixed; right: 10px; bottom: 6px; font-size: 11px; color: var(--mut); pointer-events: auto; }

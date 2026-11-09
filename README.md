@@ -32,3 +32,43 @@ then open http://localhost:8000.
 
 Note: some keyboards can't register many simultaneous keys ("ghosting"), so with
 4 players on one keyboard a few key combinations may drop out.
+
+## Code structure
+
+`index.html` only holds the two canvases and loads `src/main.js`. The code is
+split into small ES modules with one job each, following SOLID:
+
+```
+src/
+  main.js                 composition root: builds every object and wires them together
+  config.js               all tunable data (players, keys, physics, rules) – no behaviour
+  core/                   EventBus, GameLoop (fixed timestep), StateMachine, Viewport, math
+  input/                  KeyboardInput (raw keys), KeyboardShipController (keys -> intent)
+  audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds)
+  world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet
+  systems/                ShipSystem, BulletSystem, CollisionSystem, WaveSpawner,
+                          SpawnPlanner, ScoreKeeper
+  modes/                  GameMode base class, FreeForAllMode, CoopMode
+  game/Session.js         lobby choices, wave banner and final result
+  states/                 LobbyState, PlayState, PausedState, GameOverState
+  effects/                ParticleSystem (data) and EffectsDirector (events -> particles)
+  render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting, Starfield,
+                          EntityViewSync + views/ (ShipView, AsteroidView, BulletView, ParticleView)
+  render/overlay/         2D HUD and menus: Overlay2D primitives, OverlayRenderer, views/
+```
+
+How the SOLID principles show up:
+
+- **Single responsibility** – simulation, scoring, sound, particles, 3D and 2D drawing
+  live in separate classes. Renderers only read game state.
+- **Open/closed** – add a game mode by subclassing `GameMode` and listing it in
+  `modes/index.js`; add a screen by registering a view in `main.js`; add an entity type
+  with a new `EntityViewSync`. Existing classes don't change.
+- **Liskov substitution** – every `GameMode` answers the same questions
+  (`friendlyFire`, `isOver`, `headline`, …) and can replace any other.
+- **Interface segregation** – a ship only needs a controller with `read()`, a view
+  only needs `draw(overlay, frame)`, a state only needs `update(dt)`.
+- **Dependency inversion** – gameplay announces events on the `EventBus`
+  (`shipDestroyed`, `shotFired`, …); sound, effects, scoring and camera shake
+  subscribe to them, and `main.js` is the only place that knows concrete classes.
+  Swapping keyboard control for a gamepad means writing one new controller class.
