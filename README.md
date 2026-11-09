@@ -1,14 +1,15 @@
 # team-6
 Vibe Jam 2026 – lag 6
 
-## Rock Rumble
+## Mach Schnell
 
-A local multiplayer asteroid shooter for 2 players sharing one keyboard,
-flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy zeppelins,
-fighters and birds (large / medium / small targets).
+A local multiplayer fighter-jet shooter for 2 players sharing one keyboard.
+Scramble your low-poly Saab JAS 39 Gripen E, go *schnell*, and fire rockets at
+waves of enemy zeppelins, fighters and drones (large / medium / small targets),
+then at bosses. Fly with your wingman in co-op, or fight them in free-for-all.
 It is a static site with no server: `index.html` plus a vendored copy of
 [Three.js](https://threejs.org) r170 (MIT) in `vendor/three/` for the 3D graphics
-(tilted camera, lit low-poly rocks, shadows, bloom glow). Play it at
+(tilted camera, lit low-poly aircraft and scenery, shadows, bloom glow). Play it at
 https://vibe-jam-2026.github.io/team-6/.
 
 To run it locally, serve the folder over HTTP (ES modules don't load from `file://`):
@@ -28,12 +29,12 @@ then open http://localhost:8000.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
-- Zeppelins, fighters and birds score 20 / 50 / 100; extra life every 10 000 points.
+- Zeppelins, fighters and drones score 20 / 50 / 100; extra life every 10 000 points.
 - The landscape below changes every wave: a Swedish forest of pines, lakes and red
   cottages, a harbour city along a rocky coastline, the snowy Alps, then a high-fantasy
   realm (red-rock warlands with spiked war camps and a glowing portal, a lava rift, and an
   enchanted violet forest with mana crystals and a blue-roofed keep, where the zeppelins,
-  fighters and birds are replaced by flapping fish-folk raiders), and round again.
+  fighters and drones are replaced by flapping fish-folk raiders), and round again.
 - **Boss fight:** after wave 4 comes a boss (and again every 5th wave, a bit tougher each time).
   It warps in, drifts around the arena and fires rings, aimed fans and spirals; below half
   health it gets faster and angrier. Its bullets hit everyone and fly through the other enemies, and ramming
@@ -65,7 +66,7 @@ then open http://localhost:8000.
 | **N** | skip to the next wave (hint shown only while invincible) |
 | **B** | jump to the next boss wave (from the lobby: start at the first boss; hint shown only while invincible) |
 
-Jumping clears the field (rocks, boss and its bullets) and starts the chosen wave at once.
+Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
 touch. ◀ ▶ turn, ▲ thrusts, ● fires and ✸ self-destructs (they fly P1). In the lobby, tap a pilot's card
