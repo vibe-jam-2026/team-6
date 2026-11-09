@@ -8,7 +8,7 @@ import { EVENTS } from '../core/EventBus.js';
 // setIntensity(n) adds layers as the waves go up.
 
 const LOOKAHEAD = 0.15;   // seconds of music scheduled in advance
-const MUSIC_VOLUME = 0.32; // relative to SynthAudio's master, so effects stay on top
+const MUSIC_VOLUME = 4; // gain into the compressor, before SynthAudio's master (0.35)
 
 const hz = midi => 440 * 2 ** ((midi - 69) / 12);
 
@@ -42,11 +42,11 @@ const TRACKS = {
     play(v, step, bar) {
       const { bass, chord } = PROGRESSION[bar % 4];
       if (step === 0) {
-        chord.forEach(n => v.pad(hz(n - 12), v.beat * 4, 0.05));
-        v.bass(hz(bass + 12), v.beat * 3.5, 0.10, 500);
+        chord.forEach(n => v.pad(hz(n - 12), v.beat * 4, 0.09));
+        v.bass(hz(bass + 24), v.beat * 3.5, 0.22, 900);
       }
-      if (step % 2 === 0) v.pluck(hz(chord[ARP[step]] + (step >= 8 ? 12 : 0)), 0.35, 0.035, 'triangle');
-      if (step % 4 === 2) v.hat(0.025);
+      if (step % 2 === 0) v.pluck(hz(chord[ARP[step]] + (step >= 8 ? 12 : 0)), 0.35, 0.16, 'triangle');
+      if (step % 4 === 2) v.hat(0.08);
     },
   },
   playing: {
@@ -54,18 +54,18 @@ const TRACKS = {
     play(v, step, bar, intensity) {
       const { bass, chord } = PROGRESSION[bar % 4];
       // drums
-      if (step % 4 === 0) v.kick(0.5);
-      if (step % 4 === 2) v.hat(0.05);
-      if (intensity >= 2 && step % 2 === 1) v.hat(0.025);
-      if (intensity >= 2 && (step === 4 || step === 12)) v.snare(0.18);
+      if (step % 4 === 0) v.kick(0.45);
+      if (step % 4 === 2) v.hat(0.12);
+      if (intensity >= 2 && step % 2 === 1) v.hat(0.06);
+      if (intensity >= 2 && (step === 4 || step === 12)) v.snare(0.3);
       // bass: driving 8ths with an octave jump on the off-beat
-      if (step % 2 === 0) v.bass(hz(bass + (step % 4 === 2 ? 12 : 0)), v.beat * 0.45, 0.16, 700 + intensity * 250);
+      if (step % 2 === 0) v.bass(hz(bass + 12 + (step % 4 === 2 ? 12 : 0)), v.beat * 0.45, 0.3, 900 + intensity * 300);
       // arpeggio
-      if (intensity >= 1) v.pluck(hz(chord[ARP[step]]), 0.12, 0.04, 'square');
+      if (intensity >= 1) v.pluck(hz(chord[ARP[step]]), 0.12, 0.09, 'square');
       // lead melody comes in on harder waves
       if (intensity >= 3 && step % 2 === 0) {
         const note = MELODY[bar % 4][step / 2];
-        if (note) v.lead(hz(note), v.beat * 0.45, 0.05);
+        if (note) v.lead(hz(note + 12), v.beat * 0.45, 0.09);
       }
     },
   },
@@ -74,10 +74,10 @@ const TRACKS = {
     play(v, step, bar) {
       const { bass, chord } = SAD_PROGRESSION[bar % 4];
       if (step === 0) {
-        chord.forEach(n => v.pad(hz(n), v.beat * 4, 0.05));
-        v.bass(hz(bass + 12), v.beat * 4, 0.09, 400);
+        chord.forEach(n => v.pad(hz(n), v.beat * 4, 0.09));
+        v.bass(hz(bass + 24), v.beat * 4, 0.2, 800);
       }
-      if (step === 8 || step === 12) v.pluck(hz(chord[step === 8 ? 2 : 1] + 12), 0.6, 0.03, 'triangle');
+      if (step === 8 || step === 12) v.pluck(hz(chord[step === 8 ? 2 : 1] + 12), 0.6, 0.14, 'triangle');
     },
   },
 };
@@ -86,6 +86,7 @@ export class MusicPlayer {
   #synth;
   #out = null;      // music gain
   #filter = null;   // lowpass, closed while paused
+  #comp = null;     // evens out kick vs. melody so the tune is audible on small speakers
   #noise = null;
   #track = null;
   #trackName = null;
@@ -151,7 +152,14 @@ export class MusicPlayer {
     this.#filter.frequency.value = 18000;
     this.#out = ctx.createGain();
     this.#out.gain.value = MUSIC_VOLUME;
-    this.#out.connect(this.#filter);
+    this.#comp = ctx.createDynamicsCompressor();
+    this.#comp.threshold.value = -26;
+    this.#comp.knee.value = 10;
+    this.#comp.ratio.value = 4;
+    this.#comp.attack.value = 0.005;
+    this.#comp.release.value = 0.15;
+    this.#out.connect(this.#comp);
+    this.#comp.connect(this.#filter);
     this.#filter.connect(this.#synth.output);
     const len = ctx.sampleRate / 2;
     this.#noise = ctx.createBuffer(1, len, ctx.sampleRate);
