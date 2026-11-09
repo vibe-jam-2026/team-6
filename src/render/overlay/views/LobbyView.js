@@ -7,6 +7,7 @@ export class LobbyView {
     const { width: W, height: H } = o;
     const layout = lobbyLayout(W, H);
     const small = layout.small;
+    o.dim(0.32);
     const titleY = H * (layout.short ? 0.12 : 0.16);
     o.text('ROCK RUMBLE', W / 2, titleY, small ? 40 : 64, '#e8ecf4', 'center', '#7aa7ff');
     o.text(tap ? 'asteroid shooter · 2 pilots' : 'local multiplayer asteroid shooter · 2 pilots on one keyboard',

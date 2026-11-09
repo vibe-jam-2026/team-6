@@ -51,6 +51,34 @@ export class Overlay2D {
     this.ctx.globalAlpha = prev;
   }
 
+  // darken the whole 3D view behind a menu
+  dim(alpha) {
+    this.ctx.fillStyle = `rgba(4,6,12,${alpha})`;
+    this.ctx.fillRect(0, 0, this.width, this.height);
+  }
+
+  // a dark band fading out from the top or bottom edge, so text stays readable over bright ground
+  edgeShade(edge, depth, alpha = 0.6) {
+    const ctx = this.ctx, top = edge === 'top';
+    const y0 = top ? 0 : this.height, y1 = top ? depth : this.height - depth;
+    const grad = ctx.createLinearGradient(0, y0, 0, y1);
+    grad.addColorStop(0, `rgba(4,6,12,${alpha})`);
+    grad.addColorStop(1, 'rgba(4,6,12,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, Math.min(y0, y1), this.width, depth);
+  }
+
+  // a horizontal strip across the screen centred on y, soft at both ends
+  band(y, height, alpha) {
+    const ctx = this.ctx, grad = ctx.createLinearGradient(0, 0, this.width, 0);
+    grad.addColorStop(0, 'rgba(4,6,12,0)');
+    grad.addColorStop(0.3, `rgba(4,6,12,${alpha})`);
+    grad.addColorStop(0.7, `rgba(4,6,12,${alpha})`);
+    grad.addColorStop(1, 'rgba(4,6,12,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, y - height / 2, this.width, height);
+  }
+
   // a centred dark panel; returns its top-left corner
   panel(w, h) {
     const ctx = this.ctx;
