@@ -15,9 +15,9 @@ export class ShipSystem {
       }
       ship.update(dt, world.bounds);
       const inFlight = world.bullets.filter(b => b.owner === ship).length;
-      const bullet = ship.tryFire(inFlight);
-      if (bullet) {
-        world.bullets.push(bullet);
+      const bullets = ship.tryFire(inFlight);
+      if (bullets.length) {
+        world.bullets.push(...bullets);
         this.bus.emit(EVENTS.SHOT_FIRED, { ship });
       }
     }
