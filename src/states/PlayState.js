@@ -27,6 +27,7 @@ export class PlayState {
     systems.ships.update(dt, world);
     systems.bullets.update(dt, world);
     world.updateAsteroids(dt);
+    systems.selfDestruct.update(world, session.mode);
     systems.collisions.update(world, session.mode);
     systems.bullets.removeSpent(world);
     this.effects.update(dt, world);

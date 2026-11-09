@@ -10,6 +10,7 @@ import { AsteroidView } from './views/AsteroidView.js';
 import { BulletView } from './views/BulletView.js';
 import { ParticleView } from './views/ParticleView.js';
 import { LobbyShowcase } from './LobbyShowcase.js';
+import { BlastView } from './BlastView.js';
 
 // Draws the game world in 3D. Reads game state; never changes it.
 export class WorldRenderer {
@@ -30,6 +31,7 @@ export class WorldRenderer {
     this.particleView = new ParticleView(dot);
     scene.add(this.particleView.object);
     this.lobby = new LobbyShowcase(scene, this.cameraRig);
+    this.blasts = new BlastView(scene, bus);
 
     viewport.onResize(vp => {
       this.stage.resize(vp);
@@ -50,6 +52,7 @@ export class WorldRenderer {
     this.shipViews.sync(inLobby ? [] : this.world.ships, frame);
     this.bulletViews.sync(inLobby ? [] : this.world.bullets, frame);
     this.particleView.update(this.particles.particles, this.viewport);
+    this.blasts.update(t, this.viewport);
     this.cameraRig.update(dt, t, { drift: inLobby });
     this.lobby.update(inLobby, frame);
     this.stage.render();

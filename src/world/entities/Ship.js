@@ -84,6 +84,12 @@ export class Ship {
     this.respawnTimer = RULES.respawnDelay;
   }
 
+  // out of the match for good, whatever lives were left
+  eliminate() {
+    this.alive = false;
+    this.lives = 0;
+  }
+
   update(dt, bounds) {
     const c = this.controller.read();
     this.bank += (c.turn * 0.75 - this.bank) * Math.min(1, dt * 8);

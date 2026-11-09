@@ -35,13 +35,22 @@ export class World {
     this.bus.emit(EVENTS.ASTEROID_DESTROYED, { asteroid, by });
   }
 
-  destroyShip(ship, by = null) {
+  // force: ignore the deflector (a self-destruct blast); inBlast: part of one
+  destroyShip(ship, by = null, { force = false, inBlast = false } = {}) {
     if (!ship.alive) return;
-    if (ship.absorbHit()) {
+    if (!force && ship.absorbHit()) {
       this.bus.emit(EVENTS.SHIELD_HIT, { ship, by });
       return;
     }
     ship.destroy();
-    this.bus.emit(EVENTS.SHIP_DESTROYED, { ship, by });
+    this.bus.emit(EVENTS.SHIP_DESTROYED, { ship, by, inBlast });
+  }
+
+  // gone completely, without splitting into smaller rocks
+  obliterateAsteroid(asteroid, by = null) {
+    const i = this.asteroids.indexOf(asteroid);
+    if (i < 0) return;
+    this.asteroids.splice(i, 1);
+    this.bus.emit(EVENTS.ASTEROID_DESTROYED, { asteroid, by, inBlast: true });
   }
 }

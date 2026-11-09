@@ -17,6 +17,7 @@ import { CollisionSystem } from './systems/CollisionSystem.js';
 import { SpawnPlanner } from './systems/SpawnPlanner.js';
 import { WaveSpawner } from './systems/WaveSpawner.js';
 import { ScoreKeeper } from './systems/ScoreKeeper.js';
+import { SelfDestructSystem } from './systems/SelfDestructSystem.js';
 import { ParticleSystem } from './effects/ParticleSystem.js';
 import { EffectsDirector } from './effects/EffectsDirector.js';
 import { LobbyState } from './states/LobbyState.js';
@@ -34,6 +35,7 @@ import { BannerView } from './render/overlay/views/BannerView.js';
 import { PauseView } from './render/overlay/views/PauseView.js';
 import { GameOverView } from './render/overlay/views/GameOverView.js';
 import { UpgradeView } from './render/overlay/views/UpgradeView.js';
+import { FlashView } from './render/overlay/views/FlashView.js';
 
 // --- infrastructure ---
 const bus = new EventBus();
@@ -57,6 +59,7 @@ const systems = {
   ships: new ShipSystem(bus, new SpawnPlanner()),
   bullets: new BulletSystem(),
   collisions: new CollisionSystem(bus),
+  selfDestruct: new SelfDestructSystem(bus),
 };
 
 // --- states ---
@@ -74,13 +77,14 @@ const worldRenderer = new WorldRenderer({
   canvas: document.getElementById('gl'), viewport, bus, world, particles, session, states,
 });
 const hud = new HudView();
+const flash = new FlashView(bus);
 const overlay = new OverlayRenderer(
   new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, upgrades })
   .register('lobby', [new LobbyView()])
-  .register('playing', [hud, new BannerView()])
+  .register('playing', [hud, new BannerView(), flash])
   .register('paused', [hud, new PauseView()])
-  .register('upgrade', [hud, new UpgradeView()])
-  .register('gameover', [hud, new GameOverView()]);
+  .register('upgrade', [flash, hud, new UpgradeView()])
+  .register('gameover', [flash, hud, new GameOverView()]);
 const footer = document.getElementById('foot');
 
 // --- run ---

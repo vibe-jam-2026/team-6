@@ -17,16 +17,19 @@ python3 -m http.server 8000
 
 then open http://localhost:8000.
 
-| Player | Thrust | Turn | Fire |
-|--------|--------|------|------|
-| P1 (red)    | W       | A / D       | S       |
-| P2 (blue)   | ↑       | ← / →       | ↓       |
+| Player | Thrust | Turn | Fire | Self-destruct |
+|--------|--------|------|------|---------------|
+| P1 (red)    | W       | A / D       | S       | E             |
+| P2 (blue)   | ↑       | ← / →       | ↓       | Right Shift   |
 
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **Enter** starts.
 - **Modes:** *Free-for-all* (bullets hit other ships, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, survive as many waves as you can).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound.
 - Asteroids score 20 / 50 / 100 by size; extra life every 10 000 points.
+- **Self-destruct:** blows your ship up in a massive blast that wipes out every rock, bullet
+  and ship on screen, shields or not, and **ends the game**. You still score every rock
+  (and, in free-for-all, every kill) before the final scores are shown.
 - **Upgrades:** after each cleared wave, every player still in the game is offered three
   random upgrades. Browse with your turn keys and take one with your fire key; the next
   wave starts once everyone has picked. Upgrades stack up to a level cap:

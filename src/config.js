@@ -1,10 +1,10 @@
 // All tunable data lives here. Nothing in this file has behaviour.
 
 export const PLAYERS = [
-  { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS' },
-    labels: ['W thrust', 'A/D turn', 'S fire'] },
-  { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown' },
-    labels: ['↑ thrust', '←/→ turn', '↓ fire'] },
+  { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS', selfDestruct: 'KeyE' },
+    labels: ['W thrust', 'A/D turn', 'S fire', 'E self-destruct'] },
+  { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown', selfDestruct: 'ShiftRight' },
+    labels: ['↑ thrust', '←/→ turn', '↓ fire', 'R-Shift self-destruct'] },
 ];
 
 export const MENU_KEYS = {

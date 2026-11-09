@@ -39,6 +39,11 @@ export class Overlay2D {
     ctx.shadowBlur = 0;
   }
 
+  fillScreen(color) {
+    this.ctx.fillStyle = color;
+    this.ctx.fillRect(0, 0, this.width, this.height);
+  }
+
   withAlpha(alpha, draw) {
     const prev = this.ctx.globalAlpha;
     this.ctx.globalAlpha = alpha;

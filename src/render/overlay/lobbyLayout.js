@@ -1,7 +1,7 @@
 import { PLAYERS } from '../../config.js';
 
 const GAP = 12;
-const CARD_HEIGHT = 150;
+const CARD_HEIGHT = 168;
 
 // Where the lobby cards go. Shared by the 2D cards and the 3D ships on them.
 export function lobbyLayout(width, height) {

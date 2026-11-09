@@ -45,7 +45,7 @@ export class SynthAudio {
   noise(dur, vol = 0.4, cutoff = 1200) {
     if (!this.#ready) return;
     const t = this.ctx.currentTime;
-    const s = this.ctx.createBufferSource(); s.buffer = this.#noise;
+    const s = this.ctx.createBufferSource(); s.buffer = this.#noise; s.loop = true;
     const f = this.ctx.createBiquadFilter(); f.type = 'lowpass';
     f.frequency.setValueAtTime(cutoff, t);
     f.frequency.exponentialRampToValueAtTime(60, t + dur);
