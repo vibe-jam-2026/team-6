@@ -4,7 +4,7 @@ import { toSceneX, toSceneY } from '../coords.js';
 import { mergeFlat, plate, alongX } from '../geometry.js';
 
 // The "asteroids" are skinned as enemy aircraft and birds (over the fantasy
-// realm the aircraft become fish-folk). Gameplay is
+// realm all of them become fish-folk). Gameplay is
 // unchanged: large ones are bombers, medium ones fighters, small ones birds,
 // and they still split when shot. Models are built at unit size (about 2 long)
 // and scaled up to the hit radius.
@@ -107,12 +107,14 @@ const fishMouthGeometry = plate(mirrorY([[0.78, 0], [0.66, 0.13], [0.62, 0.12]])
 const fishArmGeometry = plate([[0.16, 0], [0.1, 0.45], [0.02, 0.7], [-0.12, 0.62], [-0.2, 0.36], [-0.16, 0]], 0.03);
 
 const scaleMaterial = new THREE.MeshStandardMaterial({ color: 0x2f6aa8, emissive: 0x061428, roughness: 0.5, metalness: 0.1, flatShading: true });
+const youngScaleMaterial = new THREE.MeshStandardMaterial({ color: 0x2fa89a, emissive: 0x06201c, roughness: 0.5, metalness: 0.1, flatShading: true });
 const finMaterial = new THREE.MeshStandardMaterial({ color: 0xf0b030, roughness: 0.6, flatShading: true, side: THREE.DoubleSide });
 const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0xf4f2e8, roughness: 0.3 });
 const darkMaterial = new THREE.MeshStandardMaterial({ color: 0x14080c, roughness: 0.5, side: THREE.DoubleSide });
 
-function createFishFolk() {
-  const body = new THREE.Mesh(fishBodyGeometry, scaleMaterial);
+// The small ones (the birds elsewhere) are teal youngsters.
+function createFishFolk(young = false) {
+  const body = new THREE.Mesh(fishBodyGeometry, young ? youngScaleMaterial : scaleMaterial);
   body.castShadow = true;
   for (const [g, m] of [[fishFinGeometry, finMaterial], [fishEyeGeometry, eyeMaterial], [fishPupilGeometry, darkMaterial], [fishMouthGeometry, darkMaterial]]) {
     const part = new THREE.Mesh(g, m);
@@ -135,8 +137,8 @@ function createFishFolk() {
 
 export class AsteroidView {
   constructor(asteroid, scenery) {
-    const model = asteroid.size === 1 ? createBird()
-      : scenery === 'realm' ? createFishFolk()
+    const model = scenery === 'realm' ? createFishFolk(asteroid.size === 1)
+      : asteroid.size === 1 ? createBird()
         : createPlane(asteroid.size);
     Object.assign(this, model);
     this.object = new THREE.Group();
