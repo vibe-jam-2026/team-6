@@ -1,7 +1,7 @@
 # team-6
 Vibe Jam 2026 – lag 6
 
-## Rock Rumble
+## Mach Schnell
 
 A local multiplayer asteroid shooter for up to 4 players sharing one keyboard,
 flying low-poly Saab JAS 39 Gripen E jets that fire rockets at enemy bombers,
