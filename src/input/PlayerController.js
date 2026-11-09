@@ -21,6 +21,10 @@ export class PlayerController {
     return this.keyboard.stepPressed() || (this.useMouse ? this.mouse.stepPressed() : 0);
   }
 
+  weaponStep() {
+    return this.keyboard.weaponStep() || (this.useMouse ? this.mouse.weaponStep() : 0);
+  }
+
   selfDestructPressed() {
     return this.keyboard.selfDestructPressed() || (this.useMouse && this.mouse.selfDestructPressed());
   }

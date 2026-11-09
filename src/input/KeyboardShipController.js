@@ -28,6 +28,11 @@ export class KeyboardShipController {
     return (input.wasPressed(keys.right) ? 1 : 0) - (input.wasPressed(keys.left) ? 1 : 0);
   }
 
+  // 1 when the weapon key was pressed this step: cycle to the next weapon
+  weaponStep() {
+    return this.input.wasPressed(this.keys.weapon) ? 1 : 0;
+  }
+
   selfDestructPressed() {
     return this.input.wasPressed(this.keys.selfDestruct);
   }
