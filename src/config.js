@@ -40,7 +40,7 @@ export const MENU_KEYS = {
   demo: 'KeyX',      // lobby: watch a demo where the computer flies both jets
   cpuSkill: 'KeyL',  // lobby: cycle the computer pilot's skill
   exitDemo: 'Escape', // the only key that ends a demo
-  firstPerson: 'KeyF', // toggle the cockpit view from P1's jet (any time)
+  firstPerson: 'KeyF', // cycle the camera: overview → P1's cockpit → chase behind P1 (any time)
 };
 
 // Demo mode: the computer flies every jet. It starts from the lobby with
@@ -68,7 +68,7 @@ export const SHIP = {
   drag: 0.55,            // velocity decay per second (exponential)
   maxSpeed: 440,
   radius: 13,
-  fireCooldown: 0.17,
+  fireCooldown: 0.14,    // s between shots (Rapid Fire upgrades divide it further)
   maxBullets: 5,
   muzzleOffset: 15,
 };
@@ -192,7 +192,7 @@ export const MOTHERSHIP = {
   fighters: 2,          // fighters per launch (3 when enraged)
   maxFighters: 6,       // its own fighters in the air at once
   bullet: { speed: 210, life: 4, radius: 5 },
-  shell: { speed: 160, life: 5, radius: 11 },   // the slow heavy cannon rounds
+  shell: { speed: 160, life: 5, radius: 11, hp: 4 },   // the slow heavy cannon rounds: take 4 shots to stop
 };
 
 export const RULES = {

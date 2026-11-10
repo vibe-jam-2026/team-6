@@ -72,8 +72,9 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
 - **Cockpit view:** **F** (in the lobby or any time in a match) toggles a first-person view from
   P1's jet: the camera swings down into the cockpit, looks along the nose and rolls with the turns.
-  While P1 is shot down and waiting to respawn the camera falls back to the overview, and **F** again
-  returns to the normal view. Mouse aiming still maps the pointer onto the arena as seen from the overview.
+  Press **F** again for the **chase view**: the camera follows a short distance behind and above
+  P1's jet, easing smoothly after it as it turns and banks. A third press returns to the overview.
+  While P1 is shot down and waiting to respawn the camera falls back to the overview. Mouse aiming still maps the pointer onto the arena as seen from the overview.
 - **Waves:** there are **10 levels**. Normal waves last **1 minute**: a wave opens with a group of
   enemies and more keep arriving from the edges (more often and in bigger groups each wave); the
   HUD shows the clock. When time is up the survivors retreat and the shop opens. **Wave 5** is a

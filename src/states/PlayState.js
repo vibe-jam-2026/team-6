@@ -29,7 +29,7 @@ export class PlayState {
     systems.enemies.update(dt, world);
     systems.boss.update(dt, world);
     systems.selfDestruct.update(world, session.mode);
-    systems.collisions.update(world, session.mode, { invincible: session.invincible });
+    systems.collisions.update(world, session.mode, { invincible: session.invincible, dt });
     systems.pickups.update(dt, world);
     systems.bullets.removeSpent(world);
     this.effects.update(dt, world);

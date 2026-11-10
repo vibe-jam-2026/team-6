@@ -1,6 +1,20 @@
 import { circlesOverlap } from '../core/math.js';
 import { EVENTS } from '../core/EventBus.js';
 
+const SHOT_CLASH_PADDING = 3; // px added to the two radii so tiny shots can still meet
+
+// True if two moving circles came within reach of each other at any point
+// during the last dt seconds (their positions now are the end of that step).
+function sweptOverlap(a, b, dt) {
+  const px = a.x - b.x, py = a.y - b.y;
+  const vx = a.vx - b.vx, vy = a.vy - b.vy;
+  const v2 = vx * vx + vy * vy;
+  const t = v2 > 1e-6 ? Math.max(0, Math.min(dt, (px * vx + py * vy) / v2)) : 0;
+  const cx = px - vx * t, cy = py - vy * t;
+  const r = a.radius + b.radius + SHOT_CLASH_PADDING;
+  return cx * cx + cy * cy < r * r;
+}
+
 // Detects contacts and resolves them through World. Whether bullets hurt
 // other ships is the game mode's decision, not this system's.
 // With `invincible` (a testing aid) nothing can destroy a ship.
@@ -9,9 +23,10 @@ export class CollisionSystem {
     this.bus = bus;
   }
 
-  update(world, mode, { invincible = false } = {}) {
+  update(world, mode, { invincible = false, dt = 1 / 60 } = {}) {
     const canHit = s => s.vulnerable && !invincible;
     this.#bumpShips(world);
+    this.#bulletsVsBullets(world, dt);
     this.#bulletsVsAsteroids(world);
     this.#bulletsVsBoss(world);
     this.#bulletsVsGround(world);
@@ -32,6 +47,22 @@ export class CollisionSystem {
       const push = (a.radius + b.radius - d) / 2;
       a.x -= nx * push; a.y -= ny * push; b.x += nx * push; b.y += ny * push;
       this.bus.emit(EVENTS.SHIPS_BUMPED, { a, b });
+    }
+  }
+
+  // A jet's shot and an enemy shot (planes, bosses) that meet cancel each other out,
+  // except the Mothership's heavy shells, which soak up several shots first.
+  // Both move fast, so test where they were during the whole step, not just now.
+  #bulletsVsBullets(world, dt) {
+    const enemyShots = world.bullets.filter(b => b.hostile && !b.dead);
+    if (!enemyShots.length) return;
+    for (const shot of world.bullets) {
+      if (shot.hostile || shot.dead) continue;
+      const hit = enemyShots.find(e => !e.dead && sweptOverlap(shot, e, dt));
+      if (!hit) continue;
+      shot.expire();
+      const destroyed = hit.takeHit(shot.weapon?.damage ?? 1);
+      this.bus.emit(EVENTS.BULLETS_CLASHED, { shot, enemyShot: hit, x: (shot.x + hit.x) / 2, y: (shot.y + hit.y) / 2, destroyed });
     }
   }
 
