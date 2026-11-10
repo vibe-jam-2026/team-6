@@ -28,9 +28,57 @@ const orbMaterialFor = color => {
   return orbMaterials.get(color);
 };
 
+const pipGeometry = new THREE.SphereGeometry(1, 8, 6);
+const FLASH = new THREE.Color(0xffffff).multiplyScalar(4);
+const OVERHEAT = new THREE.Color(0xff5a1f).multiplyScalar(3);   // what a shell glows as it nears bursting
+
+// The Mothership's heavy shell: a big orb with a pip circling it for every shot it
+// can still take. Each hit flashes it white, shakes it, knocks off a pip,
+// shrinks it and turns it hotter orange, so it visibly cracks up before it bursts.
+class ArmouredShellView {
+  constructor(bullet) {
+    this.base = new THREE.Color(bullet.owner.color).multiplyScalar(3);
+    this.coreMaterial = new THREE.MeshBasicMaterial({ color: this.base.clone() });
+    this.size = bullet.radius / 3 * 1.6;
+    this.object = new THREE.Group();
+    this.core = new THREE.Mesh(orbGeometry, this.coreMaterial);
+    this.object.add(this.core);
+    this.pips = Array.from({ length: bullet.maxHp }, () => {
+      const pip = new THREE.Mesh(pipGeometry, orbMaterialFor(bullet.owner.color));
+      this.object.add(pip);
+      return pip;
+    });
+  }
+
+  update(b, { t, bounds }) {
+    const shake = b.hitFlash * 3;
+    this.object.position.set(toSceneX(bounds, b.x) + (Math.random() - 0.5) * shake, toSceneY(bounds, b.y) + (Math.random() - 0.5) * shake, 4);
+    // shrinks to half size and shifts to an angry orange as it takes damage
+    // (flickering on its last hit point), swells and flashes white for a moment when hit
+    const damage = 1 - b.health, last = b.hp === 1;
+    const flicker = last ? 0.85 + 0.15 * Math.sin(t * 40) : 1;
+    this.core.scale.setScalar(this.size * (1 - 0.5 * damage) * (1 + b.hitFlash * 0.5) * flicker);
+    this.coreMaterial.color.copy(this.base).lerp(OVERHEAT, Math.min(1, damage * 1.3)).lerp(FLASH, b.hitFlash);
+    const r = this.size * 3 * (1 - 0.3 * damage) + 6, spin = t * 4;
+    this.pips.forEach((pip, i) => {
+      pip.visible = i < b.hp;
+      const a = spin + (i / this.pips.length) * Math.PI * 2;
+      pip.position.set(Math.cos(a) * r, Math.sin(a) * r, 0);
+      pip.scale.setScalar(3.2);
+    });
+  }
+
+  dispose() { this.coreMaterial.dispose(); }
+}
+
 // A small rocket in the shooter's colour, aligned with its flight direction.
 export class BulletView {
   constructor(bullet) {
+    if (bullet.hostile && bullet.armoured) {
+      this.shell = new ArmouredShellView(bullet);
+      this.object = this.shell.object;
+      return;
+    }
     if (bullet.hostile) {
       // the boss fires glowing energy orbs instead of rockets
       this.object = new THREE.Mesh(orbGeometry, orbMaterialFor(bullet.owner.color));
@@ -51,11 +99,15 @@ export class BulletView {
     this.object.add(new THREE.Mesh(bodyGeometry, bodyMaterial), new THREE.Mesh(noseGeometry, tip), ...fins, this.flame);
   }
 
-  update(b, { t, bounds }) {
+  update(b, frame) {
+    if (this.shell) return this.shell.update(b, frame);
+    const { t, bounds } = frame;
     this.object.position.set(toSceneX(bounds, b.x), toSceneY(bounds, b.y), 4);
     if (b.hostile) return;
     // Game y points down, scene y points up, so the heading flips sign.
     this.object.rotation.set(t * 12, 0, Math.atan2(-b.vy, b.vx));
     this.flame.scale.set(6 + Math.random() * 5, 1, 1);
   }
+
+  dispose() { this.shell?.dispose(); }
 }
