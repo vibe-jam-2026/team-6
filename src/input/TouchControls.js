@@ -1,5 +1,4 @@
-import { MENU_KEYS, COMPUTER_PLAYER } from '../config.js';
-import { lobbyLayout } from '../render/overlay/lobbyLayout.js';
+import { MENU_KEYS } from '../config.js';
 
 const GAMEOVER_TAP_DELAY = 800; // ms, so a late FIRE tap doesn't skip the results
 
@@ -133,29 +132,17 @@ export class TouchControls {
     for (const id of [...this.#held.keys()]) this.#hold(id, null);
   }
 
-  // --- taps on the canvas itself (lobby cards and lines, game over) ---
+  // --- taps on the canvas itself (victory flyover, game over) ---
 
   #onScreenTap(e) {
     if (!this.enabled || e.target.closest?.('#touch button, a')) return;
     this.onGesture();
     const name = this.states.currentName;
-    if (name === 'lobby') this.#lobbyTap(e.clientX, e.clientY);
-    else if (name === 'flyover') this.#tapKey(MENU_KEYS.start); // skip the victory lap
+    // lobby taps are handled by LobbyPointer, which serves the mouse too
+    if (name === 'flyover') this.#tapKey(MENU_KEYS.start); // skip the victory lap
     else if (name === 'gameover' && performance.now() - this.#stateSince > GAMEOVER_TAP_DELAY) {
       this.#tapKey(MENU_KEYS.start);
     }
-  }
-
-  #lobbyTap(x, y) {
-    const { innerWidth: W, innerHeight: H } = this.win;
-    const layout = lobbyLayout(W, H);
-    const card = layout.cards.findIndex(c => x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h);
-    // the touch pad flies P1 only, so tapping P2's card hands that jet to the computer
-    if (card === COMPUTER_PLAYER) return this.#tapKey(MENU_KEYS.computer);
-    if (card >= 0) return this.#tapKey(this.players[card].keys.fire);
-    const near = (lineY) => Math.abs(y - lineY) < 18 && Math.abs(x - W / 2) < W * 0.45;
-    if (near(layout.modeY)) this.#tapKey(MENU_KEYS.switchMode);
-    else if (near(layout.startY)) this.#tapKey(MENU_KEYS.start);
   }
 
   #tapKey(code) {

@@ -14,6 +14,7 @@ import { PlayerController } from './input/PlayerController.js';
 import { ComputerShipController } from './input/ComputerShipController.js';
 import { TestControls } from './input/TestControls.js';
 import { VoiceCommands } from './input/VoiceCommands.js';
+import { LobbyPointer } from './input/LobbyPointer.js';
 import { TouchControls } from './input/TouchControls.js';
 import { SynthAudio } from './audio/SynthAudio.js';
 import { SoundEffects } from './audio/SoundEffects.js';
@@ -152,6 +153,8 @@ const overlay = new OverlayRenderer(
 const footer = document.getElementById('foot');
 const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => { audio.unlock(); voice.start(); } });
 overlay.context.touch = touch;
+const lobbyPointer = new LobbyPointer({ input, states, isTouch: () => touch.enabled });
+overlay.context.pointer = lobbyPointer;
 overlay.context.cameraView = () => worldRenderer.view;
 
 // --- run ---
@@ -183,6 +186,7 @@ new GameLoop({
     worldRenderer.render(time);
     overlay.render(time);
     touch.sync();
+    lobbyPointer.sync();
     footer.style.display = states.currentName === 'lobby' ? '' : 'none';
   },
 }).start();
