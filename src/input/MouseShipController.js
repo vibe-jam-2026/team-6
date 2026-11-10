@@ -6,7 +6,7 @@ const DEAD_ZONE = 18;    // px: pointer this close to the ship doesn't steer
 const wrapAngle = a => Math.atan2(Math.sin(a), Math.cos(a));
 
 // Flies a ship with the mouse: the nose turns towards the pointer, the left
-// button fires, the right button thrusts, the wheel switches weapon and the
+// button toggles auto fire, the right button thrusts, the wheel switches weapon and the
 // middle button self-destructs.
 // Between waves the wheel browses the shop and a left click buys.
 // toWorld maps a screen pixel to game coordinates (the camera is tilted).
@@ -21,7 +21,8 @@ export class MouseShipController {
     return {
       thrust: mouse.isDown(MOUSE.right),
       turn: ship && mouse.moved ? this.#aim(ship) : 0,
-      fire: mouse.isDown(MOUSE.left),
+      fire: false,
+      toggleFire: mouse.wasPressed(MOUSE.left),
     };
   }
 

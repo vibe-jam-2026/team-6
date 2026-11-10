@@ -2,9 +2,9 @@
 
 export const PLAYERS = [
   { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS', selfDestruct: 'KeyE', weapon: 'KeyQ' },
-    labels: ['W thrust', 'A/D turn', 'S fire', 'Q switch weapon', 'E self-destruct'] },
+    labels: ['W thrust', 'A/D turn', 'S fire on/off', 'Q switch weapon', 'E self-destruct'] },
   { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown', selfDestruct: 'ShiftRight', weapon: 'Slash' },
-    labels: ['↑ thrust', '←/→ turn', '↓ fire', '/ switch weapon', 'R-Shift self-destruct'] },
+    labels: ['↑ thrust', '←/→ turn', '↓ fire on/off', '/ switch weapon', 'R-Shift self-destruct'] },
 ];
 
 // the player the lobby's computer key hands to the computer (P2)
@@ -14,7 +14,7 @@ export const COMPUTER_PLAYER = 1;
 export const COMPUTER_LABELS = ['flown by the computer', 'V to hand it back'];
 
 // card hints for whoever the lobby gives the mouse to (their keys still work too)
-export const MOUSE_LABELS = ['mouse aims', 'right btn thrust', 'left btn fire', 'wheel switches weapon', 'middle btn self-destruct'];
+export const MOUSE_LABELS = ['mouse aims', 'right btn thrust', 'left btn fire on/off', 'wheel switches weapon', 'middle btn self-destruct'];
 
 export const MENU_KEYS = {
   start: 'Enter',
