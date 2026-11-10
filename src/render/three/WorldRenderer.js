@@ -59,7 +59,8 @@ export class WorldRenderer {
     const dt = this.#lastTime === null ? 0 : Math.min(0.1, t - this.#lastTime);
     this.#lastTime = t;
     const inLobby = this.states.currentName === 'lobby';
-    this.sceneryKey = inLobby ? SCENERY[0].key : sceneryForWave(this.wave).key;
+    // the victory flyover tours every landscape; otherwise the wave's landscape
+    this.sceneryKey = inLobby ? SCENERY[0].key : this.session.flyover?.key ?? sceneryForWave(this.wave).key;
     this.scenery.show(this.sceneryKey);
     this.weather.show(this.sceneryKey);
     this.weather.update(dt);
@@ -73,7 +74,8 @@ export class WorldRenderer {
     this.particleView.update(this.particles.particles, this.viewport);
     this.blasts.update(t, this.viewport);
     const state = this.states.currentName;
-    this.cameraRig.update(dt, t, { drift: inLobby, spin: state === 'playing', frozen: state !== 'playing' && !inLobby });
+    const flyover = state === 'flyover';
+    this.cameraRig.update(dt, t, { drift: inLobby || flyover, spin: state === 'playing', frozen: !['playing', 'lobby', 'flyover'].includes(state) });
     this.scenery.setCameraDistance(this.cameraRig.distance);
     this.lobby.update(inLobby, frame);
     this.stage.render();

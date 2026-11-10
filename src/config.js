@@ -218,6 +218,9 @@ export const WAVES = {
 
 export const DEFAULT_JOINED = [true, true];
 
+// The victory flyover after the final boss: seconds spent over each landscape.
+export const FLYOVER = { perLandscape: 4.2 };
+
 // The landscape below the arena for each wave, in order (it cycles if there
 // are ever more waves than entries). The lobby shows the first one.
 export const SCENERY = [

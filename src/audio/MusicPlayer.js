@@ -81,6 +81,8 @@ const TRACKS = {
       }
     },
   },
+  // the victory lap gets the lobby theme, a little slower and grander
+  get flyover() { return { ...TRACKS.lobby, bpm: 104 }; },
   gameover: {
     bpm: 72,
     play(v, step, bar) {

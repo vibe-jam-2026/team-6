@@ -37,6 +37,7 @@ import { PlayState } from './states/PlayState.js';
 import { PausedState } from './states/PausedState.js';
 import { GameOverState } from './states/GameOverState.js';
 import { ShopState } from './states/ShopState.js';
+import { FlyoverState } from './states/FlyoverState.js';
 import { Shop } from './upgrades/Shop.js';
 import { WorldRenderer } from './render/three/WorldRenderer.js';
 import { Overlay2D } from './render/overlay/Overlay2D.js';
@@ -50,6 +51,7 @@ import { ShopView } from './render/overlay/views/ShopView.js';
 import { FlashView } from './render/overlay/views/FlashView.js';
 import { FireworksView } from './render/overlay/views/FireworksView.js';
 import { DemoView } from './render/overlay/views/DemoView.js';
+import { CreditsView } from './render/overlay/views/CreditsView.js';
 import { Fireworks } from './effects/Fireworks.js';
 
 // --- infrastructure ---
@@ -103,6 +105,7 @@ states
   .register('playing', new PlayState(deps))
   .register('paused', new PausedState(deps))
   .register('shop', new ShopState(deps))
+  .register('flyover', new FlyoverState(deps))
   .register('gameover', new GameOverState(deps));
 const testControls = new TestControls(deps);
 
@@ -120,6 +123,7 @@ const overlay = new OverlayRenderer(
   .register('playing', [fireworksView, hud, new BannerView(), flash, demoView])
   .register('paused', [hud, new PauseView()])
   .register('shop', [flash, hud, new ShopView(), demoView])
+  .register('flyover', [fireworksView, new CreditsView()])
   .register('gameover', [fireworksView, flash, hud, new GameOverView(), demoView]);
 const footer = document.getElementById('foot');
 const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
@@ -139,7 +143,7 @@ new GameLoop({
       states.update(dt);
     }
     // the victory fireworks run from the final boss's fall until the players leave the results
-    fireworks.update(dt, session.victory && ['playing', 'gameover'].includes(states.currentName));
+    fireworks.update(dt, session.victory && ['playing', 'flyover', 'gameover'].includes(states.currentName));
     music.setMood(states.currentName);
     music.tick();
     input.endStep();

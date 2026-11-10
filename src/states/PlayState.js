@@ -55,7 +55,8 @@ export class PlayState {
     this.#overTimer -= dt;
     if (this.#overTimer > 0) return true;
     session.finish(world.ships, waves.wave, { won });
-    this.states.change('gameover');
+    // a real win earns the victory lap over every landscape first (demos go straight on)
+    this.states.change(session.result.won && !session.demo ? 'flyover' : 'gameover');
     return true;
   }
 }

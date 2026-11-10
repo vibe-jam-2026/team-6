@@ -20,6 +20,7 @@ export class Session {
   #beforeDemo = null; // the lobby setup to put back when the demo ends
   scoreEntry = null;  // { ship, initials } while a pilot types initials for the high-score table
   newHighScores = []; // entries added on this results screen, to highlight them
+  flyover = null;     // { index, key, title, t, count } during the victory flyover
 
   // controllers: one human controller per player; computers: one computer pilot per player
   constructor(bus, controllers, modes = GAME_MODES, computers = []) {
