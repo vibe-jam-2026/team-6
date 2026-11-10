@@ -105,8 +105,10 @@ states
   .register('gameover', new GameOverState(deps));
 const testControls = new TestControls(deps);
 
-// say "nåt coolt" into the microphone to fly straight to the arctic level
+// say "nåt coolt" into the microphone to fly straight to the arctic level,
+// or "fuska" to make the players invincible
 const voice = new VoiceCommands({ lang: 'sv-SE' })
+  .on(/fuska/, () => testControls.makeInvincible())
   .on(/n[åoa]t+\s*coo?l+t/, () => {
     const arcticWave = SCENERY.findIndex(s => s.key === 'arctic') + 1;
     testControls.goToWave(arcticWave);   // its wave banner names the arctic

@@ -44,6 +44,11 @@ export class TestControls {
     return ships.map(s => `${s.name}: $${s.money}`).join(', ') || 'no ships in play';
   }
 
+  // Turns invincibility on (never off), e.g. from the "fuska" voice command.
+  makeInvincible() {
+    if (!this.session.invincible) this.#toggleInvincible();
+  }
+
   #toggleInvincible() {
     this.session.toggleInvincible();
     const on = this.session.invincible;
