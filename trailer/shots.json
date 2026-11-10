@@ -1,0 +1,288 @@
+[
+ {
+  "name": "forest_chase",
+  "actions": [
+   {
+    "wait": 0.5
+   },
+   {
+    "key": "KeyL"
+   },
+   {
+    "key": "Tab"
+   },
+   {
+    "key": "KeyG"
+   },
+   {
+    "key": "KeyX"
+   },
+   {
+    "wait": 1
+   },
+   {
+    "key": "Digit1"
+   },
+   {
+    "wait": 6
+   },
+   {
+    "key": "KeyF"
+   },
+   {
+    "key": "KeyF"
+   },
+   {
+    "wait": 1.5
+   },
+   {
+    "rec": 5
+   }
+  ]
+ },
+ {
+  "name": "fantasy",
+  "actions": [
+   {
+    "wait": 0.5
+   },
+   {
+    "key": "KeyL"
+   },
+   {
+    "key": "Tab"
+   },
+   {
+    "key": "KeyG"
+   },
+   {
+    "key": "KeyX"
+   },
+   {
+    "wait": 1
+   },
+   {
+    "key": "Digit4"
+   },
+   {
+    "wait": 8
+   },
+   {
+    "rec": 4
+   }
+  ]
+ },
+ {
+  "name": "boss",
+  "actions": [
+   {
+    "wait": 0.5
+   },
+   {
+    "key": "KeyL"
+   },
+   {
+    "key": "Tab"
+   },
+   {
+    "key": "KeyG"
+   },
+   {
+    "key": "KeyX"
+   },
+   {
+    "wait": 1
+   },
+   {
+    "key": "Digit5"
+   },
+   {
+    "wait": 6
+   },
+   {
+    "rec": 5
+   }
+  ]
+ },
+ {
+  "name": "lava_cockpit",
+  "actions": [
+   {
+    "wait": 0.5
+   },
+   {
+    "key": "KeyL"
+   },
+   {
+    "key": "Tab"
+   },
+   {
+    "key": "KeyG"
+   },
+   {
+    "key": "KeyX"
+   },
+   {
+    "wait": 1
+   },
+   {
+    "key": "Digit7"
+   },
+   {
+    "wait": 8
+   },
+   {
+    "key": "KeyF"
+   },
+   {
+    "wait": 1.5
+   },
+   {
+    "rec": 4
+   }
+  ]
+ },
+ {
+  "name": "neon",
+  "actions": [
+   {
+    "wait": 0.5
+   },
+   {
+    "key": "KeyL"
+   },
+   {
+    "key": "Tab"
+   },
+   {
+    "key": "KeyG"
+   },
+   {
+    "key": "KeyX"
+   },
+   {
+    "wait": 1
+   },
+   {
+    "key": "Digit9"
+   },
+   {
+    "wait": 10
+   },
+   {
+    "rec": 4
+   }
+  ]
+ },
+ {
+  "name": "alps_chase",
+  "actions": [
+   {
+    "wait": 0.5
+   },
+   {
+    "key": "KeyL"
+   },
+   {
+    "key": "Tab"
+   },
+   {
+    "key": "KeyG"
+   },
+   {
+    "key": "KeyX"
+   },
+   {
+    "wait": 1
+   },
+   {
+    "key": "Digit3"
+   },
+   {
+    "wait": 8
+   },
+   {
+    "key": "KeyF"
+   },
+   {
+    "key": "KeyF"
+   },
+   {
+    "wait": 1.5
+   },
+   {
+    "rec": 3.5
+   }
+  ]
+ },
+ {
+  "name": "mothership",
+  "actions": [
+   {
+    "wait": 0.5
+   },
+   {
+    "key": "KeyL"
+   },
+   {
+    "key": "Tab"
+   },
+   {
+    "key": "KeyG"
+   },
+   {
+    "key": "KeyX"
+   },
+   {
+    "wait": 1
+   },
+   {
+    "key": "Digit0"
+   },
+   {
+    "wait": 9
+   },
+   {
+    "rec": 6
+   }
+  ]
+ },
+ {
+  "name": "nuke",
+  "actions": [
+   {
+    "wait": 0.5
+   },
+   {
+    "key": "KeyL"
+   },
+   {
+    "key": "Tab"
+   },
+   {
+    "key": "KeyG"
+   },
+   {
+    "key": "KeyX"
+   },
+   {
+    "wait": 1
+   },
+   {
+    "key": "Digit8"
+   },
+   {
+    "wait": 14
+   },
+   {
+    "rec": 1.5
+   },
+   {
+    "eval": "window.__nuke=true"
+   },
+   {
+    "rec": 4
+   }
+  ]
+ }
+]
