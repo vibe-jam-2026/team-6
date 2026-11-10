@@ -4,7 +4,8 @@ import { EVENTS } from '../core/EventBus.js';
 export class SoundEffects {
   constructor(bus, synth) {
     bus.on(EVENTS.SHOT_FIRED, ({ ship }) => synth.tone(880 + ship.index * 120, 220, 0.12, 'square', 0.07));
-    bus.on(EVENTS.WEAPON_SWITCHED, ({ ship }) => [520, 780].forEach((f, k) => synth.tone(f + ship.index * 60, f, 0.05, 'square', 0.06, k * 0.05)));
+    bus.on(EVENTS.POWERUP_COLLECTED, ({ ship }) => [520, 780, 1040].forEach((f, k) => synth.tone(f + ship.index * 60, f * 1.2, 0.07, 'square', 0.07, k * 0.05)));
+    bus.on(EVENTS.POWERUP_EXPIRED, ({ ship }) => [780, 520].forEach((f, k) => synth.tone(f + ship.index * 60, f * 0.8, 0.06, 'triangle', 0.05, k * 0.06)));
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid: a, inBlast }) => !inBlast && synth.noise(0.25 + a.size * 0.18, 0.25 + a.size * 0.1, 400 + a.size * 500));
     bus.on(EVENTS.SHIP_DESTROYED, ({ inBlast }) => {
       if (inBlast) return;
