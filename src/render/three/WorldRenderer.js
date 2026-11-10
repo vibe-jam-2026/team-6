@@ -15,10 +15,12 @@ import { MothershipView } from './views/MothershipView.js';
 import { ParticleView } from './views/ParticleView.js';
 import { LobbyShowcase } from './LobbyShowcase.js';
 import { BlastView } from './BlastView.js';
+import { toSceneX, toSceneY } from './coords.js';
 
 // Draws the game world in 3D. Reads game state; never changes it.
 export class WorldRenderer {
   #lastTime = null;
+  firstPerson = false;   // ride in P1's cockpit during a match (toggled with F)
 
   constructor({ canvas, viewport, bus, world, particles, session, states }) {
     Object.assign(this, { viewport, world, particles, session, states });
@@ -56,7 +58,8 @@ export class WorldRenderer {
     const inLobby = this.states.currentName === 'lobby';
     this.sceneryKey = inLobby ? SCENERY[0].key : sceneryForWave(this.wave).key;
     this.scenery.show(this.sceneryKey);
-    const frame = { t, bounds: this.viewport, session: this.session };
+    // the cockpit view hides P1's own jet once the camera is nearly inside it
+    const frame = { t, bounds: this.viewport, session: this.session, cockpit: this.cameraRig.firstPerson > 0.5 ? 0 : null };
 
     this.asteroidViews.sync(this.world.asteroids, frame);
     this.shipViews.sync(inLobby ? [] : this.world.ships, frame);
@@ -65,9 +68,22 @@ export class WorldRenderer {
     this.particleView.update(this.particles.particles, this.viewport);
     this.blasts.update(t, this.viewport);
     const state = this.states.currentName;
-    this.cameraRig.update(dt, t, { drift: inLobby, spin: state === 'playing', frozen: state !== 'playing' && !inLobby });
+    this.cameraRig.update(dt, t, {
+      drift: inLobby, spin: state === 'playing', frozen: state !== 'playing' && !inLobby,
+      pilot: this.firstPerson && !inLobby ? this.#pilot(t) : null,
+    });
     this.scenery.setCameraDistance(this.cameraRig.distance);
     this.lobby.update(inLobby, frame);
     this.stage.render();
+  }
+
+  toggleFirstPerson() { this.firstPerson = !this.firstPerson; return this.firstPerson; }
+
+  // P1's jet in scene space, at the height its view bobs at, or null while it is down
+  #pilot(t) {
+    const ship = this.world.ships.find(s => s.index === 0);
+    if (!ship?.alive) return null;
+    const b = this.viewport;
+    return { x: toSceneX(b, ship.x), y: toSceneY(b, ship.y), z: 4 + Math.sin(t * 3 + ship.index) * 2, angle: ship.angle, bank: ship.bank };
   }
 }

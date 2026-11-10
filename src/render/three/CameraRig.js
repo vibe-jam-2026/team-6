@@ -6,13 +6,19 @@ import { CAMERA_SPIN } from '../../config.js';
 const TILT = 0.48;          // radians from straight down (the default view)
 const SHAKE_DECAY = 30;     // units per second
 const UP = new THREE.Vector3(0, 0, 1);
+const FP_BLEND = 0.6;       // seconds to swing into / out of the cockpit view
+const FP_EYE = 22;          // eye height above the jet (a little above, to clear the scenery)
+const FP_LOOK = 320;        // how far ahead the cockpit view looks
+const FP_DIP = 70;          // ...and how far below the eye it aims there
+const FP_NEAR = 2, NEAR = 10;
 
 const smooth = k => k * k * (3 - 2 * k);
 const lerp = (a, b, k) => a + (b - a) * k;
 
 // Positions the tilted camera so the whole arena fits on screen, adds menu drift,
 // explosion shake and random swings to new angles during play, and maps screen
-// pixels back onto the arena plane.
+// pixels back onto the arena plane. It can also ride in a jet's cockpit (first
+// person); the overview camera keeps running behind it for screenToPlane.
 export class CameraRig {
   #shake = 0;
   #raycaster = new THREE.Raycaster();
@@ -23,9 +29,16 @@ export class CameraRig {
   #blend = 1;       // 0..1 progress of the current swing
   #timer = 0;       // seconds until the next swing
   #target = new THREE.Vector3();
+  #overview;        // copy of the overview camera, for mapping screen pixels
+  #fp = 0;          // 0..1 how far into the cockpit view we are
+  #eye = new THREE.Vector3();
+  #look = new THREE.Vector3();
+  #up = new THREE.Vector3();
+  #jolt = new THREE.Vector3();   // this frame's explosion shake
 
   constructor(camera, bus) {
     this.camera = camera;
+    this.#overview = camera.clone();
     bus.on(EVENTS.SHIP_DESTROYED, () => { this.#shake = 10; });
     bus.on(EVENTS.SELF_DESTRUCT, () => { this.#shake = 45; });
     bus.on(EVENTS.BOSS_DESTROYED, () => { this.#shake = 28; });
@@ -35,7 +48,14 @@ export class CameraRig {
   resetShake() { this.#shake = 0; }
 
   // distance from the camera to the point it looks at (the scenery fades its fog by it)
-  get distance() { return this.#view ? this.#view.d : this.camera.position.length(); }
+  get distance() {
+    const d = this.#view ? this.#view.d : this.camera.position.length();
+    if (!this.#fp || !this.viewport) return d;
+    return lerp(d, Math.max(this.viewport.width, this.viewport.height) * 0.5, smooth(this.#fp));
+  }
+
+  // 0..1: how far the camera has swung into the cockpit (1 = fully first person)
+  get firstPerson() { return this.#fp; }
 
   fit(viewport) {
     const cam = this.camera;
@@ -49,28 +69,66 @@ export class CameraRig {
     this.#blend = 1;
     this.#timer = rand(...CAMERA_SPIN.interval);
     this.#place(this.#view);
+    this.#snapshot();
   }
 
   // spin: swing to random angles now and then; otherwise ease back to the default view
-  update(dt, t, { drift = false, spin = false, frozen = false } = {}) {
+  // pilot: { x, y, z, angle, bank } in scene space to ride along in that jet's cockpit
+  update(dt, t, { drift = false, spin = false, frozen = false, pilot = null } = {}) {
     if (!this.#view) return;
     const cam = this.camera;
     if (!frozen) this.#steer(dt, spin);
     this.#shake = Math.max(0, this.#shake - dt * SHAKE_DECAY);
     this.#place(this.#view);
     if (drift) { cam.position.x += Math.sin(t * 0.25) * 60; cam.position.y += Math.cos(t * 0.2) * 30; }
-    if (this.#shake > 0) {
-      cam.position.x += rand(-this.#shake, this.#shake) * 1.5;
-      cam.position.y += rand(-this.#shake, this.#shake) * 1.5;
-    }
+    this.#jolt.set(0, 0, 0);
+    if (this.#shake > 0) this.#jolt.set(rand(-this.#shake, this.#shake) * 1.5, rand(-this.#shake, this.#shake) * 1.5, 0);
+    cam.position.add(this.#jolt);
     cam.lookAt(this.#target);
     cam.updateMatrixWorld();
+    this.#snapshot();
+    this.#fp = pilot ? Math.min(1, this.#fp + dt / FP_BLEND) : Math.max(0, this.#fp - dt / FP_BLEND);
+    if (pilot) this.#aimCockpit(pilot);
+    if (this.#fp > 0) this.#ride(smooth(this.#fp));
+    const near = this.#fp > 0.5 ? FP_NEAR : NEAR;
+    if (cam.near !== near) { cam.near = near; cam.updateProjectionMatrix(); }
+    cam.updateMatrixWorld();
+  }
+
+  // eye, look-at point and up vector inside the pilot's cockpit
+  #aimCockpit({ x, y, z, angle, bank }) {
+    const fx = Math.cos(angle), fy = -Math.sin(angle);   // game y points down, scene y up
+    this.#eye.set(x, y, z + FP_EYE);
+    this.#look.set(x + fx * FP_LOOK, y + fy * FP_LOOK, z + FP_EYE - FP_DIP);
+    // roll with the jet's bank
+    this.#up.set(0, 0, 1).applyAxisAngle(new THREE.Vector3(fx, fy, 0), bank * 0.6);
+  }
+
+  // blend the overview camera (already placed) towards the cockpit by k
+  #ride(k) {
+    const cam = this.camera;
+    const target = this.#target.clone();
+    // a softer shake in the cockpit: the eye is far closer to everything
+    cam.position.copy(this.#overview.position).lerp(this.#eye, k).addScaledVector(this.#jolt, -0.75 * k);
+    cam.up.copy(UP).lerp(this.#up, k).normalize();
+    cam.lookAt(target.lerp(this.#look, k));
+    cam.up.copy(UP);
+  }
+
+  // remember the overview camera so screen pixels still map onto the arena in the cockpit
+  #snapshot() {
+    const o = this.#overview, cam = this.camera;
+    o.position.copy(cam.position);
+    o.quaternion.copy(cam.quaternion);
+    o.projectionMatrix.copy(cam.projectionMatrix);
+    o.projectionMatrixInverse.copy(cam.projectionMatrixInverse);
+    o.updateMatrixWorld();
   }
 
   // screen pixel -> point on the horizontal plane at the given height
   screenToPlane(px, py, height = 0) {
     const { width: w, height: h } = this.viewport;
-    this.#raycaster.setFromCamera(new THREE.Vector2((px / w) * 2 - 1, -(py / h) * 2 + 1), this.camera);
+    this.#raycaster.setFromCamera(new THREE.Vector2((px / w) * 2 - 1, -(py / h) * 2 + 1), this.#overview);
     const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -height);
     return this.#raycaster.ray.intersectPlane(plane, new THREE.Vector3()) || new THREE.Vector3();
   }
