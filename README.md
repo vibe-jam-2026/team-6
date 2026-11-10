@@ -29,7 +29,7 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
 | P2 (blue)   | ↑       | ← / →       | ↓       | Right Shift   |
 
 - **Weapon power-ups:** every jet flies with **Rockets**, the all-rounder. Shot-down enemies sometimes
-  drop a glowing crate (drones rarely, planes more often, zeppelins usually, bosses always) — fly
+  drop a glowing crate (drones rarely, planes more often, zeppelins usually) — fly
   into it to arm its weapon for **10 seconds**, after which you're back on rockets. Grabbing another
   crate swaps the weapon and restarts the clock; dying or the wave ending loses it, and an untouched
   crate blinks and vanishes after 12 seconds. The HUD shows the weapon and a draining timer bar under

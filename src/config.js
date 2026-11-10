@@ -85,7 +85,7 @@ export const WEAPONS = [
 // the extra WEAPONS. Flying into it arms that gun for `duration` seconds,
 // then the jet goes back to rockets. Grabbing another crate replaces the gun
 // and restarts the clock.
-//   dropChance: per enemy size (1 drone, 2 plane, 3 zeppelin); bosses always drop one
+//   dropChance: per enemy size (1 drone, 2 plane, 3 zeppelin); bosses drop nothing
 //   life: seconds an untouched crate floats before it vanishes (it blinks near the end)
 export const POWERUPS = {
   duration: 10,
@@ -93,7 +93,6 @@ export const POWERUPS = {
   radius: 16,
   drift: 30,            // px/s a crate drifts in a random direction
   dropChance: { 1: 0.1, 2: 0.25, 3: 0.6 },
-  bossDrops: 2,
 };
 
 // how homing missiles pick a target: only things within this range and this

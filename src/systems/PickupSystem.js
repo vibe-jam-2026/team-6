@@ -1,6 +1,6 @@
 import { POWERUPS, WEAPONS } from '../config.js';
 import { EVENTS } from '../core/EventBus.js';
-import { circlesOverlap, pick, rand, TAU } from '../core/math.js';
+import { circlesOverlap, pick } from '../core/math.js';
 import { Pickup } from '../world/entities/Pickup.js';
 
 // the weapons a crate can hold: everything but the standard gun
@@ -14,12 +14,6 @@ export class PickupSystem {
     this.world = world;
     bus.on(EVENTS.ASTEROID_DESTROYED, ({ asteroid: a }) => {
       if (Math.random() < (POWERUPS.dropChance[a.size] ?? 0)) this.drop(a.x, a.y);
-    });
-    bus.on(EVENTS.BOSS_DESTROYED, ({ boss }) => {
-      for (let i = 0; i < POWERUPS.bossDrops; i++) {
-        const a = rand(0, TAU), r = boss.radius * 0.5;
-        this.drop(boss.x + Math.cos(a) * r, boss.y + Math.sin(a) * r);
-      }
     });
   }
 
