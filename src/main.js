@@ -1,6 +1,6 @@
 // Composition root: creates every object and wires them together.
 // This is the only file that knows the concrete classes of everything.
-import { PLAYERS, MENU_KEYS, TEST_KEYS, SCENERY } from './config.js';
+import { PLAYERS, MENU_KEYS, TEST_KEYS, SCENERY, WAVES } from './config.js';
 import { EventBus, EVENTS } from './core/EventBus.js';
 import { Viewport } from './core/Viewport.js';
 import { ActivityMonitor } from './core/ActivityMonitor.js';
@@ -115,7 +115,8 @@ const testControls = new TestControls(deps);
 
 // say "nåt coolt" into the microphone to fly straight to the arctic level,
 // "fuska" to make the players invincible, "engage" to hold every human
-// pilot's thrusters on and "stop" to hand them back to the keys
+// pilot's thrusters on, "stop" to hand them back to the keys, "cockpit" to
+// switch to the cockpit view and "boss" to jump to the final boss wave
 const setAutoThrust = on => {
   if (states.currentName !== 'playing') return;
   if (controllers.every(c => c.autoThrust === on)) return;
@@ -130,7 +131,10 @@ const voice = new VoiceCommands({ lang: 'sv-SE' })
   .on(/n[åoa]t+\s*coo?l+t/, () => {
     const arcticWave = SCENERY.findIndex(s => s.key === 'arctic') + 1;
     testControls.goToWave(arcticWave);   // its wave banner names the arctic
-  });
+  })
+  // the Swedish recogniser may hear "kockpit" or split it in two
+  .on(/\b[ck]o[ck]{1,2}\s?pit/, () => setView('cockpit'))
+  .on(/\b(boss|bås|bos)\b/, () => testControls.goToWave(WAVES.final));
 input.onKeyDown(() => voice.start());
 mouse.onButtonDown(() => voice.start());
 
@@ -157,6 +161,13 @@ const lobbyPointer = new LobbyPointer({ input, states, isTouch: () => touch.enab
 overlay.context.pointer = lobbyPointer;
 overlay.context.cameraView = () => worldRenderer.view;
 
+// switches the camera to `view` and says which view is on
+function setView(view) {
+  worldRenderer.view = view;
+  if (states.currentName !== 'lobby') session.announce({ overview: 'OVERVIEW', cockpit: 'COCKPIT VIEW', chase: 'CHASE VIEW' }[view], 1.2);
+  bus.emit(EVENTS.MENU_ACTION);
+}
+
 // --- run ---
 states.change('lobby');
 new GameLoop({
@@ -167,11 +178,7 @@ new GameLoop({
       states.change('lobby');
     } else {
       if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
-      if (input.wasPressed(MENU_KEYS.firstPerson)) {
-        const view = worldRenderer.cycleView();
-        if (states.currentName !== 'lobby') session.announce({ overview: 'OVERVIEW', cockpit: 'COCKPIT VIEW', chase: 'CHASE VIEW' }[view], 1.2);
-        bus.emit(EVENTS.MENU_ACTION);
-      }
+      if (input.wasPressed(MENU_KEYS.firstPerson)) setView(worldRenderer.cycleView());
       testControls.update();
       states.update(dt);
     }
