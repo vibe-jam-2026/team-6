@@ -177,7 +177,7 @@ export class Mothership {
 
   #bullet(x, y, angle, speed, kind) {
     return new Bullet(this, x, y, Math.cos(angle) * speed, Math.sin(angle) * speed,
-      { life: kind.life, radius: kind.radius, hostile: true });
+      { life: kind.life, radius: kind.radius, hostile: true, hp: kind.hp ?? 1 });
   }
 
   #nearestShip(world) {

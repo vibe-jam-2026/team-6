@@ -49,7 +49,8 @@ export class CollisionSystem {
     }
   }
 
-  // A jet's shot and an enemy shot (planes, bosses) that meet cancel each other out.
+  // A jet's shot and an enemy shot (planes, bosses) that meet cancel each other out,
+  // except the Mothership's heavy shells, which soak up several shots first.
   // Both move fast, so test where they were during the whole step, not just now.
   #bulletsVsBullets(world, dt) {
     const enemyShots = world.bullets.filter(b => b.hostile && !b.dead);
@@ -59,8 +60,8 @@ export class CollisionSystem {
       const hit = enemyShots.find(e => !e.dead && sweptOverlap(shot, e, dt));
       if (!hit) continue;
       shot.expire();
-      hit.expire();
-      this.bus.emit(EVENTS.BULLETS_CLASHED, { shot, enemyShot: hit, x: (shot.x + hit.x) / 2, y: (shot.y + hit.y) / 2 });
+      const destroyed = hit.takeHit(shot.weapon?.damage ?? 1);
+      this.bus.emit(EVENTS.BULLETS_CLASHED, { shot, enemyShot: hit, x: (shot.x + hit.x) / 2, y: (shot.y + hit.y) / 2, destroyed });
     }
   }
 

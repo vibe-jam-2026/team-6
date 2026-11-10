@@ -15,7 +15,12 @@ export class EffectsDirector {
       particles.burst(a.x, a.y, a.size === 1 ? DRONE_SPARKS : PLANE_DEBRIS, 8 + a.size * 6, 90 + a.size * 30, 0.9));
     bus.on(EVENTS.SHIP_DESTROYED, ({ ship }) => this.#shipExplosion(ship));
     bus.on(EVENTS.SELF_DESTRUCT, e => this.#selfDestruct(e));
-    bus.on(EVENTS.BULLETS_CLASHED, ({ x, y, enemyShot }) => particles.burst(x, y, enemyShot.owner?.color ?? FLAME, 8, 120, 0.3));
+    bus.on(EVENTS.BULLETS_CLASHED, ({ x, y, enemyShot: e, destroyed }) => {
+      const color = e.owner?.color ?? FLAME;
+      if (!e.armoured) particles.burst(x, y, color, 8, 120, 0.3);
+      else if (!destroyed) { particles.burst(x, y, '#ffffff', 10, 150, 0.3); particles.burst(e.x, e.y, color, 8, 90, 0.5); }
+      else { particles.burst(e.x, e.y, '#ffffff', 24, 220, 0.5); particles.burst(e.x, e.y, color, 30, 180, 0.8); }
+    });
     bus.on(EVENTS.SHIELD_HIT, ({ ship: s }) => particles.burst(s.x, s.y, SHIELD, 28, 200, 0.6));
     bus.on(EVENTS.BOSS_HIT, ({ boss, x, y }) => particles.burst(x, y, boss.color, 6, 140, 0.4));
     bus.on(EVENTS.BOSS_DESTROYED, ({ boss }) => this.#bossExplosion(boss));
