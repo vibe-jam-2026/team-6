@@ -139,24 +139,28 @@ export class Overlay2D {
     ctx.strokeRect(left + 0.5, y + 12.5, w - 1, h - 1);
   }
 
-  // The power-up weapon a jet holds: its name boxed in its colour with a bar
-  // underneath draining over the seconds left (left: 1..0). Starts at x for
-  // 'left' or ends at x for 'right'. pulse (0..1) brightens it just after a pickup;
-  // in the last 30 % it blinks.
-  powerupTag(weapon, left, x, y, align, pulse = 0) {
+  // A power-up weapon a jet holds: its name and seconds left boxed in its
+  // colour, with a bar underneath draining over the last `full` seconds.
+  // Starts at x for 'left' or ends at x for 'right'; returns its width so tags
+  // can sit in a row. pulse (0..1) brightens it just after a pickup; it blinks
+  // in its last 30 %.
+  powerupTag(weapon, seconds, full, x, y, align, pulse = 0) {
     const ctx = this.ctx, size = 11, padX = 7, h = 19;
+    const label = `${weapon.name} ${Math.ceil(seconds)}`;
+    const left = seconds / full;
     ctx.font = `${size}px ${FONT}`;
-    const w = ctx.measureText(weapon.name).width + padX * 2;
+    const w = ctx.measureText(label).width + padX * 2;
     const x0 = align === 'right' ? x - w : x;
     const blink = left < 0.3 && Math.sin(performance.now() / (40 + left * 300)) < 0;
     this.withAlpha(blink ? 0.45 : 1, () => {
       this.card(x0, y - h / 2, w, h, {
         fill: `rgba(4,6,12,${0.55 + pulse * 0.3})`, stroke: weapon.color, lineWidth: 1.5 + pulse * 1.5, glowColor: weapon.color,
       });
-      this.text(weapon.name, x0 + w / 2, y - 1, size, weapon.color, 'center', pulse > 0 ? weapon.color : null);
+      this.text(label, x0 + w / 2, y - 1, size, weapon.color, 'center', pulse > 0 ? weapon.color : null);
       ctx.fillStyle = weapon.color;
       ctx.fillRect(x0 + 3, y + h / 2 - 4, (w - 6) * Math.max(0, Math.min(1, left)), 2);
     });
+    return w;
   }
 
   // small ship outline, used as a lives icon

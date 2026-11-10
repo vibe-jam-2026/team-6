@@ -34,42 +34,43 @@ export class Ship {
     this.nextLifeAt = RULES.extraLifeEvery;
     this.respawnTimer = 0.2 + index * 0.05;
     this.invulnerable = 0;
-    this.cooldown = 0;
+    this.cooldowns = new Map();    // weapon id -> seconds until it can fire again
     this.thrusting = false;
     this.wantsToFire = false;
     this.autoFire = !controller.isComputer; // pilots' guns run on their own; the fire key toggles them
     this.stats = baseStats();
     this.upgrades = new Map();     // upgrade id -> level
     this.shieldCharges = 0;
-    this.powerup = null;           // a weapon picked up from a crate, while it lasts
-    this.powerupTime = 0;          // seconds left on it
+    this.powerups = [];            // [{ weapon, time }]: weapons picked up from crates, in pickup order
     this.rollTime = 0;             // seconds left in a barrel roll
     this.rollDir = 0;              // -1 rolling left, 1 right
     this.rollCooldown = 0;
     this.justRolled = false;       // a roll started this step (for the sound)
   }
 
-  // the standard gun, or the power-up weapon while one is armed
-  get weapon() { return this.powerup ?? WEAPONS[0]; }
+  // the guns that fire: every power-up held, or the standard gun when there are none
+  get weapons() { return this.powerups.length ? this.powerups.map(p => p.weapon) : [WEAPONS[0]]; }
+  // the newest gun (the computer pilot aims for it)
+  get weapon() { return this.weapons.at(-1); }
 
-  // arms a power-up weapon for `duration` seconds (replacing any current one)
-  grantPowerup(weapon, duration) {
-    this.powerup = weapon;
-    this.powerupTime = duration;
+  // Arms a power-up weapon for `duration` seconds alongside any others held;
+  // one already held gets `duration` more, up to `maxTime`.
+  grantPowerup(weapon, duration, maxTime = Infinity) {
+    const held = this.powerups.find(p => p.weapon === weapon);
+    if (held) held.time = Math.min(maxTime, held.time + duration);
+    else this.powerups.push({ weapon, time: Math.min(maxTime, duration) });
   }
 
-  clearPowerup() {
-    this.powerup = null;
-    this.powerupTime = 0;
+  clearPowerups() {
+    this.powerups = [];
   }
 
-  // Counts the power-up down; true on the step it runs out.
-  tickPowerup(dt) {
-    if (!this.powerup) return false;
-    this.powerupTime -= dt;
-    if (this.powerupTime > 0) return false;
-    this.clearPowerup();
-    return true;
+  // Counts every power-up down; returns the weapons that ran out this step.
+  tickPowerups(dt) {
+    for (const p of this.powerups) p.time -= dt;
+    const expired = this.powerups.filter(p => p.time <= 0).map(p => p.weapon);
+    if (expired.length) this.powerups = this.powerups.filter(p => p.time > 0);
+    return expired;
   }
 
   get name() { return this.player.name + (this.controller.isComputer ? ' CPU' : ''); }
@@ -95,7 +96,7 @@ export class Ship {
   // called as each wave begins: the deflector recharges
   prepareForWave() {
     this.shieldCharges = this.stats.shieldCapacity;
-    this.clearPowerup();
+    this.clearPowerups();
   }
 
   // The deflector soaks up a hit if it has charge left; true if it did.
@@ -114,12 +115,13 @@ export class Ship {
   }
 
   spawnAt({ x, y }) {
-    Object.assign(this, { x, y, vx: 0, vy: 0, angle: FACING_UP, alive: true, invulnerable: RULES.invulnTime, cooldown: 0, rollTime: 0, rollCooldown: 0 });
+    Object.assign(this, { x, y, vx: 0, vy: 0, angle: FACING_UP, alive: true, invulnerable: RULES.invulnTime, rollTime: 0, rollCooldown: 0 });
+    this.cooldowns.clear();
   }
 
   destroy() {
     this.alive = false;
-    this.clearPowerup();
+    this.clearPowerups();
     this.lives--;
     this.respawnTimer = RULES.respawnDelay;
   }
@@ -127,7 +129,7 @@ export class Ship {
   // out of the match for good, whatever lives were left
   eliminate() {
     this.alive = false;
-    this.clearPowerup();
+    this.clearPowerups();
     this.lives = 0;
   }
 
@@ -166,15 +168,22 @@ export class Ship {
     this.y += this.vy * dt;
     bounds.wrap(this);
     this.invulnerable = Math.max(0, this.invulnerable - dt);
-    this.cooldown -= dt;
+    for (const [id, t] of this.cooldowns) this.cooldowns.set(id, t - dt);
   }
 
-  // Returns the bullets fired this step (several with spread shot), or [] if
-  // the trigger is up, the gun is cooling down or too many shots are in the air.
-  tryFire(bulletsInFlight) {
-    const st = this.stats, w = this.weapon;
-    if (!this.wantsToFire || this.cooldown > 0 || bulletsInFlight >= st.maxBullets + w.magazine) return [];
-    this.cooldown = st.fireCooldown * w.cooldown;
+  // Returns the bullets fired this step by every gun that is ready (several
+  // with spread shot or stacked power-ups), or [] if the trigger is up.
+  // inFlight(weapon) says how many of that gun's shots are in the air; each
+  // gun cools down and is capped on its own.
+  tryFire(inFlight = () => 0) {
+    if (!this.wantsToFire) return [];
+    return this.weapons.flatMap(w => this.#fireWeapon(w, inFlight(w)));
+  }
+
+  #fireWeapon(w, bulletsInFlight) {
+    const st = this.stats;
+    if ((this.cooldowns.get(w.id) ?? 0) > 0 || bulletsInFlight >= st.maxBullets + w.magazine) return [];
+    this.cooldowns.set(w.id, st.fireCooldown * w.cooldown);
     const shots = st.shots + w.shots, speed = st.bulletSpeed * w.speed, spread = SPREAD_ANGLE * w.spread;
     const bullets = [];
     for (let k = 0; k < shots; k++) {
