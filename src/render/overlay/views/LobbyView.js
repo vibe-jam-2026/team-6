@@ -47,8 +47,10 @@ export class LobbyView {
     if (!tap) {
       const owner = session.mouseOwner === null ? 'nobody (keyboard only)' : PLAYERS[session.mouseOwner].name;
       const cpu = PLAYERS[COMPUTER_PLAYER];
-      o.text(`V  ${cpu.name} flown by: ${session.computer[COMPUTER_PLAYER] ? 'the computer' : 'a player'}`, W / 2, by + 96, 13,
+      o.text(`V  ${cpu.name} flown by: ${session.computer[COMPUTER_PLAYER] ? 'the computer' : 'a player'}`, W / 2 - 140, by + 96, 13,
         session.computer[COMPUTER_PLAYER] ? cpu.color : '#9aa1b2', 'center');
+      const skill = session.cpuSkill;
+      o.text(`L  computer skill: ${skill.name}`, W / 2 + 150, by + 96, 13, skill.color, 'center');
       o.text(`C  mouse control: ${owner}`, W / 2, by + 114, 13,
         session.mouseOwner === null ? '#9aa1b2' : PLAYERS[session.mouseOwner].color, 'center');
       if (session.humanCount === 1) o.text('flying solo: SPACE fires too', W / 2, by + 132, 11, '#7d8496', 'center');

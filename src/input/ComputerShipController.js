@@ -7,9 +7,9 @@
 //   4. picks a weapon for the range: scatter up close, blaster, then rockets.
 // Between waves it spends its money in the shop (see pickPurchase).
 
-const TURN_GAIN = 5;          // turn input per radian off the wanted heading
-const LOOKAHEAD = 0.9;        // s: how far ahead to look for collisions
-const SAFETY_MARGIN = 26;     // px of clearance it wants around threats
+// skill-dependent numbers (reaction, aim, dodging) come from CPU_SKILLS via getSkill()
+const ACE = { think: 1, aimError: 0, lookahead: 0.9, margin: 26, turnGain: 5, roll: 3 };
+const AIM_DRIFT_FRAMES = 50;  // how often its aim error wanders to a new value
 const CRUISE_SPEED = 230;     // it only thrusts towards targets below this speed
 const SHIP_PENALTY = 120;     // px: prefers rocks a little over enemy jets
 // how much the computer likes each upgrade when shopping (default 1)
@@ -28,19 +28,31 @@ export class ComputerShipController {
   #wantedWeapon = null;
   #weaponFrames = 0;
   #ship = null;
+  #frame = 0;
+  #held = null;       // the last decision, repeated until it thinks again
+  #aimOffset = 0;
 
-  // getMode() returns the current game mode (for friendly fire)
-  constructor(world, getMode) {
+  // getMode() returns the current game mode (for friendly fire),
+  // getSkill() one of CPU_SKILLS (how well it flies)
+  constructor(world, getMode, getSkill = () => ACE) {
     this.world = world;
     this.getMode = getMode;
+    this.getSkill = getSkill;
   }
+
+  get skill() { return this.getSkill() ?? ACE; }
 
   read(ship) {
     if (!ship) return { thrust: false, turn: 0, fire: false };
     this.#ship = ship;
+    const skill = this.skill;
+    this.#frame++;
+    if (this.#frame % AIM_DRIFT_FRAMES === 0) this.#aimOffset = (Math.random() * 2 - 1) * skill.aimError;
+    // a slower pilot only thinks every few frames and holds its input in between
+    if (this.#held && this.#frame % skill.think !== 0) return { ...this.#held, roll: 0 };
     const threat = ship.invulnerable > 0.4 ? null : this.#mostUrgentThreat(ship);
-    if (threat) return this.#evade(ship, threat);
-    return this.#attack(ship);
+    this.#held = threat ? this.#evade(ship, threat) : this.#attack(ship);
+    return this.#held;
   }
 
   // --- combat ---
@@ -49,7 +61,7 @@ export class ComputerShipController {
     const target = this.#pickTarget(ship);
     if (!target) return { thrust: false, turn: 0, fire: false };
     const aim = this.#lead(ship, target);
-    const diff = wrapAngle(Math.atan2(aim.y, aim.x) - ship.angle);
+    const diff = wrapAngle(Math.atan2(aim.y, aim.x) + this.#aimOffset - ship.angle);
     const dist = Math.hypot(aim.x, aim.y);
     this.#chooseWeapon(ship, dist);
     const range = this.#range(ship, ship.weapon);
@@ -57,7 +69,7 @@ export class ComputerShipController {
     const speed = Math.hypot(ship.vx, ship.vy);
     return {
       thrust: dist > range * 0.65 && Math.abs(diff) < 0.35 && speed < CRUISE_SPEED,
-      turn: clamp(diff * TURN_GAIN),
+      turn: clamp(diff * this.skill.turnGain),
       fire: Math.abs(diff) < tolerance && dist < range * 0.95,
     };
   }
@@ -127,9 +139,9 @@ export class ComputerShipController {
       const vx = (o.vx ?? 0) - ship.vx, vy = (o.vy ?? 0) - ship.vy;
       const v2 = vx * vx + vy * vy;
       // time and distance of closest approach if nobody changes course
-      const tca = v2 > 1e-6 ? Math.max(0, Math.min(LOOKAHEAD, -(p.x * vx + p.y * vy) / v2)) : 0;
+      const tca = v2 > 1e-6 ? Math.max(0, Math.min(this.skill.lookahead, -(p.x * vx + p.y * vy) / v2)) : 0;
       const cx = p.x + vx * tca, cy = p.y + vy * tca;
-      const clearance = Math.hypot(cx, cy) - o.radius - ship.radius - SAFETY_MARGIN;
+      const clearance = Math.hypot(cx, cy) - o.radius - ship.radius - this.skill.margin;
       if (clearance < 0 && (!worst || tca < worst.tca)) worst = { cx, cy, vx, vy, tca };
     }
     return worst;
@@ -142,7 +154,7 @@ export class ComputerShipController {
     if (Math.hypot(ax, ay) < 1) { ax = -vy; ay = vx; } // dead centre: go sideways
     const diff = wrapAngle(Math.atan2(ay, ax) - ship.angle);
     const attack = this.#attack(ship);
-    return { thrust: Math.abs(diff) < 1.3, turn: clamp(diff * TURN_GAIN), fire: attack.fire };
+    return { thrust: Math.abs(diff) < 1.3, turn: clamp(diff * this.skill.turnGain), fire: attack.fire };
   }
 
   // offset from the ship to something, the short way round the wrapping arena

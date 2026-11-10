@@ -1,4 +1,4 @@
-import { DEFAULT_JOINED, PLAYERS, sceneryForWave } from '../config.js';
+import { DEFAULT_JOINED, PLAYERS, sceneryForWave, CPU_SKILLS, DEFAULT_CPU_SKILL } from '../config.js';
 import { EVENTS } from '../core/EventBus.js';
 import { GAME_MODES } from '../modes/index.js';
 import { Ship } from '../world/entities/Ship.js';
@@ -16,6 +16,7 @@ export class Session {
   mouseOwner = null;  // index of the player flying with the mouse, or null
   computer = [];      // computer[i]: player i is flown by the computer
   demo = false;       // demo mode: the computer flies every jet
+  #cpuSkill = DEFAULT_CPU_SKILL; // index into CPU_SKILLS
   #beforeDemo = null; // the lobby setup to put back when the demo ends
   scoreEntry = null;  // { ship, initials } while a pilot types initials for the high-score table
   newHighScores = []; // entries added on this results screen, to highlight them
@@ -69,6 +70,9 @@ export class Session {
     this.computer = this.#beforeDemo.computer;
     this.#beforeDemo = null;
   }
+
+  get cpuSkill() { return CPU_SKILLS[this.#cpuSkill]; }
+  nextCpuSkill() { this.#cpuSkill = (this.#cpuSkill + 1) % CPU_SKILLS.length; }
 
   toggleInvincible() { this.invincible = !this.invincible; }
   // nobody -> P1 -> P2 -> ... -> nobody

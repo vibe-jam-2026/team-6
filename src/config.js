@@ -10,6 +10,19 @@ export const PLAYERS = [
 // the player the lobby's computer key hands to the computer (P2)
 export const COMPUTER_PLAYER = 1;
 
+// How well the computer flies, picked in the lobby (it also flies the demo).
+//   think: frames between decisions (it holds its last input in between)
+//   aimError: radians its aim wanders either side of the perfect lead
+//   lookahead / margin: how far ahead (s) and how wide (px) it watches for collisions
+//   turnGain: how hard it steers per radian off course
+//   roll: chance per second it barrel-rolls out of a hit it can't otherwise dodge
+export const CPU_SKILLS = [
+  { name: 'EASY', color: '#9dff5c', think: 14, aimError: 0.22, lookahead: 0.35, margin: 6, turnGain: 2.6, roll: 0 },
+  { name: 'NORMAL', color: '#ffd23f', think: 5, aimError: 0.07, lookahead: 0.6, margin: 16, turnGain: 4, roll: 0.5 },
+  { name: 'ACE', color: '#ff5d73', think: 1, aimError: 0, lookahead: 0.9, margin: 26, turnGain: 5, roll: 3 },
+];
+export const DEFAULT_CPU_SKILL = 1;
+
 // card hints for a computer-flown jet
 export const COMPUTER_LABELS = ['flown by the computer', 'V to hand it back'];
 
@@ -25,6 +38,7 @@ export const MENU_KEYS = {
   mouse: 'KeyC',     // lobby: hand the mouse to nobody / P1 / P2
   computer: 'KeyV',  // lobby: let the computer fly P2 (or hand it back)
   demo: 'KeyX',      // lobby: watch a demo where the computer flies both jets
+  cpuSkill: 'KeyL',  // lobby: cycle the computer pilot's skill
   exitDemo: 'Escape', // the only key that ends a demo
 };
 

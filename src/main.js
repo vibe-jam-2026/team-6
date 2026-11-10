@@ -74,7 +74,7 @@ const screenToWorld = (px, py) => {
 const mouseController = new MouseShipController(mouse, screenToWorld);
 const controllers = PLAYERS.map(p => new PlayerController(new KeyboardShipController(input, p.keys), mouseController));
 const world = new World(viewport, bus);
-const computers = PLAYERS.map(() => new ComputerShipController(world, () => session.mode));
+const computers = PLAYERS.map(() => new ComputerShipController(world, () => session.mode, () => session.cpuSkill));
 const session = new Session(bus, controllers, undefined, computers);
 // a phone has one pilot: start the lobby with only P1 joined
 if (TouchControls.likelyTouch()) session.joined = session.joined.map((_, i) => i === 0);
