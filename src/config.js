@@ -26,7 +26,7 @@ export const MENU_KEYS = {
   computer: 'KeyV',  // lobby: let the computer fly P2 (or hand it back)
   demo: 'KeyX',      // lobby: watch a demo where the computer flies both jets
   exitDemo: 'Escape', // the only key that ends a demo
-  firstPerson: 'KeyF', // toggle the cockpit view from P1's jet (any time)
+  firstPerson: 'KeyF', // cycle the camera: overview → P1's cockpit → chase behind P1 (any time)
 };
 
 // Demo mode: the computer flies every jet. It starts from the lobby with
