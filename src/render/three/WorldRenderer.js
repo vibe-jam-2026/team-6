@@ -7,6 +7,7 @@ import { SCENERY, sceneryForWave } from '../../config.js';
 import { EVENTS } from '../../core/EventBus.js';
 import { createGlowDotTexture } from './textures.js';
 import { EntityViewSync } from './EntityViewSync.js';
+import { WeatherView } from './WeatherView.js';
 import { GroundTargetView } from './views/GroundTargetView.js';
 import { ShipView } from './views/ShipView.js';
 import { AsteroidView } from './views/AsteroidView.js';
@@ -37,6 +38,7 @@ export class WorldRenderer {
     this.groundViews = new EntityViewSync(scene, g => new GroundTargetView(g, (x, y) => this.scenery.groundAt(x, y)));
     this.bulletViews = new EntityViewSync(scene, b => new BulletView(b));
     this.bossViews = new EntityViewSync(scene, b => b.kind === 'mothership' ? new MothershipView(b) : new BossView(b));
+    this.weather = new WeatherView(scene, dot);
     this.particleView = new ParticleView(dot);
     scene.add(this.particleView.object);
     this.lobby = new LobbyShowcase(scene, this.cameraRig);
@@ -48,6 +50,7 @@ export class WorldRenderer {
       this.lighting.fit(vp);
       this.cameraRig.fit(vp);
       this.scenery.fit(vp, this.stage.camera.position.length());
+      this.weather.fit(vp);
     });
   }
 
@@ -58,6 +61,8 @@ export class WorldRenderer {
     const inLobby = this.states.currentName === 'lobby';
     this.sceneryKey = inLobby ? SCENERY[0].key : sceneryForWave(this.wave).key;
     this.scenery.show(this.sceneryKey);
+    this.weather.show(this.sceneryKey);
+    this.weather.update(dt);
     const frame = { t, bounds: this.viewport, session: this.session };
 
     this.asteroidViews.sync(this.world.asteroids, frame);
