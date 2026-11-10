@@ -1,7 +1,6 @@
 import { circlesOverlap } from '../core/math.js';
 import { EVENTS } from '../core/EventBus.js';
-
-const SHOT_CLASH_PADDING = 3; // px added to the two radii so tiny shots can still meet
+import { SHOT_CLASH_PADDING } from '../config.js';
 
 // True if two moving circles came within reach of each other at any point
 // during the last dt seconds (their positions now are the end of that step).
