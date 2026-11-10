@@ -16,7 +16,8 @@ export class ShipView {
     if (!ship.alive) return;
     this.object.position.set(toSceneX(bounds, ship.x), toSceneY(bounds, ship.y), 4 + Math.sin(t * 3 + ship.index) * 2);
     this.object.rotation.set(0, 0, -ship.angle);
-    m.body.rotation.x = ship.bank;
+    // a barrel roll spins the jet a full turn around its nose
+    m.body.rotation.x = ship.bank + ship.rollProgress * Math.PI * 2 * ship.rollDir;
     m.flame.visible = ship.thrusting;
     if (ship.thrusting) m.flame.scale.set(14 + Math.random() * 12, 1 + Math.random() * 0.2, 1);
     const shielded = ship.invulnerable > 0 || session.invincible;

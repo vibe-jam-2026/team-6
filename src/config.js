@@ -72,6 +72,12 @@ export const SHIP = {
   muzzleOffset: 15,
 };
 
+// Barrel roll: double-tap a turn key to flip sideways out of trouble. The jet
+// hops `distance` px to that side over `duration` seconds and can't be hit
+// while it rolls; then it has to wait `cooldown` seconds to roll again.
+//   doubleTap: max frames between the two taps
+export const ROLL = { duration: 0.42, distance: 80, cooldown: 1.3, doubleTap: 14 };
+
 export const BULLET = { speed: 560, life: 0.95, radius: 2 };
 export const SPREAD_ANGLE = 0.14; // radians between bullets of a spread shot
 

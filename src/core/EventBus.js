@@ -19,6 +19,7 @@ export class EventBus {
 export const EVENTS = {
   SHOT_FIRED: 'shotFired',             // { ship }
   WEAPON_SWITCHED: 'weaponSwitched',   // { ship, weapon }
+  SHIP_ROLLED: 'shipRolled',           // { ship, dir } a barrel roll started
   ASTEROID_DESTROYED: 'asteroidDestroyed', // { asteroid, by, inBlast }
   SHIP_DESTROYED: 'shipDestroyed',     // { ship, by, inBlast }
   SHIPS_BUMPED: 'shipsBumped',         // { a, b }

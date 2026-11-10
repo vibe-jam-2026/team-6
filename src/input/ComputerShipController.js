@@ -149,12 +149,21 @@ export class ComputerShipController {
 
   // Turn away from where the threat will be and burn; keep shooting if
   // something happens to be in front.
-  #evade(ship, { cx, cy, vx, vy }) {
+  #evade(ship, { cx, cy, vx, vy, tca }) {
     let ax = -cx, ay = -cy;
     if (Math.hypot(ax, ay) < 1) { ax = -vy; ay = vx; } // dead centre: go sideways
     const diff = wrapAngle(Math.atan2(ay, ax) - ship.angle);
     const attack = this.#attack(ship);
-    return { thrust: Math.abs(diff) < 1.3, turn: clamp(diff * this.skill.turnGain), fire: attack.fire };
+    return { thrust: Math.abs(diff) < 1.3, turn: clamp(diff * this.skill.turnGain), fire: attack.fire, roll: this.#rollAway(ship, cx, cy, tca) };
+  }
+
+  // About to be hit with no time to turn: sometimes (more often for better
+  // pilots) barrel-roll to the side away from the threat.
+  #rollAway(ship, cx, cy, tca) {
+    if (tca > 0.5 || ship.rolling || ship.rollCooldown > 0) return 0;
+    if (Math.random() > this.skill.roll * this.skill.think / 60) return 0;
+    const cross = Math.cos(ship.angle) * cy - Math.sin(ship.angle) * cx; // > 0: threat on the right
+    return cross > 0 ? -1 : 1;
   }
 
   // offset from the ship to something, the short way round the wrapping arena

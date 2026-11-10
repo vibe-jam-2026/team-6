@@ -14,6 +14,7 @@ export class ShipSystem {
         continue;
       }
       ship.update(dt, world.bounds);
+      if (ship.justRolled) this.bus.emit(EVENTS.SHIP_ROLLED, { ship, dir: ship.rollDir });
       if (ship.cycleWeapon(ship.controller.weaponStep?.() ?? 0)) {
         this.bus.emit(EVENTS.WEAPON_SWITCHED, { ship, weapon: ship.weapon });
       }

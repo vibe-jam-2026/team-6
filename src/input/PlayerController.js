@@ -14,7 +14,7 @@ export class PlayerController {
     const k = this.keyboard.read(ship);
     if (!this.useMouse) return k;
     const m = this.mouse.read(ship);
-    return { thrust: k.thrust || m.thrust, turn: k.turn || m.turn, fire: k.fire || m.fire };
+    return { thrust: k.thrust || m.thrust, turn: k.turn || m.turn, fire: k.fire || m.fire, roll: k.roll };
   }
 
   stepPressed() {
