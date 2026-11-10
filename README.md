@@ -20,7 +20,9 @@ python3 -m http.server 8000
 
 then open http://localhost:8000.
 
-| Player | Thrust | Turn | Fire | Switch weapon | Self-destruct |
+Jets fire **continuously** — just aim. The fire key joins the lobby and buys in the shop.
+
+| Player | Thrust | Turn | Join / buy | Switch weapon | Self-destruct |
 |--------|--------|------|------|---------------|---------------|
 | P1 (red)    | W       | A / D       | S       | Q             | E             |
 | P2 (blue)   | ↑       | ← / →       | ↓       | /             | Right Shift   |
@@ -31,15 +33,15 @@ then open http://localhost:8000.
   shotgun blast and **Homing** fires slow, heavy missiles that lock on to the nearest enemy
   ahead (in free-for-all also other jets) and take 3 hits off the boss. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 
-- **Flying solo:** with only one pilot joined, **Space** fires too (and buys in the shop between waves).
+- **Flying solo:** with only one pilot joined, **Space** also buys in the shop between waves.
 - **Mouse control:** in the lobby, **C** hands the mouse to nobody → P1 → P2. That pilot's jet turns its
-  nose towards the pointer, the **left button** fires, the **right button** thrusts, the **wheel**
+  nose towards the pointer, the **right button** thrusts, the **wheel**
   switches weapon and the **middle button** self-destructs; between waves the **wheel** browses the shop and a **left click** buys.
   Their keys keep working too, so e.g. P1 can fly with WASD while P2 uses the mouse.
 - **Computer pilot:** in the lobby, **V** hands P2 to the computer (and joins it), and **V** again
   takes it back. It dodges rocks, the boss and its bullets, leads its shots, hunts the nearest
   target (including you in free-for-all), switches to the weapon that suits the range and spends its own money in the shop between waves. Its HUD
-  name reads *P2 CPU*. With P1 as the only human, **Space** fires too.
+  name reads *P2 CPU*. With P1 as the only human, **Space** also buys in the shop.
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse,
   **V** lets the computer fly P2, **X** starts a demo, **Enter** starts.
 - **Demo mode:** **X** in the lobby (or 30 seconds without touching anything there) starts a match
@@ -129,7 +131,7 @@ From the browser console, `game.addMoney(500)` gives every pilot $500 and
 Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
-touch. ◀ ▶ turn, ▲ thrusts, ● fires, ⇄ switches weapon and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
+touch. ◀ ▶ turn, ▲ thrusts, ⇄ switches weapon and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
 to join or leave, tap P2's card to add or remove a computer pilot, tap the mode line to switch mode and the start line to start. Between
 waves, ◀ ▶ browse the shop and ● buys. In
 game there are pause and sound buttons at the bottom; on the game-over screen, tap

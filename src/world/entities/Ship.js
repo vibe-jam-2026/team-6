@@ -113,7 +113,7 @@ export class Ship {
     const st = this.stats;
     this.angle += c.turn * st.turnSpeed * dt;
     this.thrusting = c.thrust;
-    this.wantsToFire = c.fire;
+    this.wantsToFire = true; // guns fire continuously; the fire key only drives the menus
     if (c.thrust) {
       this.vx += Math.cos(this.angle) * st.thrust * dt;
       this.vy += Math.sin(this.angle) * st.thrust * dt;
@@ -130,7 +130,7 @@ export class Ship {
   }
 
   // Returns the bullets fired this step (several with spread shot), or [] if
-  // the trigger is up, the gun is cooling down or too many shots are in the air.
+  // the gun is cooling down or too many shots are in the air.
   tryFire(bulletsInFlight) {
     const st = this.stats, w = this.weapon;
     if (!this.wantsToFire || this.cooldown > 0 || bulletsInFlight >= st.maxBullets + w.magazine) return [];
