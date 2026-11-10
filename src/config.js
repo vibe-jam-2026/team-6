@@ -118,6 +118,21 @@ export const ENEMY_TYPES = {
     launchSpread: 0.6 },       // radians either side of the nearest jet it aims drones
 };
 
+// Anti-aircraft guns on the ground below the arena, from wave 2 on (timed waves
+// only). They swing towards the nearest jet and fire leading flak shots up at
+// it; jets can't hit them by flying into them, only by shooting them.
+//   count(wave): guns placed when the wave starts
+export const GROUND = {
+  count: wave => (wave < 2 ? 0 : Math.min(4, Math.floor((wave + 1) / 2))),
+  radius: 20, hp: 3, score: 150, bounty: 20, color: '#ff4a3a',
+  fireEvery: [2.6, 4.2],     // seconds between shots
+  range: 480,                // only fires at jets this close
+  bullet: { speed: 240, life: 2.4, radius: 4 },
+  edgeMargin: 90,            // px kept clear of the arena edges
+  spacing: 170,              // px between guns
+  shipClearance: 180,        // px from any jet when placed
+};
+
 // how likely each type is when a wave spawns an enemy: [drone, plane, zeppelin] weights,
 // sliding from the first wave to the last timed wave
 export const ENEMY_MIX = { first: [6, 3, 1], last: [3, 4, 2] };

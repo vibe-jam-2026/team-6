@@ -76,7 +76,7 @@ export class ComputerShipController {
 
   #pickTarget(ship) {
     const { world } = this;
-    const candidates = [...world.asteroids];
+    const candidates = [...world.asteroids, ...world.groundTargets];
     if (world.boss?.vulnerable) candidates.push(world.boss);
     if (this.getMode().friendlyFire) candidates.push(...world.ships.filter(s => s !== ship && s.alive));
     let best = null, bestScore = Infinity;

@@ -39,6 +39,7 @@ export function createWater(w, h, level, color) {
     new THREE.MeshStandardMaterial({ color, roughness: 0.7, metalness: 0 }));
   mesh.position.z = level;
   mesh.receiveShadow = true;
+  mesh.userData.waterLevel = level; // so props can float on it
   return mesh;
 }
 

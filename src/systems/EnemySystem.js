@@ -22,6 +22,13 @@ export class EnemySystem {
         this.bus.emit(EVENTS.DRONE_LAUNCHED, { from: enemy, drone });
       }
     }
+    for (const gun of world.groundTargets) {
+      const shots = gun.think(dt, world);
+      if (shots.length) {
+        world.bullets.push(...shots);
+        this.bus.emit(EVENTS.ENEMY_FIRED, { enemy: gun });
+      }
+    }
     world.updateAsteroids(dt);
   }
 }

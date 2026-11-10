@@ -7,6 +7,7 @@ import { SCENERY, sceneryForWave } from '../../config.js';
 import { EVENTS } from '../../core/EventBus.js';
 import { createGlowDotTexture } from './textures.js';
 import { EntityViewSync } from './EntityViewSync.js';
+import { GroundTargetView } from './views/GroundTargetView.js';
 import { ShipView } from './views/ShipView.js';
 import { AsteroidView } from './views/AsteroidView.js';
 import { BulletView } from './views/BulletView.js';
@@ -33,6 +34,7 @@ export class WorldRenderer {
     bus.on(EVENTS.WAVE_STARTED, ({ wave }) => { this.wave = wave; });
     this.asteroidViews = new EntityViewSync(scene, a => new AsteroidView(a, this.sceneryKey));
     this.shipViews = new EntityViewSync(scene, s => new ShipView(s));
+    this.groundViews = new EntityViewSync(scene, g => new GroundTargetView(g, (x, y) => this.scenery.groundAt(x, y)));
     this.bulletViews = new EntityViewSync(scene, b => new BulletView(b));
     this.bossViews = new EntityViewSync(scene, b => b.kind === 'mothership' ? new MothershipView(b) : new BossView(b));
     this.particleView = new ParticleView(dot);
@@ -59,6 +61,7 @@ export class WorldRenderer {
     const frame = { t, bounds: this.viewport, session: this.session };
 
     this.asteroidViews.sync(this.world.asteroids, frame);
+    this.groundViews.sync(inLobby ? [] : this.world.groundTargets, frame);
     this.shipViews.sync(inLobby ? [] : this.world.ships, frame);
     this.bulletViews.sync(inLobby ? [] : this.world.bullets, frame);
     this.bossViews.sync(!inLobby && this.world.boss ? [this.world.boss] : [], frame);

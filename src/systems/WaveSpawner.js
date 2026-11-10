@@ -1,7 +1,8 @@
-import { BOSS, ENEMY_MIX, MOTHERSHIP, RULES, WAVES } from '../config.js';
+import { BOSS, ENEMY_MIX, GROUND, MOTHERSHIP, RULES, WAVES } from '../config.js';
 import { dist2, rand } from '../core/math.js';
 import { EVENTS } from '../core/EventBus.js';
 import { Asteroid } from '../world/entities/Asteroid.js';
+import { GroundTarget } from '../world/entities/GroundTarget.js';
 import { Boss } from '../world/entities/Boss.js';
 import { Mothership } from '../world/entities/Mothership.js';
 
@@ -72,6 +73,7 @@ export class WaveSpawner {
     if (this.isBossWave()) return this.#spawnBoss(world);
     const count = Math.min(WAVES.opening + (this.wave - 1) * WAVES.openingPerWave + Math.floor(world.ships.length / 2), RULES.maxWaveSize);
     this.#spawn(world, count);
+    this.#placeGuns(world);
     this.bus.emit(EVENTS.WAVE_STARTED, { wave: this.wave, boss: false });
   }
 
@@ -83,6 +85,19 @@ export class WaveSpawner {
     if (!due || this.timeLeft < WAVES.quietEnd || world.asteroids.length >= WAVES.maxEnemies) return;
     this.#spawnTimer = this.#interval();
     this.#spawn(world, 1 + Math.floor(this.wave * WAVES.groupPerWave));
+  }
+
+  // AA guns on the ground, spread out and away from the jets
+  #placeGuns(world) {
+    world.groundTargets = [];
+    const { width: w, height: h } = world, m = GROUND.edgeMargin;
+    for (let i = 0, tries = 0; i < GROUND.count(this.wave) && tries < 200; tries++) {
+      const p = { x: rand(m, w - m), y: rand(m, h - m) };
+      if (world.ships.some(s => s.alive && dist2(s, p) < GROUND.shipClearance ** 2)) continue;
+      if (world.groundTargets.some(g => dist2(g, p) < GROUND.spacing ** 2)) continue;
+      world.groundTargets.push(new GroundTarget(p.x, p.y));
+      i++;
+    }
   }
 
   #interval() {

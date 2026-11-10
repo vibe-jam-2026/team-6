@@ -14,6 +14,7 @@ export class CollisionSystem {
     this.#bumpShips(world);
     this.#bulletsVsAsteroids(world);
     this.#bulletsVsBoss(world);
+    this.#bulletsVsGround(world);
     this.#bulletsVsShips(world, mode.friendlyFire, canHit);
     this.#shipsVsAsteroids(world, canHit);
     this.#shipsVsBoss(world, canHit);
@@ -40,6 +41,16 @@ export class CollisionSystem {
       if (b.dead || b.hostile) continue;
       const enemy = world.asteroids.find(a => circlesOverlap(b, b.radius, a, a.radius * 0.92));
       if (enemy) { b.expire(); world.hitEnemy(enemy, b.owner, b.weapon?.damage ?? 1); }
+    }
+  }
+
+  // jets' shots hit the guns on the ground below (jets themselves fly over them)
+  #bulletsVsGround(world) {
+    if (!world.groundTargets.length) return;
+    for (const b of world.bullets) {
+      if (b.dead || b.hostile) continue;
+      const gun = world.groundTargets.find(g => circlesOverlap(b, b.radius, g, g.radius));
+      if (gun) { b.expire(); world.hitGroundTarget(gun, b.owner, b.weapon?.damage ?? 1); }
     }
   }
 
