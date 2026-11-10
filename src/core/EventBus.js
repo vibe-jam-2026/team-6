@@ -21,7 +21,7 @@ export const EVENTS = {
   SHIP_ROLLED: 'shipRolled',           // { ship, dir } a barrel roll started
   POWERUP_DROPPED: 'powerupDropped',   // { pickup }
   POWERUP_COLLECTED: 'powerupCollected', // { ship, pickup, weapon }
-  POWERUP_EXPIRED: 'powerupExpired',   // { ship, weapon } the jet is back on rockets
+  POWERUP_EXPIRED: 'powerupExpired',   // { ship, weapon } one power-up ran out (others may still be held)
   ASTEROID_DESTROYED: 'asteroidDestroyed', // { asteroid, by, inBlast }
   SHIP_DESTROYED: 'shipDestroyed',     // { ship, by, inBlast }
   SHIPS_BUMPED: 'shipsBumped',         // { a, b }

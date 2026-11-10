@@ -32,7 +32,7 @@ export class PickupSystem {
       const ship = world.ships.find(s => s.alive && circlesOverlap(s, s.radius, p, p.radius));
       if (!ship) continue;
       p.expire();
-      ship.grantPowerup(p.weapon, POWERUPS.duration);
+      ship.grantPowerup(p.weapon, POWERUPS.duration, POWERUPS.maxTime);
       this.bus.emit(EVENTS.POWERUP_COLLECTED, { ship, pickup: p, weapon: p.weapon });
     }
     world.pickups = world.pickups.filter(p => !p.dead);

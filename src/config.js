@@ -106,13 +106,15 @@ export const WEAPONS = [
 ];
 
 // Weapon power-ups: a shot-down enemy sometimes drops a crate holding one of
-// the extra WEAPONS. Flying into it arms that gun for `duration` seconds,
-// then the jet goes back to rockets. Grabbing another crate replaces the gun
-// and restarts the clock.
+// the extra WEAPONS. Flying into it arms that gun for `duration` seconds.
+// Power-ups stack: each weapon held fires at once, each on its own clock, and
+// a crate of a weapon already held adds `duration` to it (up to `maxTime`).
+// When the last one runs out the jet goes back to rockets.
 //   dropChance: per enemy size (1 drone, 2 plane, 3 zeppelin); bosses drop nothing
 //   life: seconds an untouched crate floats before it vanishes (it blinks near the end)
 export const POWERUPS = {
   duration: 10,
+  maxTime: 30,          // the most seconds one weapon can stack up to
   life: 12,
   radius: 16,
   drift: 30,            // px/s a crate drifts in a random direction

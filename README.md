@@ -30,10 +30,11 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
 
 - **Weapon power-ups:** every jet flies with **Rockets**, the all-rounder. Shot-down enemies sometimes
   drop a glowing crate (drones rarely, planes more often, zeppelins usually) — fly
-  into it to arm its weapon for **10 seconds**, after which you're back on rockets. Grabbing another
-  crate swaps the weapon and restarts the clock; dying or the wave ending loses it, and an untouched
-  crate blinks and vanishes after 12 seconds. The HUD shows the weapon and a draining timer bar under
-  your lives. The **Blaster** fires fast, small, short-range bolts, **Scatter** is a slow five-shot
+  into it to arm its weapon for **10 seconds**. Power-ups **stack**: every weapon you hold fires at
+  once, each on its own clock, and a crate of a weapon you already hold adds 10 seconds to it (up to
+  30). When the last one runs out you're back on rockets. Dying or the wave ending loses them all, and
+  an untouched crate blinks and vanishes after 12 seconds. The HUD shows a tag per weapon under your
+  lives, with its seconds left and a draining bar. The **Blaster** fires fast, small, short-range bolts, **Scatter** is a slow five-shot
   shotgun blast and **Homing** fires slow, heavy missiles that lock on to the nearest enemy
   ahead (in free-for-all also other jets) and take 3 hits off the boss. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 
