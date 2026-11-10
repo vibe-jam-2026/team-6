@@ -38,7 +38,7 @@ export class HudView {
     o.text(`${this.#waveText(waves)}  ·  ${session.mode.title}`, W / 2, 22, 13,
       waves.isTimed && waves.timeLeft <= 10 ? '#ffd23f' : '#c3cad8', 'center');
     if (world.boss) o.bossBar(world.boss, W / 2, 46, Math.min(420, W * 0.4));
-    if (session.invincible) o.text('INVINCIBLE · G to turn off', W / 2, H - 34, 12, '#ffd23f', 'center', '#ffd23f');
+    if (session.invincible) o.text('INVINCIBLE', W / 2, H - 34, 12, '#ffd23f', 'center', '#ffd23f');
     if (!touch?.enabled && !session.demo) {
       o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · 1-9/0 wave · K +$${RULES.devMoney}${session.invincible ? ' · N next · B boss' : ''}`,
         W / 2, H - 16, 11, '#9aa1b2', 'center');
