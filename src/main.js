@@ -146,6 +146,7 @@ const overlay = new OverlayRenderer(
 const footer = document.getElementById('foot');
 const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => { audio.unlock(); voice.start(); } });
 overlay.context.touch = touch;
+overlay.context.firstPerson = () => worldRenderer.firstPerson;
 
 // --- run ---
 states.change('lobby');
@@ -157,6 +158,11 @@ new GameLoop({
       states.change('lobby');
     } else {
       if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
+      if (input.wasPressed(MENU_KEYS.firstPerson)) {
+        const on = worldRenderer.toggleFirstPerson();
+        if (states.currentName !== 'lobby') session.announce(on ? 'COCKPIT VIEW' : 'OVERVIEW', 1.2);
+        bus.emit(EVENTS.MENU_ACTION);
+      }
       testControls.update();
       states.update(dt);
     }

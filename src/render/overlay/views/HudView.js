@@ -7,7 +7,7 @@ const PICKUP_PULSE_MS = 500; // how long the power-up tag flares after a pickup
 export class HudView {
   #lastPowerup = new WeakMap(); // ship -> { weapon, at } to flare the tag on a pickup
 
-  draw(o, { world, waves, session, audio, touch, time = 0 }) {
+  draw(o, { world, waves, session, audio, touch, firstPerson, time = 0 }) {
     const { width: W, height: H } = o;
     o.edgeShade('top', 90);
     o.edgeShade('bottom', 90);
@@ -41,7 +41,7 @@ export class HudView {
     if (world.boss) o.bossBar(world.boss, W / 2, 46, Math.min(420, W * 0.4));
     if (session.invincible) o.text('INVINCIBLE', W / 2, H - 34, 12, '#ffd23f', 'center', '#ffd23f');
     if (!touch?.enabled && !session.demo) {
-      o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · 1-9/0 wave · K +$${RULES.devMoney}${session.invincible ? ' · N next · B boss' : ''}`,
+      o.text(`P pause · M ${audio.muted ? 'unmute' : 'mute'} · F ${firstPerson?.() ? 'overview' : 'cockpit view'} · 1-9/0 wave · K +$${RULES.devMoney}${session.invincible ? ' · N next · B boss' : ''}`,
         W / 2, H - 16, 11, '#9aa1b2', 'center');
     }
   }
