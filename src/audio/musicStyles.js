@@ -3,7 +3,8 @@
 //   prog: 4 bars of { bass (MIDI root), chord (MIDI triad) }
 //   melody: 4 bars of 8 eighth-notes (MIDI, null = rest), played an octave up
 //   kick / snare: 16th steps that hit; hats: 'offbeat' | 'eighths' | 'none'
-//   bass: 'eighths' | 'sixteenths' | 'pulse' | 'oompah' | 'long'
+//   bass: 'eighths' | 'sixteenths' | 'pulse' | 'oompah' | 'long' | 'ebm' (gated 16ths with octave jumps)
+//   punch: a harder, clicky kick
 //   arp: 'arp' (broken chords on 8ths) | 'stab' (chord on beats 2 and 4) | 'bells' (high, sparse)
 //   pluck / lead: oscillator types; pad: hold the chord each bar
 // Wave numbers come in through sceneryForWave, so styles follow the landscapes.
@@ -77,6 +78,17 @@ export const MUSIC_STYLES = {
     melody: [[78, null, null, null, 76, null, null, null], [74, null, null, null, null, null, 71, null],
       [79, null, null, null, 78, null, null, null], [76, null, null, null, null, null, null, null]],
   },
+};
+
+// The final boss (the Mothership) gets its own track whatever the landscape:
+// pumping EBM in D minor. Four-to-the-floor kick, a gated sixteenth-note
+// sawtooth bass jumping octaves, hard snare on 2 and 4, metallic stabs.
+export const FINAL_BOSS_STYLE = {
+  bpm: 132, kick: [0, 4, 8, 12], snare: [4, 12], hats: 'offbeat', bass: 'ebm', arp: 'stab', pluck: 'sawtooth', lead: 'square',
+  punch: true, boss: true,
+  prog: [{ bass: 38, chord: [62, 65, 69] }, { bass: 38, chord: [62, 65, 69] }, { bass: 34, chord: [62, 65, 70] }, { bass: 33, chord: [61, 64, 69] }],
+  melody: [[74, null, null, 74, null, null, 77, null], [76, null, 74, null, null, null, null, null],
+    [74, null, null, 74, null, null, 70, null], [69, null, null, 73, null, 76, null, null]],
 };
 
 // Boss waves keep the landscape's tune but push it: faster, a kick on every

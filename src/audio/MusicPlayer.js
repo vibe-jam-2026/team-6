@@ -1,6 +1,6 @@
 import { EVENTS } from '../core/EventBus.js';
 import { sceneryForWave } from '../config.js';
-import { MUSIC_STYLES, bossVersion } from './musicStyles.js';
+import { MUSIC_STYLES, FINAL_BOSS_STYLE, bossVersion } from './musicStyles.js';
 
 // Procedural background music: a small step sequencer on top of SynthAudio's
 // AudioContext. No sound files. Call tick() every update; it schedules notes a
@@ -50,7 +50,7 @@ const TRACKS = {
     play(v, step, bar, intensity, style) {
       const { bass, chord } = style.prog[bar % 4];
       // drums
-      if (style.kick.includes(step)) v.kick(0.45);
+      if (style.kick.includes(step)) v.kick(style.punch ? 0.6 : 0.45, style.punch);
       if (style.hats === 'offbeat' && step % 4 === 2) v.hat(0.12);
       if (style.hats === 'eighths' && step % 2 === 0) v.hat(step % 4 === 2 ? 0.12 : 0.06);
       if (intensity >= 2 && style.hats !== 'none' && step % 2 === 1) v.hat(0.05);
@@ -58,6 +58,12 @@ const TRACKS = {
       // bass
       const cutoff = 900 + intensity * 300, root = bass + 12;
       switch (style.bass) {
+        case 'ebm': {
+          // root, root, octave, root… accented on the beat, ducked under the kick
+          const jump = [0, 0, 12, 0, 0, 12, 0, 7, 0, 0, 12, 0, 0, 12, 15, 12][step];
+          v.bass(hz(root + jump), v.beat * 0.2, step % 4 === 0 ? 0.2 : 0.3, cutoff * (step % 4 === 2 ? 1.6 : 1.1));
+          break;
+        }
         case 'sixteenths': v.bass(hz(root + (step % 4 === 2 ? 12 : 0)), v.beat * 0.22, 0.26, cutoff); break;
         case 'pulse': if ([0, 6, 8, 14].includes(step)) v.bass(hz(root), v.beat * 0.6, 0.3, cutoff); break;
         case 'oompah':
@@ -113,10 +119,10 @@ export class MusicPlayer {
 
   constructor(synth, bus) {
     this.#synth = synth;
-    bus.on(EVENTS.WAVE_STARTED, ({ wave, boss }) => {
+    bus.on(EVENTS.WAVE_STARTED, ({ wave, boss, final }) => {
       this.setIntensity(wave);
       const style = MUSIC_STYLES[sceneryForWave(wave).key] ?? MUSIC_STYLES.forest;
-      this.#style = boss ? bossVersion(style) : style;
+      this.#style = final ? FINAL_BOSS_STYLE : boss ? bossVersion(style) : style;
     });
   }
 
@@ -222,10 +228,11 @@ export class MusicPlayer {
     };
     return {
       beat,
-      kick(vol) {
-        const o = osc('sine', 150, 0.3);
-        o.frequency.exponentialRampToValueAtTime(40, t + 0.15);
+      kick(vol, punch = false) {
+        const o = osc('sine', punch ? 180 : 150, 0.3);
+        o.frequency.exponentialRampToValueAtTime(punch ? 45 : 40, t + (punch ? 0.08 : 0.15));
         env(o, vol, 0.003, 0.28);
+        if (punch) noiseHit(0.012, vol * 0.5, 'highpass', 3000); // beater click
       },
       hat: vol => noiseHit(0.05, vol, 'highpass', 7000),
       snare: vol => noiseHit(0.16, vol, 'bandpass', 1800),
