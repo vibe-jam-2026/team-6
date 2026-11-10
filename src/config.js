@@ -54,7 +54,7 @@ export const SHIP = {
   drag: 0.55,            // velocity decay per second (exponential)
   maxSpeed: 440,
   radius: 13,
-  fireCooldown: 0.17,
+  fireCooldown: 0.15,    // s between shots (Rapid Fire upgrades divide it further)
   maxBullets: 5,
   muzzleOffset: 15,
 };
