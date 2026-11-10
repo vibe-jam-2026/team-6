@@ -1,8 +1,9 @@
 import { PLAYERS, MOUSE_LABELS, COMPUTER_LABELS, COMPUTER_PLAYER, DEMO } from '../../../config.js';
 import { lobbyLayout } from '../lobbyLayout.js';
+import { drawHighScores } from './highScoreTable.js';
 
 export class LobbyView {
-  draw(o, { time, session, audio, touch }) {
+  draw(o, { time, session, audio, touch, highScores }) {
     const tap = touch?.enabled;
     const { width: W, height: H } = o;
     const layout = lobbyLayout(W, H);
@@ -25,6 +26,13 @@ export class LobbyView {
       const labels = cpu ? COMPUTER_LABELS.map(t => tap ? t.replace('V', 'tap') : t) : mouse ? MOUSE_LABELS : p.labels;
       if (!layout.short) labels.forEach((t, k) => o.text(t, c.x + c.w / 2, c.y + 104 + k * 15, 11, mouse || cpu ? p.color : '#9aa1b2', 'center'));
     });
+
+    // the best scores, beside the pilot cards when there is room
+    const cardsRight = Math.max(...layout.cards.map(c => c.x + c.w));
+    if (highScores && W - cardsRight > 300) {
+      const x = (cardsRight + W) / 2;
+      drawHighScores(o, highScores.top(5), { x, y: layout.cards[0].y + 12, width: Math.min(240, W - cardsRight - 60), time });
+    }
 
     const by = layout.footerY;
     const mode = session.mode;

@@ -17,6 +17,8 @@ export class Session {
   computer = [];      // computer[i]: player i is flown by the computer
   demo = false;       // demo mode: the computer flies every jet
   #beforeDemo = null; // the lobby setup to put back when the demo ends
+  scoreEntry = null;  // { ship, initials } while a pilot types initials for the high-score table
+  newHighScores = []; // entries added on this results screen, to highlight them
 
   // controllers: one human controller per player; computers: one computer pilot per player
   constructor(bus, controllers, modes = GAME_MODES, computers = []) {
@@ -103,6 +105,7 @@ export class Session {
     else if (won) headline = ships.length > 1 ? `the Mothership is down · ${ranked[0].name} tops the score` : `the Mothership is down · final score ${ranked[0].score}`;
     this.result = {
       won,
+      wave,
       ranked,
       headline,
       showKills: mode.showKills(ships),

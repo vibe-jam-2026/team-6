@@ -19,6 +19,7 @@ import { SoundEffects } from './audio/SoundEffects.js';
 import { MusicPlayer } from './audio/MusicPlayer.js';
 import { World } from './world/World.js';
 import { Session } from './game/Session.js';
+import { HighScores } from './game/HighScores.js';
 import { ShipSystem } from './systems/ShipSystem.js';
 import { BulletSystem } from './systems/BulletSystem.js';
 import { CollisionSystem } from './systems/CollisionSystem.js';
@@ -55,7 +56,7 @@ import { Fireworks } from './effects/Fireworks.js';
 const bus = new EventBus();
 const viewport = new Viewport(window);
 const activity = new ActivityMonitor(window);
-const capturedKeys = [...PLAYERS.flatMap(p => Object.values(p.keys)), MENU_KEYS.start, MENU_KEYS.switchMode, 'Space'];
+const capturedKeys = [...PLAYERS.flatMap(p => Object.values(p.keys)), MENU_KEYS.start, MENU_KEYS.switchMode, 'Space', 'Backspace'];
 const input = new KeyboardInput(window, capturedKeys);
 const audio = new SynthAudio();
 input.onKeyDown(() => audio.unlock());
@@ -79,6 +80,7 @@ const session = new Session(bus, controllers, undefined, computers);
 if (TouchControls.likelyTouch()) session.joined = session.joined.map((_, i) => i === 0);
 const waves = new WaveSpawner(bus);
 const shop = new Shop();
+const highScores = new HighScores();
 const particles = new ParticleSystem();
 const effects = new EffectsDirector(bus, particles);
 const fireworks = new Fireworks(bus, viewport);
@@ -95,7 +97,7 @@ const systems = {
 
 // --- states ---
 const states = new StateMachine();
-const deps = { input, bus, world, session, waves, effects, states, systems, shop, activity };
+const deps = { input, bus, world, session, waves, effects, states, systems, shop, activity, highScores };
 states
   .register('lobby', new LobbyState(deps))
   .register('playing', new PlayState(deps))
@@ -113,7 +115,7 @@ const flash = new FlashView(bus);
 const fireworksView = new FireworksView(fireworks);
 const demoView = new DemoView();
 const overlay = new OverlayRenderer(
-  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, shop })
+  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, shop, highScores })
   .register('lobby', [new LobbyView()])
   .register('playing', [fireworksView, hud, new BannerView(), flash, demoView])
   .register('paused', [hud, new PauseView()])
@@ -153,4 +155,4 @@ new GameLoop({
 
 // handle for debugging from the browser console
 // game.addMoney(500) gives every pilot $500; game.addMoney(500, 0) only P1
-window.game = { states, world, session, bus, waves, shop, fireworks, addMoney: (amount, player) => testControls.addMoney(amount, player) };
+window.game = { states, world, session, bus, waves, shop, fireworks, highScores, addMoney: (amount, player) => testControls.addMoney(amount, player) };
