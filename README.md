@@ -45,6 +45,9 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
   name reads *P2 CPU*. With P1 as the only human, **Space** works as P1's fire key too.
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse,
   **V** lets the computer fly P2, **X** starts a demo, **Enter** starts.
+- **Voice command:** say **"nåt coolt"** into the microphone to fly straight to the arctic level
+  (wave 8). The browser asks for the microphone after your first key press, click or tap; it needs a
+  browser with speech recognition (Chrome, Edge, Safari), and in the shop or while paused it does nothing.
 - **Demo mode:** **X** in the lobby (or 30 seconds without touching anything there) starts a match
   where the computer flies both jets, in the mode picked in the lobby. When a demo match ends the results
   show for a few seconds and the next one starts. Only **Esc** ends the demo (other keys, clicks and

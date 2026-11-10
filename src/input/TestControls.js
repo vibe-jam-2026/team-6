@@ -18,15 +18,22 @@ export class TestControls {
     }
 
     const target = this.#requestedWave();
-    if (target === null) return;
+    if (target !== null) this.goToWave(target);
+  }
+
+  // Jumps the match to `wave` (from the lobby it starts the match there).
+  // Returns false when that can't happen right now (e.g. paused or in the shop).
+  goToWave(target) {
+    const { states } = this;
     if (states.currentName === 'lobby') {
-      if (this.session.joinedCount === 0) return;
+      if (this.session.joinedCount === 0) return false;
       states.change('playing');
     } else if (states.currentName !== 'playing') {
-      return;
+      return false;
     }
     this.waves.jumpTo(target, this.world);
     this.bus.emit(EVENTS.MENU_ACTION);
+    return true;
   }
 
   // Gives money to one player (by index, 0 = P1) or to every ship in the match.

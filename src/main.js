@@ -1,6 +1,6 @@
 // Composition root: creates every object and wires them together.
 // This is the only file that knows the concrete classes of everything.
-import { PLAYERS, MENU_KEYS, TEST_KEYS } from './config.js';
+import { PLAYERS, MENU_KEYS, TEST_KEYS, SCENERY } from './config.js';
 import { EventBus, EVENTS } from './core/EventBus.js';
 import { Viewport } from './core/Viewport.js';
 import { ActivityMonitor } from './core/ActivityMonitor.js';
@@ -13,6 +13,7 @@ import { MouseShipController } from './input/MouseShipController.js';
 import { PlayerController } from './input/PlayerController.js';
 import { ComputerShipController } from './input/ComputerShipController.js';
 import { TestControls } from './input/TestControls.js';
+import { VoiceCommands } from './input/VoiceCommands.js';
 import { TouchControls } from './input/TouchControls.js';
 import { SynthAudio } from './audio/SynthAudio.js';
 import { SoundEffects } from './audio/SoundEffects.js';
@@ -104,6 +105,15 @@ states
   .register('gameover', new GameOverState(deps));
 const testControls = new TestControls(deps);
 
+// say "nåt coolt" into the microphone to fly straight to the arctic level
+const voice = new VoiceCommands({ lang: 'sv-SE' })
+  .on(/n[åoa]t+\s*coo?l+t/, () => {
+    const arcticWave = SCENERY.findIndex(s => s.key === 'arctic') + 1;
+    testControls.goToWave(arcticWave);   // its wave banner names the arctic
+  });
+input.onKeyDown(() => voice.start());
+mouse.onButtonDown(() => voice.start());
+
 // --- presentation ---
 const worldRenderer = new WorldRenderer({
   canvas: document.getElementById('gl'), viewport, bus, world, particles, session, states,
@@ -120,7 +130,7 @@ const overlay = new OverlayRenderer(
   .register('shop', [flash, hud, new ShopView(), demoView])
   .register('gameover', [fireworksView, flash, hud, new GameOverView(), demoView]);
 const footer = document.getElementById('foot');
-const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
+const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => { audio.unlock(); voice.start(); } });
 overlay.context.touch = touch;
 
 // --- run ---
