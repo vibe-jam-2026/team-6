@@ -1,6 +1,6 @@
 // Composition root: creates every object and wires them together.
 // This is the only file that knows the concrete classes of everything.
-import { PLAYERS, MENU_KEYS, TEST_KEYS } from './config.js';
+import { PLAYERS, MENU_KEYS, TEST_KEYS, SCENERY } from './config.js';
 import { EventBus, EVENTS } from './core/EventBus.js';
 import { Viewport } from './core/Viewport.js';
 import { ActivityMonitor } from './core/ActivityMonitor.js';
@@ -13,6 +13,7 @@ import { MouseShipController } from './input/MouseShipController.js';
 import { PlayerController } from './input/PlayerController.js';
 import { ComputerShipController } from './input/ComputerShipController.js';
 import { TestControls } from './input/TestControls.js';
+import { VoiceCommands } from './input/VoiceCommands.js';
 import { TouchControls } from './input/TouchControls.js';
 import { SynthAudio } from './audio/SynthAudio.js';
 import { SoundEffects } from './audio/SoundEffects.js';
@@ -30,6 +31,7 @@ import { ScoreKeeper } from './systems/ScoreKeeper.js';
 import { Paymaster } from './systems/Paymaster.js';
 import { EnemySystem } from './systems/EnemySystem.js';
 import { SelfDestructSystem } from './systems/SelfDestructSystem.js';
+import { PickupSystem } from './systems/PickupSystem.js';
 import { ParticleSystem } from './effects/ParticleSystem.js';
 import { EffectsDirector } from './effects/EffectsDirector.js';
 import { LobbyState } from './states/LobbyState.js';
@@ -95,6 +97,7 @@ const systems = {
   boss: new BossSystem(bus),
   collisions: new CollisionSystem(bus),
   selfDestruct: new SelfDestructSystem(bus),
+  pickups: new PickupSystem(bus, world),
 };
 
 // --- states ---
@@ -108,6 +111,27 @@ states
   .register('flyover', new FlyoverState(deps))
   .register('gameover', new GameOverState(deps));
 const testControls = new TestControls(deps);
+
+// say "nåt coolt" into the microphone to fly straight to the arctic level,
+// "fuska" to make the players invincible, "engage" to hold every human
+// pilot's thrusters on and "stop" to hand them back to the keys
+const setAutoThrust = on => {
+  if (states.currentName !== 'playing') return;
+  if (controllers.every(c => c.autoThrust === on)) return;
+  for (const c of controllers) c.autoThrust = on;
+  session.announce(on ? 'THRUSTERS ENGAGED' : 'THRUSTERS OFF', 1.5);
+};
+const voice = new VoiceCommands({ lang: 'sv-SE' })
+  .on(/fuska/, () => testControls.makeInvincible())
+  // the Swedish recogniser may spell the English word a few ways
+  .on(/\b(engage|engag|in\s?gage|en\s?gage|ingage|engej|ingej)/, () => setAutoThrust(true))
+  .on(/\bstopp?\b/, () => setAutoThrust(false))
+  .on(/n[åoa]t+\s*coo?l+t/, () => {
+    const arcticWave = SCENERY.findIndex(s => s.key === 'arctic') + 1;
+    testControls.goToWave(arcticWave);   // its wave banner names the arctic
+  });
+input.onKeyDown(() => voice.start());
+mouse.onButtonDown(() => voice.start());
 
 // --- presentation ---
 const worldRenderer = new WorldRenderer({
@@ -126,8 +150,9 @@ const overlay = new OverlayRenderer(
   .register('flyover', [fireworksView, new CreditsView()])
   .register('gameover', [fireworksView, flash, hud, new GameOverView(), demoView]);
 const footer = document.getElementById('foot');
-const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => audio.unlock() });
+const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => { audio.unlock(); voice.start(); } });
 overlay.context.touch = touch;
+overlay.context.firstPerson = () => worldRenderer.firstPerson;
 
 // --- run ---
 states.change('lobby');
@@ -139,6 +164,11 @@ new GameLoop({
       states.change('lobby');
     } else {
       if (input.wasPressed(MENU_KEYS.mute)) audio.toggleMute();
+      if (input.wasPressed(MENU_KEYS.firstPerson)) {
+        const on = worldRenderer.toggleFirstPerson();
+        if (states.currentName !== 'lobby') session.announce(on ? 'COCKPIT VIEW' : 'OVERVIEW', 1.2);
+        bus.emit(EVENTS.MENU_ACTION);
+      }
       testControls.update();
       states.update(dt);
     }
@@ -159,4 +189,4 @@ new GameLoop({
 
 // handle for debugging from the browser console
 // game.addMoney(500) gives every pilot $500; game.addMoney(500, 0) only P1
-window.game = { states, world, session, bus, waves, shop, fireworks, highScores, addMoney: (amount, player) => testControls.addMoney(amount, player) };
+window.game = { states, world, session, bus, waves, shop, fireworks, systems, highScores, addMoney: (amount, player) => testControls.addMoney(amount, player) };

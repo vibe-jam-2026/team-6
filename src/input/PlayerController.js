@@ -5,6 +5,7 @@ export class PlayerController {
     this.keyboard = keyboard;
     this.mouse = mouse;
     this.useMouse = false;
+    this.autoThrust = false;   // voice "engage" holds the thrusters on until "stop"
   }
 
   get solo() { return this.keyboard.solo; }
@@ -12,17 +13,16 @@ export class PlayerController {
 
   read(ship) {
     const k = this.keyboard.read(ship);
-    if (!this.useMouse) return k;
-    const m = this.mouse.read(ship);
-    return { thrust: k.thrust || m.thrust, turn: k.turn || m.turn, fire: k.fire || m.fire, roll: k.roll };
+    const c = this.useMouse ? this.#merge(k, this.mouse.read(ship)) : k;
+    return this.autoThrust ? { ...c, thrust: true } : c;
+  }
+
+  #merge(k, m) {
+    return { thrust: k.thrust || m.thrust, turn: k.turn || m.turn, fire: k.fire || m.fire, toggleFire: k.toggleFire || m.toggleFire, roll: k.roll };
   }
 
   stepPressed() {
     return this.keyboard.stepPressed() || (this.useMouse ? this.mouse.stepPressed() : 0);
-  }
-
-  weaponStep() {
-    return this.keyboard.weaponStep() || (this.useMouse ? this.mouse.weaponStep() : 0);
   }
 
   selfDestructPressed() {

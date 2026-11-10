@@ -4,7 +4,7 @@
 //   1. dodges anything about to hit it (rocks, the boss, boss bullets),
 //   2. otherwise turns to lead the best target and fires when lined up,
 //   3. closes in with short bursts of thrust when the target is out of range,
-//   4. picks a weapon for the range: scatter up close, blaster, then rockets.
+//   4. detours to grab weapon crates that are close by.
 // Between waves it spends its money in the shop (see pickPurchase).
 
 // skill-dependent numbers (reaction, aim, dodging) come from CPU_SKILLS via getSkill()
@@ -14,7 +14,7 @@ const CRUISE_SPEED = 230;     // it only thrusts towards targets below this spee
 const SHIP_PENALTY = 120;     // px: prefers rocks a little over enemy jets
 // how much the computer likes each upgrade when shopping (default 1)
 const SHOP_TASTE = { rapidFire: 2, spread: 2, railRounds: 1.5, deflector: 1.5, spareShip: 0.8 };
-const WEAPON_SWITCH_FRAMES = 90; // waits this long between weapon changes so it doesn't flap
+const PICKUP_SEEK = 360;       // px: goes for weapon crates this close
 
 const clamp = v => Math.max(-1, Math.min(1, v));
 const wrapAngle = a => Math.atan2(Math.sin(a), Math.cos(a));
@@ -25,9 +25,6 @@ export class ComputerShipController {
   isComputer = true;
   solo = false;       // set by the Session like the other controllers; unused
   useMouse = false;
-  #wantedWeapon = null;
-  #weaponFrames = 0;
-  #ship = null;
   #frame = 0;
   #held = null;       // the last decision, repeated until it thinks again
   #aimOffset = 0;
@@ -44,15 +41,41 @@ export class ComputerShipController {
 
   read(ship) {
     if (!ship) return { thrust: false, turn: 0, fire: false };
-    this.#ship = ship;
     const skill = this.skill;
     this.#frame++;
     if (this.#frame % AIM_DRIFT_FRAMES === 0) this.#aimOffset = (Math.random() * 2 - 1) * skill.aimError;
     // a slower pilot only thinks every few frames and holds its input in between
     if (this.#held && this.#frame % skill.think !== 0) return { ...this.#held, roll: 0 };
     const threat = ship.invulnerable > 0.4 ? null : this.#mostUrgentThreat(ship);
-    this.#held = threat ? this.#evade(ship, threat) : this.#attack(ship);
+    const crate = threat ? null : this.#nearbyPickup(ship);
+    this.#held = threat ? this.#evade(ship, threat) : crate ? this.#collect(ship, crate) : this.#attack(ship);
     return this.#held;
+  }
+
+  // --- power-ups ---
+
+  #nearbyPickup(ship) {
+    let best = null, bestDist = PICKUP_SEEK;
+    for (const p of this.world.pickups ?? []) {
+      const { x, y } = this.#offset(ship, p);
+      const d = Math.hypot(x, y);
+      if (d < bestDist) { best = p; bestDist = d; }
+    }
+    return best;
+  }
+
+  // fly through the crate, still shooting at whatever happens to be ahead
+  #collect(ship, crate) {
+    const p = this.#offset(ship, crate);
+    // steer so the ship's own drift doesn't carry it past
+    const aimX = p.x - ship.vx * 0.3, aimY = p.y - ship.vy * 0.3;
+    const diff = wrapAngle(Math.atan2(aimY, aimX) - ship.angle);
+    const attack = this.#attack(ship);
+    return {
+      thrust: Math.abs(diff) < 0.5 && Math.hypot(ship.vx, ship.vy) < CRUISE_SPEED,
+      turn: clamp(diff * this.skill.turnGain),
+      fire: attack.fire,
+    };
   }
 
   // --- combat ---
@@ -63,7 +86,6 @@ export class ComputerShipController {
     const aim = this.#lead(ship, target);
     const diff = wrapAngle(Math.atan2(aim.y, aim.x) + this.#aimOffset - ship.angle);
     const dist = Math.hypot(aim.x, aim.y);
-    this.#chooseWeapon(ship, dist);
     const range = this.#range(ship, ship.weapon);
     const tolerance = Math.max(0.05, Math.atan2(target.radius * 0.8, dist));
     const speed = Math.hypot(ship.vx, ship.vy);
@@ -103,26 +125,6 @@ export class ComputerShipController {
 
   #bulletSpeed(ship, w) { return ship.stats.bulletSpeed * (w?.speed ?? 1); }
   #range(ship, w) { return this.#bulletSpeed(ship, w) * ship.stats.bulletLife * (w?.life ?? 1); }
-
-  // the shortest-range weapon that still reaches the target hits hardest
-  #chooseWeapon(ship, dist) {
-    const weapons = ship.weapons ?? [];
-    const reach = w => this.#range(ship, w) * 0.8;
-    const inReach = weapons.filter(w => reach(w) >= dist).sort((a, b) => reach(a) - reach(b));
-    const longest = [...weapons].sort((a, b) => reach(b) - reach(a))[0];
-    this.#wantedWeapon = (inReach[0] ?? longest)?.id ?? null;
-  }
-
-  // 1 to cycle to the next weapon while it is not yet holding the one it wants
-  weaponStep() {
-    const ship = this.#ship;
-    this.#weaponFrames++;
-    if (!ship?.weapon || !this.#wantedWeapon || ship.weapon.id === this.#wantedWeapon) return 0;
-    if (this.#weaponFrames < WEAPON_SWITCH_FRAMES) return 0;
-    // keep cycling every frame until the wanted gun comes up, then rest
-    if (ship.weapons[(ship.weaponIndex + 1) % ship.weapons.length].id === this.#wantedWeapon) this.#weaponFrames = 0;
-    return 1;
-  }
 
   // --- survival ---
 

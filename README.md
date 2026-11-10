@@ -20,14 +20,20 @@ python3 -m http.server 8000
 
 then open http://localhost:8000.
 
-| Player | Thrust | Turn | Fire | Switch weapon | Self-destruct |
-|--------|--------|------|------|---------------|---------------|
-| P1 (red)    | W       | A / D       | S       | Q             | E             |
-| P2 (blue)   | ↑       | ← / →       | ↓       | /             | Right Shift   |
+Jets fire **continuously** by default — the fire key toggles auto fire on and off (the HUD shows
+*AUTO FIRE* or *FIRE OFF* next to your lives). It also joins the lobby and buys in the shop.
 
-- **Weapons:** every jet carries four guns and the switch-weapon key cycles through them
-  (the HUD lists them all under your lives and boxes the active one). **Rockets** are the all-rounder, the
-  **Blaster** fires fast, small, short-range bolts, **Scatter** is a slow five-shot
+| Player | Thrust | Turn | Fire (toggle) | Self-destruct |
+|--------|--------|------|------|---------------|
+| P1 (red)    | W       | A / D       | S       | E             |
+| P2 (blue)   | ↑       | ← / →       | ↓       | Right Shift   |
+
+- **Weapon power-ups:** every jet flies with **Rockets**, the all-rounder. Shot-down enemies sometimes
+  drop a glowing crate (drones rarely, planes more often, zeppelins usually) — fly
+  into it to arm its weapon for **10 seconds**, after which you're back on rockets. Grabbing another
+  crate swaps the weapon and restarts the clock; dying or the wave ending loses it, and an untouched
+  crate blinks and vanishes after 12 seconds. The HUD shows the weapon and a draining timer bar under
+  your lives. The **Blaster** fires fast, small, short-range bolts, **Scatter** is a slow five-shot
   shotgun blast and **Homing** fires slow, heavy missiles that lock on to the nearest enemy
   ahead (in free-for-all also other jets) and take 3 hits off the boss. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 
@@ -35,15 +41,15 @@ then open http://localhost:8000.
   out of trouble. It hops about 80 px to that side, can't be hit while it rolls, and has to wait
   just over a second before rolling again.
 
-- **Flying solo:** with only one pilot joined, **Space** fires too (and buys in the shop between waves).
+- **Flying solo:** with only one pilot joined, **Space** works as your fire key too (toggles auto fire, buys in the shop).
 - **Mouse control:** in the lobby, **C** hands the mouse to nobody → P1 → P2. That pilot's jet turns its
-  nose towards the pointer, the **left button** fires, the **right button** thrusts, the **wheel**
-  switches weapon and the **middle button** self-destructs; between waves the **wheel** browses the shop and a **left click** buys.
+  nose towards the pointer, the **left button** toggles auto fire, the **right button** thrusts and the
+  **middle button** self-destructs; between waves the **wheel** browses the shop and a **left click** buys.
   Their keys keep working too, so e.g. P1 can fly with WASD while P2 uses the mouse.
 - **Computer pilot:** in the lobby, **V** hands P2 to the computer (and joins it), and **V** again
   takes it back. It dodges rocks, the boss and its bullets, leads its shots, hunts the nearest
-  target (including you in free-for-all), switches to the weapon that suits the range and spends its own money in the shop between waves. Its HUD
-  name reads *P2 CPU*. With P1 as the only human, **Space** fires too. **L** in the lobby sets its
+  target (including you in free-for-all), detours to grab nearby weapon crates and spends its own money in the shop between waves. Its HUD
+  name reads *P2 CPU*. With P1 as the only human, **Space** works as P1's fire key too. **L** in the lobby sets its
   skill: *Easy* reacts slowly, aims loosely and dodges late; *Normal* is in between; *Ace* reacts
   every frame, aims true and barrel-rolls out of close calls. The skill applies to the demo too.
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse,
@@ -52,6 +58,11 @@ then open http://localhost:8000.
   up to three initials on the results screen and press **Enter** (Enter alone keeps your player
   name). The table shows there and beside the pilot cards in the lobby. Demo matches, computer
   pilots and invincible test runs don't count.
+- **Voice command:** say **"nåt coolt"** into the microphone to fly straight to the arctic level
+  (wave 8). The browser asks for the microphone after your first key press, click or tap; it needs a
+  browser with speech recognition (Chrome, Edge, Safari), and in the shop or while paused it does nothing.
+  Say **"engage"** to keep the thrusters on without holding the key, and **"stop"** to turn them off again
+  (applies to every human pilot during a match; a new match starts with them off).
 - **Demo mode:** **X** in the lobby (or 30 seconds without touching anything there) starts a match
   where the computer flies both jets, in the mode picked in the lobby. When a demo match ends the results
   show for a few seconds and the next one starts. Only **Esc** ends the demo (other keys, clicks and
@@ -59,6 +70,10 @@ then open http://localhost:8000.
 - **Modes:** *Free-for-all* (rockets hit other jets, 250 pts per kill, last ship flying wins)
   or *Co-op* (no friendly fire, fight through to the final boss together).
 - **In game:** **P**/**Esc** pause (Q in pause quits to lobby), **M** mutes sound and music.
+- **Cockpit view:** **F** (in the lobby or any time in a match) toggles a first-person view from
+  P1's jet: the camera swings down into the cockpit, looks along the nose and rolls with the turns.
+  While P1 is shot down and waiting to respawn the camera falls back to the overview, and **F** again
+  returns to the normal view. Mouse aiming still maps the pointer onto the arena as seen from the overview.
 - **Waves:** there are **10 levels**. Normal waves last **1 minute**: a wave opens with a group of
   enemies and more keep arriving from the edges (more often and in bigger groups each wave); the
   HUD shows the clock. When time is up the survivors retreat and the shop opens. **Wave 5** is a
@@ -153,7 +168,7 @@ From the browser console, `game.addMoney(500)` gives every pilot $500 and
 Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
-touch. ◀ ▶ turn, ▲ thrusts, ● fires, ⇄ switches weapon and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
+touch. ◀ ▶ turn, ▲ thrusts, ● toggles auto fire and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
 to join or leave, tap P2's card to add or remove a computer pilot, tap the mode line to switch mode and the start line to start. Between
 waves, ◀ ▶ browse the shop and ● buys. In
 game there are pause and sound buttons at the bottom; on the game-over screen, tap

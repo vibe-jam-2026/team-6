@@ -22,7 +22,7 @@ export class Ship {
   constructor(index, player, controller) {
     this.index = index;
     this.player = player;          // { name, color, ... }
-    this.controller = controller;  // anything with read(ship) -> { thrust, turn, fire }
+    this.controller = controller;  // anything with read(ship) -> { thrust, turn, fire, toggleFire }
     this.x = 0; this.y = 0; this.vx = 0; this.vy = 0;
     this.angle = FACING_UP;
     this.bank = 0;                 // visual roll, eased towards the turn input
@@ -37,25 +37,38 @@ export class Ship {
     this.cooldown = 0;
     this.thrusting = false;
     this.wantsToFire = false;
+    this.autoFire = !controller.isComputer; // pilots' guns run on their own; the fire key toggles them
     this.stats = baseStats();
     this.upgrades = new Map();     // upgrade id -> level
     this.shieldCharges = 0;
-    this.weapons = [...WEAPONS];   // the guns this ship can switch between
-    this.weaponIndex = 0;
+    this.powerup = null;           // a weapon picked up from a crate, while it lasts
+    this.powerupTime = 0;          // seconds left on it
     this.rollTime = 0;             // seconds left in a barrel roll
     this.rollDir = 0;              // -1 rolling left, 1 right
     this.rollCooldown = 0;
     this.justRolled = false;       // a roll started this step (for the sound)
   }
 
-  get weapon() { return this.weapons[this.weaponIndex]; }
+  // the standard gun, or the power-up weapon while one is armed
+  get weapon() { return this.powerup ?? WEAPONS[0]; }
 
-  // Switches to the next available weapon (dir -1 for the previous one).
-  // Returns true if the weapon changed.
-  cycleWeapon(dir = 1) {
-    const n = this.weapons.length;
-    if (n < 2 || !dir) return false;
-    this.weaponIndex = (this.weaponIndex + Math.sign(dir) + n) % n;
+  // arms a power-up weapon for `duration` seconds (replacing any current one)
+  grantPowerup(weapon, duration) {
+    this.powerup = weapon;
+    this.powerupTime = duration;
+  }
+
+  clearPowerup() {
+    this.powerup = null;
+    this.powerupTime = 0;
+  }
+
+  // Counts the power-up down; true on the step it runs out.
+  tickPowerup(dt) {
+    if (!this.powerup) return false;
+    this.powerupTime -= dt;
+    if (this.powerupTime > 0) return false;
+    this.clearPowerup();
     return true;
   }
 
@@ -82,6 +95,7 @@ export class Ship {
   // called as each wave begins: the deflector recharges
   prepareForWave() {
     this.shieldCharges = this.stats.shieldCapacity;
+    this.clearPowerup();
   }
 
   // The deflector soaks up a hit if it has charge left; true if it did.
@@ -105,6 +119,7 @@ export class Ship {
 
   destroy() {
     this.alive = false;
+    this.clearPowerup();
     this.lives--;
     this.respawnTimer = RULES.respawnDelay;
   }
@@ -112,6 +127,7 @@ export class Ship {
   // out of the match for good, whatever lives were left
   eliminate() {
     this.alive = false;
+    this.clearPowerup();
     this.lives = 0;
   }
 
@@ -121,7 +137,8 @@ export class Ship {
     const st = this.stats;
     this.angle += c.turn * st.turnSpeed * dt;
     this.thrusting = c.thrust;
-    this.wantsToFire = c.fire;
+    if (c.toggleFire) this.autoFire = !this.autoFire;
+    this.wantsToFire = this.autoFire || !!c.fire;
     this.justRolled = false;
     this.rollCooldown = Math.max(0, this.rollCooldown - dt);
     if (c.roll && !this.rolling && this.rollCooldown <= 0) {

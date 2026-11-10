@@ -139,25 +139,23 @@ export class Overlay2D {
     ctx.strokeRect(left + 0.5, y + 12.5, w - 1, h - 1);
   }
 
-  // A row of weapon tags, in catalogue order, starting at x for 'left' or
-  // ending at x for 'right', with the active one boxed in its colour. pulse (0..1) briefly
-  // brightens the active tag just after a switch.
-  weaponStrip(weapons, active, x, y, align, pulse = 0) {
-    const ctx = this.ctx, size = 11, padX = 6, h = 17, gap = 5;
+  // The power-up weapon a jet holds: its name boxed in its colour with a bar
+  // underneath draining over the seconds left (left: 1..0). Starts at x for
+  // 'left' or ends at x for 'right'. pulse (0..1) brightens it just after a pickup;
+  // in the last 30 % it blinks.
+  powerupTag(weapon, left, x, y, align, pulse = 0) {
+    const ctx = this.ctx, size = 11, padX = 7, h = 19;
     ctx.font = `${size}px ${FONT}`;
-    const widths = weapons.map(w => ctx.measureText(w.name).width + padX * 2);
-    const total = widths.reduce((a, b) => a + b, 0) + gap * (weapons.length - 1);
-    let left = align === 'right' ? x - total : x;
-    weapons.forEach((w, i) => {
-      const on = w === active;
-      if (on) {
-        this.card(left, y - h / 2, widths[i], h, {
-          fill: `rgba(4,6,12,${0.55 + pulse * 0.3})`, stroke: w.color, lineWidth: 1.5 + pulse * 1.5, glowColor: w.color,
-        });
-      }
-      this.withAlpha(on ? 1 : 0.4, () =>
-        this.text(w.name, left + widths[i] / 2, y + 0.5, size, on ? w.color : '#c3cad8', 'center', on && pulse > 0 ? w.color : null));
-      left += widths[i] + gap;
+    const w = ctx.measureText(weapon.name).width + padX * 2;
+    const x0 = align === 'right' ? x - w : x;
+    const blink = left < 0.3 && Math.sin(performance.now() / (40 + left * 300)) < 0;
+    this.withAlpha(blink ? 0.45 : 1, () => {
+      this.card(x0, y - h / 2, w, h, {
+        fill: `rgba(4,6,12,${0.55 + pulse * 0.3})`, stroke: weapon.color, lineWidth: 1.5 + pulse * 1.5, glowColor: weapon.color,
+      });
+      this.text(weapon.name, x0 + w / 2, y - 1, size, weapon.color, 'center', pulse > 0 ? weapon.color : null);
+      ctx.fillStyle = weapon.color;
+      ctx.fillRect(x0 + 3, y + h / 2 - 4, (w - 6) * Math.max(0, Math.min(1, left)), 2);
     });
   }
 

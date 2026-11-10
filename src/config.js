@@ -1,10 +1,10 @@
 // All tunable data lives here. Nothing in this file has behaviour.
 
 export const PLAYERS = [
-  { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS', selfDestruct: 'KeyE', weapon: 'KeyQ' },
-    labels: ['W thrust', 'A/D turn', 'S fire', 'Q switch weapon', 'E self-destruct'] },
-  { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown', selfDestruct: 'ShiftRight', weapon: 'Slash' },
-    labels: ['↑ thrust', '←/→ turn', '↓ fire', '/ switch weapon', 'R-Shift self-destruct'] },
+  { name: 'P1', color: '#ff5d73', keys: { thrust: 'KeyW', left: 'KeyA', right: 'KeyD', fire: 'KeyS', selfDestruct: 'KeyE' },
+    labels: ['W thrust', 'A/D turn', 'S fire on/off', 'E self-destruct'] },
+  { name: 'P2', color: '#4dd2ff', keys: { thrust: 'ArrowUp', left: 'ArrowLeft', right: 'ArrowRight', fire: 'ArrowDown', selfDestruct: 'ShiftRight' },
+    labels: ['↑ thrust', '←/→ turn', '↓ fire on/off', 'R-Shift self-destruct'] },
 ];
 
 // the player the lobby's computer key hands to the computer (P2)
@@ -27,7 +27,7 @@ export const DEFAULT_CPU_SKILL = 1;
 export const COMPUTER_LABELS = ['flown by the computer', 'V to hand it back'];
 
 // card hints for whoever the lobby gives the mouse to (their keys still work too)
-export const MOUSE_LABELS = ['mouse aims', 'right btn thrust', 'left btn fire', 'wheel switches weapon', 'middle btn self-destruct'];
+export const MOUSE_LABELS = ['mouse aims', 'right btn thrust', 'left btn fire on/off', 'middle btn self-destruct'];
 
 export const MENU_KEYS = {
   start: 'Enter',
@@ -40,6 +40,7 @@ export const MENU_KEYS = {
   demo: 'KeyX',      // lobby: watch a demo where the computer flies both jets
   cpuSkill: 'KeyL',  // lobby: cycle the computer pilot's skill
   exitDemo: 'Escape', // the only key that ends a demo
+  firstPerson: 'KeyF', // toggle the cockpit view from P1's jet (any time)
 };
 
 // Demo mode: the computer flies every jet. It starts from the lobby with
@@ -81,7 +82,8 @@ export const ROLL = { duration: 0.42, distance: 80, cooldown: 1.3, doubleTap: 14
 export const BULLET = { speed: 560, life: 0.95, radius: 2 };
 export const SPREAD_ANGLE = 0.14; // radians between bullets of a spread shot
 
-// The guns every jet carries; a pilot cycles through them with their weapon key.
+// The guns. Every jet flies with the first one (rockets); the others are
+// temporary power-ups that enemies drop (see POWERUPS).
 // Each one scales the ship's own (upgradeable) gun stats, so upgrades help every weapon.
 //   cooldown / speed / life: multipliers on fire cooldown, shot speed and range
 //   shots: extra bullets per trigger pull, spread: multiplier on SPREAD_ANGLE
@@ -99,6 +101,20 @@ export const WEAPONS = [
     cooldown: 2.8, speed: 0.6, life: 2.6, shots: 0, spread: 1, magazine: -2, size: 1.35,
     homing: 3.2, damage: 3 },
 ];
+
+// Weapon power-ups: a shot-down enemy sometimes drops a crate holding one of
+// the extra WEAPONS. Flying into it arms that gun for `duration` seconds,
+// then the jet goes back to rockets. Grabbing another crate replaces the gun
+// and restarts the clock.
+//   dropChance: per enemy size (1 drone, 2 plane, 3 zeppelin); bosses drop nothing
+//   life: seconds an untouched crate floats before it vanishes (it blinks near the end)
+export const POWERUPS = {
+  duration: 10,
+  life: 12,
+  radius: 16,
+  drift: 30,            // px/s a crate drifts in a random direction
+  dropChance: { 1: 0.1, 2: 0.25, 3: 0.6 },
+};
 
 // how homing missiles pick a target: only things within this range and this
 // angle either side of the missile's heading count

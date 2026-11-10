@@ -15,6 +15,7 @@ export class LobbyState {
     this.activity?.reset(); // the idle clock starts over each time the lobby opens
     this.world.ships = [];
     this.world.bullets = [];
+    this.world.pickups = [];
     this.world.boss = null;
     this.world.speedScale = 1;
   }

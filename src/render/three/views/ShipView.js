@@ -10,9 +10,9 @@ export class ShipView {
     this.object.scale.setScalar(SCALE);
   }
 
-  update(ship, { t, bounds, session }) {
+  update(ship, { t, bounds, session, cockpit }) {
     const m = this.model;
-    this.object.visible = ship.alive;
+    this.object.visible = ship.alive && cockpit !== ship.index;
     if (!ship.alive) return;
     this.object.position.set(toSceneX(bounds, ship.x), toSceneY(bounds, ship.y), 4 + Math.sin(t * 3 + ship.index) * 2);
     this.object.rotation.set(0, 0, -ship.angle);

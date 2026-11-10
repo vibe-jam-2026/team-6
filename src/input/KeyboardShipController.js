@@ -1,9 +1,10 @@
 import { ROLL } from '../config.js';
 
 // Turns one player's keys into an abstract control intent. Ships only depend on
-// the { thrust, turn, fire } shape, so another controller (gamepad, AI, network)
+// the { thrust, turn, fire, toggleFire } shape, so another controller (gamepad, AI, network)
 // can be swapped in without touching Ship.
 //
+// The fire key toggles auto fire on and off rather than being held.
 // soloFire is an extra fire key (Space) that only counts while `solo` is set,
 // i.e. when this player flies alone and no one else needs the key.
 export class KeyboardShipController {
@@ -23,7 +24,8 @@ export class KeyboardShipController {
     return {
       thrust: input.isDown(keys.thrust),
       turn: (input.isDown(keys.right) ? 1 : 0) - (input.isDown(keys.left) ? 1 : 0),
-      fire: input.isDown(keys.fire) || (this.solo && input.isDown(this.soloFire)),
+      fire: false,
+      toggleFire: this.confirmPressed(),
       roll: this.#doubleTap('right') - this.#doubleTap('left'),
     };
   }
@@ -40,11 +42,6 @@ export class KeyboardShipController {
   stepPressed() {
     const { input, keys } = this;
     return (input.wasPressed(keys.right) ? 1 : 0) - (input.wasPressed(keys.left) ? 1 : 0);
-  }
-
-  // 1 when the weapon key was pressed this step: cycle to the next weapon
-  weaponStep() {
-    return this.input.wasPressed(this.keys.weapon) ? 1 : 0;
   }
 
   selfDestructPressed() {

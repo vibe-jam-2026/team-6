@@ -30,6 +30,7 @@ export class PlayState {
     systems.boss.update(dt, world);
     systems.selfDestruct.update(world, session.mode);
     systems.collisions.update(world, session.mode, { invincible: session.invincible });
+    systems.pickups.update(dt, world);
     systems.bullets.removeSpent(world);
     this.effects.update(dt, world);
     const timeUp = this.waves.update(dt, world);
