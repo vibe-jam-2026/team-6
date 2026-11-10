@@ -24,6 +24,8 @@ jobs:
       # the site is the top of the repo, or docs/ when only docs/ has an index.html (a built Vite app, say)
       - id: site
         run: if [ ! -f index.html ] && [ -f docs/index.html ]; then echo "path=docs" >> "$GITHUB_OUTPUT"; else echo "path=." >> "$GITHUB_OUTPUT"; fi
+      # stamp the commit id into the game so the lobby shows which version is live
+      - run: sed -i "s/VERSION = 'dev'/VERSION = '${GITHUB_SHA::7}'/" src/version.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

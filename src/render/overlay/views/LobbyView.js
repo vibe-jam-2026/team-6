@@ -1,5 +1,6 @@
 import { PLAYERS, MOUSE_LABELS, COMPUTER_LABELS, COMPUTER_PLAYER, DEMO } from '../../../config.js';
 import { lobbyLayout } from '../lobbyLayout.js';
+import { VERSION } from '../../../version.js';
 
 export class LobbyView {
   draw(o, { time, session, audio, touch }) {
@@ -8,6 +9,7 @@ export class LobbyView {
     const layout = lobbyLayout(W, H);
     const small = layout.small;
     o.dim(0.32);
+    o.text(`version ${VERSION}`, 10, H - 12, 11, '#7d8496', 'left');
     const titleY = H * (layout.short ? 0.12 : 0.16);
     o.text('MACH MANIA', W / 2, titleY, small ? 40 : 64, '#e8ecf4', 'center', '#7aa7ff');
     o.text(tap ? 'fighter-jet shooter · 2 pilots' : 'local multiplayer fighter-jet shooter · 2 pilots on one keyboard',
