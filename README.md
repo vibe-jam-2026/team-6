@@ -52,8 +52,11 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
   name reads *P2 CPU*. With P1 as the only human, **Space** works as P1's fire key too. **L** in the lobby sets its
   skill: *Easy* reacts slowly, aims loosely and dodges late; *Normal* is in between; *Ace* reacts
   every frame, aims true and barrel-rolls out of close calls. The skill applies to the demo too.
-- **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse,
-  **V** lets the computer fly P2, **L** sets the computer's skill, **X** starts a demo, **Enter** starts.
+- **Lobby:** every option is a button you can click (or tap) as well as a hotkey, shown on the button:
+  click a pilot card or press their fire key to join/leave, **Start** (**Enter**), **Mode** (**Tab**),
+  **P2 pilot** player/computer (**V**), **CPU skill** (**L**), **Mouse** owner (**C**), **Camera** (**F**),
+  **Sound** (**M**), **Demo** (**X**) and **Invincible** (**G**, testing). The *start at wave* row (keys
+  **1–9/0**) starts the match straight at that wave.
 - **High scores:** the ten best scores are kept in your browser. If you make the table, type
   up to three initials on the results screen and press **Enter** (Enter alone keeps your player
   name). The table shows there and beside the pilot cards in the lobby. Demo matches, computer
@@ -170,7 +173,7 @@ Jumping clears the field (enemies, boss and its bullets) and starts the chosen w
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
 touch. ◀ ▶ turn, ▲ thrusts, ● toggles auto fire and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
-to join or leave, tap P2's card to add or remove a computer pilot, tap the mode line to switch mode and the start line to start. Between
+to join or leave, tap P2's card to add or remove a computer pilot, and tap the start button or any option button. Between
 waves, ◀ ▶ browse the shop and ● buys. In
 game there are pause and sound buttons at the bottom; on the game-over screen, tap
 anywhere to go back to the lobby. Add `?touch=1` to the URL to force the controls on
