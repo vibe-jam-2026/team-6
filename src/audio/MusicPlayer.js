@@ -1,11 +1,14 @@
 import { EVENTS } from '../core/EventBus.js';
+import { sceneryForWave } from '../config.js';
+import { MUSIC_STYLES, bossVersion } from './musicStyles.js';
 
 // Procedural background music: a small step sequencer on top of SynthAudio's
 // AudioContext. No sound files. Call tick() every update; it schedules notes a
 // little ahead of time so playback stays steady even when frames hitch.
 //
 // setMood(name) picks the track ('lobby', 'playing', 'paused', 'shop', 'gameover');
-// setIntensity(n) adds layers as the waves go up.
+// setIntensity(n) adds layers as the waves go up, and the match tune takes its
+// chords, melody, drums and instruments from the landscape's style (musicStyles.js).
 
 const LOOKAHEAD = 0.15;   // seconds of music scheduled in advance
 const MUSIC_VOLUME = 4; // gain into the compressor, before SynthAudio's master (0.35)
@@ -26,13 +29,6 @@ const SAD_PROGRESSION = [
   { bass: 38, chord: [57, 62, 65] },
   { bass: 28, chord: [56, 59, 64] },
 ];
-// Lead melody on an 8th-note grid (8 per bar), null = rest.
-const MELODY = [
-  [76, null, 74, 76, null, 72, 74, null],
-  [72, null, 69, null, 72, 74, null, null],
-  [76, null, 79, null, 77, 76, 74, null],
-  [74, null, 71, null, 74, null, null, null],
-];
 const ARP = [0, 1, 2, 1, 0, 2, 1, 2, 0, 1, 2, 1, 2, 1, 0, 1]; // chord-tone index per 16th
 
 // Each track decides what plays on a given 16th-note step.
@@ -50,22 +46,38 @@ const TRACKS = {
     },
   },
   playing: {
-    bpm: 132,
-    play(v, step, bar, intensity) {
-      const { bass, chord } = PROGRESSION[bar % 4];
+    bpm: 128, // the style's own tempo is used (see #bpm)
+    play(v, step, bar, intensity, style) {
+      const { bass, chord } = style.prog[bar % 4];
       // drums
-      if (step % 4 === 0) v.kick(0.45);
-      if (step % 4 === 2) v.hat(0.12);
-      if (intensity >= 2 && step % 2 === 1) v.hat(0.06);
-      if (intensity >= 2 && (step === 4 || step === 12)) v.snare(0.3);
-      // bass: driving 8ths with an octave jump on the off-beat
-      if (step % 2 === 0) v.bass(hz(bass + 12 + (step % 4 === 2 ? 12 : 0)), v.beat * 0.45, 0.3, 900 + intensity * 300);
-      // arpeggio
-      if (intensity >= 1) v.pluck(hz(chord[ARP[step]]), 0.12, 0.09, 'square');
-      // lead melody comes in on harder waves
-      if (intensity >= 3 && step % 2 === 0) {
-        const note = MELODY[bar % 4][step / 2];
-        if (note) v.lead(hz(note + 12), v.beat * 0.45, 0.09);
+      if (style.kick.includes(step)) v.kick(0.45);
+      if (style.hats === 'offbeat' && step % 4 === 2) v.hat(0.12);
+      if (style.hats === 'eighths' && step % 2 === 0) v.hat(step % 4 === 2 ? 0.12 : 0.06);
+      if (intensity >= 2 && style.hats !== 'none' && step % 2 === 1) v.hat(0.05);
+      if ((intensity >= 2 || style.boss) && style.snare.includes(step)) v.snare(0.3);
+      // bass
+      const cutoff = 900 + intensity * 300, root = bass + 12;
+      switch (style.bass) {
+        case 'sixteenths': v.bass(hz(root + (step % 4 === 2 ? 12 : 0)), v.beat * 0.22, 0.26, cutoff); break;
+        case 'pulse': if ([0, 6, 8, 14].includes(step)) v.bass(hz(root), v.beat * 0.6, 0.3, cutoff); break;
+        case 'oompah':
+          if (step === 0 || step === 8) v.bass(hz(root), v.beat * 0.8, 0.3, cutoff);
+          if (step === 4 || step === 12) v.bass(hz(root + 7), v.beat * 0.6, 0.24, cutoff);
+          break;
+        case 'long': if (step === 0) v.bass(hz(root), v.beat * 3.8, 0.26, 600 + intensity * 150); break;
+        default: if (step % 2 === 0) v.bass(hz(root + (step % 4 === 2 ? 12 : 0)), v.beat * 0.45, 0.3, cutoff);
+      }
+      if (style.pad && step === 0) chord.forEach(n => v.pad(hz(n - 12), v.beat * 4, 0.06));
+      // chords on top
+      if (intensity >= 1) {
+        if (style.arp === 'stab') { if (step === 4 || step === 12) chord.forEach(n => v.pluck(hz(n), 0.15, 0.06, style.pluck)); }
+        else if (style.arp === 'bells') { if (step % 4 === 0) v.pluck(hz(chord[ARP[step]] + 12), 0.9, 0.08, style.pluck); }
+        else v.pluck(hz(chord[ARP[step]]), 0.12, 0.09, style.pluck);
+      }
+      // the melody comes in from the second wave
+      if (intensity >= 2 && step % 2 === 0) {
+        const note = style.melody[bar % 4][step / 2];
+        if (note) v.lead(hz(note + 12), v.beat * (style.bass === 'long' ? 1.6 : 0.45), 0.09, style.lead);
       }
     },
   },
@@ -92,13 +104,18 @@ export class MusicPlayer {
   #trackName = null;
   #mood = null;
   #intensity = 1;
+  #style = MUSIC_STYLES.forest;
   #nextTime = 0;
   #step = 0;
   #bar = 0;
 
   constructor(synth, bus) {
     this.#synth = synth;
-    bus.on(EVENTS.WAVE_STARTED, ({ wave }) => this.setIntensity(wave));
+    bus.on(EVENTS.WAVE_STARTED, ({ wave, boss }) => {
+      this.setIntensity(wave);
+      const style = MUSIC_STYLES[sceneryForWave(wave).key] ?? MUSIC_STYLES.forest;
+      this.#style = boss ? bossVersion(style) : style;
+    });
   }
 
   setIntensity(n) { this.#intensity = Math.max(1, Math.min(3, n)); }
@@ -127,7 +144,7 @@ export class MusicPlayer {
     while (this.#nextTime < ctx.currentTime + LOOKAHEAD) {
       const stepDur = 60 / this.#bpm() / 4;
       if (!this.#synth.muted) {
-        this.#track.play(this.#voices(this.#nextTime, stepDur * 4), this.#step, this.#bar, this.#intensity);
+        this.#track.play(this.#voices(this.#nextTime, stepDur * 4), this.#step, this.#bar, this.#intensity, this.#style);
       }
       this.#nextTime += stepDur;
       if (++this.#step === 16) { this.#step = 0; this.#bar++; }
@@ -136,7 +153,7 @@ export class MusicPlayer {
 
   #bpm() {
     const t = this.#track;
-    return this.#trackName === 'playing' ? t.bpm + (this.#intensity - 1) * 6 : t.bpm;
+    return this.#trackName === 'playing' ? this.#style.bpm + (this.#intensity - 1) * 4 : t.bpm;
   }
 
   #start(name) {
@@ -218,8 +235,8 @@ export class MusicPlayer {
         o.connect(f); env(f, vol, 0.005, dur);
       },
       pluck(freq, dur, vol, type) { env(osc(type, freq, dur), vol, 0.004, dur); },
-      lead(freq, dur, vol) {
-        const o = osc('square', freq, dur);
+      lead(freq, dur, vol, type = 'square') {
+        const o = osc(type, freq, dur);
         o.detune.setValueAtTime(0, t);
         o.detune.linearRampToValueAtTime(-8, t + dur);
         env(o, vol, 0.01, dur);
