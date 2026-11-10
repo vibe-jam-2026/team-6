@@ -20,6 +20,7 @@ export class SoundEffects {
       synth.tone(220, 25, 2.2, 'sawtooth', 0.22);
       synth.tone(110, 18, 2.6, 'square', 0.16, 0.05);
     });
+    bus.on(EVENTS.BULLETS_CLASHED, () => synth.tone(1600, 500, 0.06, 'square', 0.04));
     bus.on(EVENTS.SHIELD_HIT, () => synth.tone(1200, 300, 0.25, 'sine', 0.14));
     bus.on(EVENTS.WAVE_CLEARED, () => [392, 523, 659].forEach((f, k) => synth.tone(f, f, 0.14, 'triangle', 0.1, k * 0.08)));
     bus.on(EVENTS.UPGRADE_BOUGHT, ({ ship }) => [660, 990, 1320].forEach((f, k) => synth.tone(f + ship.index * 40, f * 1.5, 0.1, 'square', 0.07, k * 0.06)));

@@ -28,6 +28,7 @@ export const EVENTS = {
   WAVE_STARTED: 'waveStarted',         // { wave, boss }
   WAVE_CLEARED: 'waveCleared',         // { wave }
   SELF_DESTRUCT: 'selfDestruct',       // { ship, x, y } after everything in the blast is gone
+  BULLETS_CLASHED: 'bulletsClashed',   // { shot, enemyShot, x, y } a jet's shot hit an enemy shot
   SHIELD_HIT: 'shieldHit',             // { ship, by }
   SHIELD_BLOCKED: 'shieldBlocked',     // { boss, x, y } a shot hit the Mothership's shield
   VICTORY: 'victory',                  // {} the final boss is down: the game is won
