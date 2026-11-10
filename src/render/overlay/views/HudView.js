@@ -26,6 +26,10 @@ export class HudView {
           o.shipIcon(c.x + dir * (8 + i * 18), c.y + 22, -Math.PI / 2, s.color, 0.55);
         }
         if (s.isOut) o.text('OUT', c.x, c.y + 22, 14, s.color, c.align);
+        else if (!s.controller.isComputer) {
+          const x = c.x + dir * (8 + Math.min(s.lives, MAX_LIFE_ICONS) * 18 + 4);
+          o.text(s.autoFire ? 'AUTO FIRE' : 'FIRE OFF', x, c.y + 22, 11, s.autoFire ? '#9aa1b2' : '#ff6b6b', c.align);
+        }
         else if (s.weapons.length > 1) {
           o.weaponStrip(s.weapons, s.weapon, c.x, c.y + (c.y < H / 2 ? 46 : -24), c.align, this.#pulse(s, time));
         }

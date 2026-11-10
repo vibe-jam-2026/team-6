@@ -22,7 +22,7 @@ export class Ship {
   constructor(index, player, controller) {
     this.index = index;
     this.player = player;          // { name, color, ... }
-    this.controller = controller;  // anything with read(ship) -> { thrust, turn, fire }
+    this.controller = controller;  // anything with read(ship) -> { thrust, turn, fire, toggleFire }
     this.x = 0; this.y = 0; this.vx = 0; this.vy = 0;
     this.angle = FACING_UP;
     this.bank = 0;                 // visual roll, eased towards the turn input
@@ -37,10 +37,11 @@ export class Ship {
     this.cooldown = 0;
     this.thrusting = false;
     this.wantsToFire = false;
+    this.autoFire = !controller.isComputer; // pilots' guns run on their own; the fire key toggles them
     this.stats = baseStats();
     this.upgrades = new Map();     // upgrade id -> level
     this.shieldCharges = 0;
-    this.weapons = [...WEAPONS];   // the guns this ship can switch between
+    this.weapons = [...WEAPONS];   // the trigger is up, the guns this ship can switch between
     this.weaponIndex = 0;
   }
 
@@ -113,7 +114,8 @@ export class Ship {
     const st = this.stats;
     this.angle += c.turn * st.turnSpeed * dt;
     this.thrusting = c.thrust;
-    this.wantsToFire = true; // guns fire continuously; the fire key only drives the menus
+    if (c.toggleFire) this.autoFire = !this.autoFire;
+    this.wantsToFire = this.autoFire || !!c.fire;
     if (c.thrust) {
       this.vx += Math.cos(this.angle) * st.thrust * dt;
       this.vy += Math.sin(this.angle) * st.thrust * dt;
@@ -130,7 +132,7 @@ export class Ship {
   }
 
   // Returns the bullets fired this step (several with spread shot), or [] if
-  // the gun is cooling down or too many shots are in the air.
+  // the trigger is up, the gun is cooling down or too many shots are in the air.
   tryFire(bulletsInFlight) {
     const st = this.stats, w = this.weapon;
     if (!this.wantsToFire || this.cooldown > 0 || bulletsInFlight >= st.maxBullets + w.magazine) return [];
