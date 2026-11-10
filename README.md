@@ -48,6 +48,8 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
 - **Voice command:** say **"nåt coolt"** into the microphone to fly straight to the arctic level
   (wave 8). The browser asks for the microphone after your first key press, click or tap; it needs a
   browser with speech recognition (Chrome, Edge, Safari), and in the shop or while paused it does nothing.
+  Say **"engage"** to keep the thrusters on without holding the key, and **"stop"** to turn them off again
+  (applies to every human pilot during a match; a new match starts with them off).
 - **Demo mode:** **X** in the lobby (or 30 seconds without touching anything there) starts a match
   where the computer flies both jets, in the mode picked in the lobby. When a demo match ends the results
   show for a few seconds and the next one starts. Only **Esc** ends the demo (other keys, clicks and

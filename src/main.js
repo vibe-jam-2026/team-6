@@ -106,9 +106,19 @@ states
 const testControls = new TestControls(deps);
 
 // say "nåt coolt" into the microphone to fly straight to the arctic level,
-// or "fuska" to make the players invincible
+// "fuska" to make the players invincible, "engage" to hold every human
+// pilot's thrusters on and "stop" to hand them back to the keys
+const setAutoThrust = on => {
+  if (states.currentName !== 'playing') return;
+  if (controllers.every(c => c.autoThrust === on)) return;
+  for (const c of controllers) c.autoThrust = on;
+  session.announce(on ? 'THRUSTERS ENGAGED' : 'THRUSTERS OFF', 1.5);
+};
 const voice = new VoiceCommands({ lang: 'sv-SE' })
   .on(/fuska/, () => testControls.makeInvincible())
+  // the Swedish recogniser may spell the English word a few ways
+  .on(/\b(engage|engag|in\s?gage|en\s?gage|ingage|engej|ingej)/, () => setAutoThrust(true))
+  .on(/\bstopp?\b/, () => setAutoThrust(false))
   .on(/n[åoa]t+\s*coo?l+t/, () => {
     const arcticWave = SCENERY.findIndex(s => s.key === 'arctic') + 1;
     testControls.goToWave(arcticWave);   // its wave banner names the arctic

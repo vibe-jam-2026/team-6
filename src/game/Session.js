@@ -84,6 +84,7 @@ export class Session {
     this.controllers.forEach((c, i) => {
       c.solo = solo;               // a lone pilot can also fire with Space
       c.useMouse = i === this.mouseOwner;
+      c.autoThrust = false;
     });
     return PLAYERS
       .map((player, i) => this.joined[i] ? new Ship(i, player, this.computer[i] ? this.computers[i] : this.controllers[i]) : null)
