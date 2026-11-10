@@ -28,6 +28,7 @@ export class LobbyState {
     if (input.wasPressed(MENU_KEYS.mouse)) { session.cycleMouseOwner(); this.#click(); }
     if (input.wasPressed(MENU_KEYS.computer)) { session.toggleComputer(COMPUTER_PLAYER); this.#click(); }
     if (input.wasPressed(MENU_KEYS.switchMode)) { session.nextMode(); this.#click(); }
+    if (input.wasPressed(MENU_KEYS.cpuSkill)) { session.nextCpuSkill(); this.#click(); }
     const idle = this.activity && this.activity.idleSeconds >= DEMO.idleTime;
     if (input.wasPressed(MENU_KEYS.demo) || idle) {
       this.#click();

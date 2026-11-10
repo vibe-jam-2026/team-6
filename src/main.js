@@ -20,6 +20,7 @@ import { SoundEffects } from './audio/SoundEffects.js';
 import { MusicPlayer } from './audio/MusicPlayer.js';
 import { World } from './world/World.js';
 import { Session } from './game/Session.js';
+import { HighScores } from './game/HighScores.js';
 import { ShipSystem } from './systems/ShipSystem.js';
 import { BulletSystem } from './systems/BulletSystem.js';
 import { CollisionSystem } from './systems/CollisionSystem.js';
@@ -38,6 +39,7 @@ import { PlayState } from './states/PlayState.js';
 import { PausedState } from './states/PausedState.js';
 import { GameOverState } from './states/GameOverState.js';
 import { ShopState } from './states/ShopState.js';
+import { FlyoverState } from './states/FlyoverState.js';
 import { Shop } from './upgrades/Shop.js';
 import { WorldRenderer } from './render/three/WorldRenderer.js';
 import { Overlay2D } from './render/overlay/Overlay2D.js';
@@ -51,13 +53,14 @@ import { ShopView } from './render/overlay/views/ShopView.js';
 import { FlashView } from './render/overlay/views/FlashView.js';
 import { FireworksView } from './render/overlay/views/FireworksView.js';
 import { DemoView } from './render/overlay/views/DemoView.js';
+import { CreditsView } from './render/overlay/views/CreditsView.js';
 import { Fireworks } from './effects/Fireworks.js';
 
 // --- infrastructure ---
 const bus = new EventBus();
 const viewport = new Viewport(window);
 const activity = new ActivityMonitor(window);
-const capturedKeys = [...PLAYERS.flatMap(p => Object.values(p.keys)), MENU_KEYS.start, MENU_KEYS.switchMode, 'Space'];
+const capturedKeys = [...PLAYERS.flatMap(p => Object.values(p.keys)), MENU_KEYS.start, MENU_KEYS.switchMode, 'Space', 'Backspace'];
 const input = new KeyboardInput(window, capturedKeys);
 const audio = new SynthAudio();
 input.onKeyDown(() => audio.unlock());
@@ -75,12 +78,13 @@ const screenToWorld = (px, py) => {
 const mouseController = new MouseShipController(mouse, screenToWorld);
 const controllers = PLAYERS.map(p => new PlayerController(new KeyboardShipController(input, p.keys), mouseController));
 const world = new World(viewport, bus);
-const computers = PLAYERS.map(() => new ComputerShipController(world, () => session.mode));
+const computers = PLAYERS.map(() => new ComputerShipController(world, () => session.mode, () => session.cpuSkill));
 const session = new Session(bus, controllers, undefined, computers);
 // a phone has one pilot: start the lobby with only P1 joined
 if (TouchControls.likelyTouch()) session.joined = session.joined.map((_, i) => i === 0);
 const waves = new WaveSpawner(bus);
 const shop = new Shop();
+const highScores = new HighScores();
 const particles = new ParticleSystem();
 const effects = new EffectsDirector(bus, particles);
 const fireworks = new Fireworks(bus, viewport);
@@ -98,12 +102,13 @@ const systems = {
 
 // --- states ---
 const states = new StateMachine();
-const deps = { input, bus, world, session, waves, effects, states, systems, shop, activity };
+const deps = { input, bus, world, session, waves, effects, states, systems, shop, activity, highScores };
 states
   .register('lobby', new LobbyState(deps))
   .register('playing', new PlayState(deps))
   .register('paused', new PausedState(deps))
   .register('shop', new ShopState(deps))
+  .register('flyover', new FlyoverState(deps))
   .register('gameover', new GameOverState(deps));
 const testControls = new TestControls(deps);
 
@@ -137,11 +142,12 @@ const flash = new FlashView(bus);
 const fireworksView = new FireworksView(fireworks);
 const demoView = new DemoView();
 const overlay = new OverlayRenderer(
-  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, shop })
+  new Overlay2D(document.getElementById('hud'), viewport), states, { world, session, waves, audio, shop, highScores })
   .register('lobby', [new LobbyView()])
   .register('playing', [fireworksView, hud, new BannerView(), flash, demoView])
   .register('paused', [hud, new PauseView()])
   .register('shop', [flash, hud, new ShopView(), demoView])
+  .register('flyover', [fireworksView, new CreditsView()])
   .register('gameover', [fireworksView, flash, hud, new GameOverView(), demoView]);
 const footer = document.getElementById('foot');
 const touch = new TouchControls({ input, states, players: PLAYERS, onGesture: () => { audio.unlock(); voice.start(); } });
@@ -167,7 +173,7 @@ new GameLoop({
       states.update(dt);
     }
     // the victory fireworks run from the final boss's fall until the players leave the results
-    fireworks.update(dt, session.victory && ['playing', 'gameover'].includes(states.currentName));
+    fireworks.update(dt, session.victory && ['playing', 'flyover', 'gameover'].includes(states.currentName));
     music.setMood(states.currentName);
     music.tick();
     input.endStep();
@@ -183,4 +189,4 @@ new GameLoop({
 
 // handle for debugging from the browser console
 // game.addMoney(500) gives every pilot $500; game.addMoney(500, 0) only P1
-window.game = { states, world, session, bus, waves, shop, fireworks, systems, addMoney: (amount, player) => testControls.addMoney(amount, player) };
+window.game = { states, world, session, bus, waves, shop, fireworks, systems, highScores, addMoney: (amount, player) => testControls.addMoney(amount, player) };

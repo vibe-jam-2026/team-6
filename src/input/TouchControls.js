@@ -140,6 +140,7 @@ export class TouchControls {
     this.onGesture();
     const name = this.states.currentName;
     if (name === 'lobby') this.#lobbyTap(e.clientX, e.clientY);
+    else if (name === 'flyover') this.#tapKey(MENU_KEYS.start); // skip the victory lap
     else if (name === 'gameover' && performance.now() - this.#stateSince > GAMEOVER_TAP_DELAY) {
       this.#tapKey(MENU_KEYS.start);
     }

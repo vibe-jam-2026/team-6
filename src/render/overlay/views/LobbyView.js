@@ -1,9 +1,10 @@
 import { PLAYERS, MOUSE_LABELS, COMPUTER_LABELS, COMPUTER_PLAYER, DEMO } from '../../../config.js';
 import { lobbyLayout } from '../lobbyLayout.js';
+import { drawHighScores } from './highScoreTable.js';
 import { VERSION } from '../../../version.js';
 
 export class LobbyView {
-  draw(o, { time, session, audio, touch, cameraView }) {
+  draw(o, { time, session, audio, touch, cameraView, highScores }) {
     const tap = touch?.enabled;
     const { width: W, height: H } = o;
     const layout = lobbyLayout(W, H);
@@ -28,6 +29,13 @@ export class LobbyView {
       if (!layout.short) labels.forEach((t, k) => o.text(t, c.x + c.w / 2, c.y + 104 + k * 15, 11, mouse || cpu ? p.color : '#9aa1b2', 'center'));
     });
 
+    // the best scores, beside the pilot cards when there is room
+    const cardsRight = Math.max(...layout.cards.map(c => c.x + c.w));
+    if (highScores && W - cardsRight > 300) {
+      const x = (cardsRight + W) / 2;
+      drawHighScores(o, highScores.top(5), { x, y: layout.cards[0].y + 12, width: Math.min(240, W - cardsRight - 60), time });
+    }
+
     const by = layout.footerY;
     const mode = session.mode;
     o.text(tap ? 'tap P1 to join · tap P2 for a computer pilot' : 'press a pilot\'s FIRE key to join / leave', W / 2, by, 14, '#9aa1b2', 'center');
@@ -41,8 +49,10 @@ export class LobbyView {
     if (!tap) {
       const owner = session.mouseOwner === null ? 'nobody (keyboard only)' : PLAYERS[session.mouseOwner].name;
       const cpu = PLAYERS[COMPUTER_PLAYER];
-      o.text(`V  ${cpu.name} flown by: ${session.computer[COMPUTER_PLAYER] ? 'the computer' : 'a player'}`, W / 2, by + 96, 13,
+      o.text(`V  ${cpu.name} flown by: ${session.computer[COMPUTER_PLAYER] ? 'the computer' : 'a player'}`, W / 2 - 140, by + 96, 13,
         session.computer[COMPUTER_PLAYER] ? cpu.color : '#9aa1b2', 'center');
+      const skill = session.cpuSkill;
+      o.text(`L  computer skill: ${skill.name}`, W / 2 + 150, by + 96, 13, skill.color, 'center');
       o.text(`C  mouse control: ${owner}`, W / 2, by + 114, 13,
         session.mouseOwner === null ? '#9aa1b2' : PLAYERS[session.mouseOwner].color, 'center');
       if (session.humanCount === 1) o.text('flying solo: SPACE works as your fire key too', W / 2, by + 132, 11, '#7d8496', 'center');

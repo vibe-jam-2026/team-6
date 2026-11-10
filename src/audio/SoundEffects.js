@@ -3,6 +3,7 @@ import { EVENTS } from '../core/EventBus.js';
 // Maps game events to sounds. Gameplay code never calls audio directly.
 export class SoundEffects {
   constructor(bus, synth) {
+    bus.on(EVENTS.SHIP_ROLLED, () => synth.noise(0.3, 0.06, 2500));
     bus.on(EVENTS.SHOT_FIRED, ({ ship }) => synth.tone(880 + ship.index * 120, 220, 0.12, 'square', 0.07));
     bus.on(EVENTS.POWERUP_COLLECTED, ({ ship }) => [520, 780, 1040].forEach((f, k) => synth.tone(f + ship.index * 60, f * 1.2, 0.07, 'square', 0.07, k * 0.05)));
     bus.on(EVENTS.POWERUP_EXPIRED, ({ ship }) => [780, 520].forEach((f, k) => synth.tone(f + ship.index * 60, f * 0.8, 0.06, 'triangle', 0.05, k * 0.06)));

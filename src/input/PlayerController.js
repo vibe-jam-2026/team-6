@@ -18,7 +18,7 @@ export class PlayerController {
   }
 
   #merge(k, m) {
-    return { thrust: k.thrust || m.thrust, turn: k.turn || m.turn, fire: k.fire || m.fire, toggleFire: k.toggleFire || m.toggleFire };
+    return { thrust: k.thrust || m.thrust, turn: k.turn || m.turn, fire: k.fire || m.fire, toggleFire: k.toggleFire || m.toggleFire, roll: k.roll };
   }
 
   stepPressed() {

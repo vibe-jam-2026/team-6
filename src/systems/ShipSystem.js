@@ -14,6 +14,7 @@ export class ShipSystem {
         continue;
       }
       ship.update(dt, world.bounds);
+      if (ship.justRolled) this.bus.emit(EVENTS.SHIP_ROLLED, { ship, dir: ship.rollDir });
       const weapon = ship.powerup;
       if (ship.tickPowerup(dt)) this.bus.emit(EVENTS.POWERUP_EXPIRED, { ship, weapon });
       const inFlight = world.bullets.filter(b => b.owner === ship).length;

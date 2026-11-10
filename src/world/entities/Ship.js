@@ -1,4 +1,4 @@
-import { SHIP, RULES, BULLET, SPREAD_ANGLE, WEAPONS } from '../../config.js';
+import { SHIP, RULES, BULLET, SPREAD_ANGLE, WEAPONS, ROLL } from '../../config.js';
 import { Bullet } from './Bullet.js';
 
 const FACING_UP = -Math.PI / 2;
@@ -43,6 +43,10 @@ export class Ship {
     this.shieldCharges = 0;
     this.powerup = null;           // a weapon picked up from a crate, while it lasts
     this.powerupTime = 0;          // seconds left on it
+    this.rollTime = 0;             // seconds left in a barrel roll
+    this.rollDir = 0;              // -1 rolling left, 1 right
+    this.rollCooldown = 0;
+    this.justRolled = false;       // a roll started this step (for the sound)
   }
 
   // the standard gun, or the power-up weapon while one is armed
@@ -72,7 +76,11 @@ export class Ship {
   get color() { return this.player.color; }
   get inPlay() { return this.alive || this.lives > 0; }
   get isOut() { return !this.inPlay; }
-  get vulnerable() { return this.alive && this.invulnerable <= 0; }
+  get rolling() { return this.rollTime > 0; }
+  // 0..1 through the current roll (for the 3D spin)
+  get rollProgress() { return this.rolling ? 1 - this.rollTime / ROLL.duration : 0; }
+  // can't be hit while respawn-shielded or in the middle of a barrel roll
+  get vulnerable() { return this.alive && this.invulnerable <= 0 && !this.rolling; }
 
   upgradeLevel(id) { return this.upgrades.get(id) ?? 0; }
 
@@ -106,7 +114,7 @@ export class Ship {
   }
 
   spawnAt({ x, y }) {
-    Object.assign(this, { x, y, vx: 0, vy: 0, angle: FACING_UP, alive: true, invulnerable: RULES.invulnTime, cooldown: 0 });
+    Object.assign(this, { x, y, vx: 0, vy: 0, angle: FACING_UP, alive: true, invulnerable: RULES.invulnTime, cooldown: 0, rollTime: 0, rollCooldown: 0 });
   }
 
   destroy() {
@@ -131,6 +139,21 @@ export class Ship {
     this.thrusting = c.thrust;
     if (c.toggleFire) this.autoFire = !this.autoFire;
     this.wantsToFire = this.autoFire || !!c.fire;
+    this.justRolled = false;
+    this.rollCooldown = Math.max(0, this.rollCooldown - dt);
+    if (c.roll && !this.rolling && this.rollCooldown <= 0) {
+      this.rollTime = ROLL.duration;
+      this.rollDir = Math.sign(c.roll);
+      this.rollCooldown = ROLL.duration + ROLL.cooldown;
+      this.justRolled = true;
+    }
+    if (this.rolling) {
+      // hop sideways: -1 to the jet's left, 1 to its right (y points down)
+      const side = this.angle + this.rollDir * Math.PI / 2, step = ROLL.distance / ROLL.duration * Math.min(dt, this.rollTime);
+      this.x += Math.cos(side) * step;
+      this.y += Math.sin(side) * step;
+      this.rollTime = Math.max(0, this.rollTime - dt);
+    }
     if (c.thrust) {
       this.vx += Math.cos(this.angle) * st.thrust * dt;
       this.vy += Math.sin(this.angle) * st.thrust * dt;

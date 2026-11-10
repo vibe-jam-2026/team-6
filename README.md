@@ -37,6 +37,10 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
   shotgun blast and **Homing** fires slow, heavy missiles that lock on to the nearest enemy
   ahead (in free-for-all also other jets) and take 3 hits off the boss. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 
+- **Barrel roll:** double-tap a turn key (on touch screens, a turn button) to roll the jet sideways
+  out of trouble. It hops about 80 px to that side, can't be hit while it rolls, and has to wait
+  just over a second before rolling again.
+
 - **Flying solo:** with only one pilot joined, **Space** works as your fire key too (toggles auto fire, buys in the shop).
 - **Mouse control:** in the lobby, **C** hands the mouse to nobody → P1 → P2. That pilot's jet turns its
   nose towards the pointer, the **left button** toggles auto fire, the **right button** thrusts and the
@@ -45,9 +49,15 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
 - **Computer pilot:** in the lobby, **V** hands P2 to the computer (and joins it), and **V** again
   takes it back. It dodges rocks, the boss and its bullets, leads its shots, hunts the nearest
   target (including you in free-for-all), detours to grab nearby weapon crates and spends its own money in the shop between waves. Its HUD
-  name reads *P2 CPU*. With P1 as the only human, **Space** works as P1's fire key too.
+  name reads *P2 CPU*. With P1 as the only human, **Space** works as P1's fire key too. **L** in the lobby sets its
+  skill: *Easy* reacts slowly, aims loosely and dodges late; *Normal* is in between; *Ace* reacts
+  every frame, aims true and barrel-rolls out of close calls. The skill applies to the demo too.
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse,
-  **V** lets the computer fly P2, **X** starts a demo, **Enter** starts.
+  **V** lets the computer fly P2, **L** sets the computer's skill, **X** starts a demo, **Enter** starts.
+- **High scores:** the ten best scores are kept in your browser. If you make the table, type
+  up to three initials on the results screen and press **Enter** (Enter alone keeps your player
+  name). The table shows there and beside the pilot cards in the lobby. Demo matches, computer
+  pilots and invincible test runs don't count.
 - **Voice command:** say **"nåt coolt"** into the microphone to fly straight to the arctic level
   (wave 8). The browser asks for the microphone after your first key press, click or tap; it needs a
   browser with speech recognition (Chrome, Edge, Safari), and in the shop or while paused it does nothing.
@@ -79,6 +89,11 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
   | Plane | turns towards the nearest jet and fires at it | 2 | 100 | $15 |
   | Zeppelin | drifts slowly and launches drones at you (up to 3 of its own at a time) | 5 | 200 | $30 |
 
+  From wave 2, **anti-aircraft guns** also stand on the ground below (1–4 per wave, none on boss
+  waves). Each swings its turret towards the nearest jet within range and fires leading flak
+  at it. You fly over them and can't crash into them, but your shots hit them: 3 hits, 150 points,
+  $20. They leave with the other enemies when the wave's time is up.
+
   Plane bullets, like the boss's, fly through the other enemies. Flying into an enemy costs
   your jet and counts as one hit on it. Shooting down another jet in free-for-all pays $50 and
   every hit on the boss $2. Each pilot's money is shown in gold next to their score. Extra life
@@ -97,6 +112,14 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
   | 8 | arctic pack ice: cracked floes, icebergs and a red research station |
   | 9 | a neon city at night: dark towers, glowing rooftops and streets traced in light |
   | 10 | the Moon: grey craters under a black sky and a small moon base |
+
+  Each landscape has its own **weather** (rain over the forest, the coast and the neon city, snow
+  in the Alps, a blizzard on the ice, blowing sand over the dunes, rising embers over the volcano,
+  magic motes in the fantasy realm, nothing on the Moon) and its own **music**. The tune changes
+  key, beat and instruments: folk-ish drive in the forest, bright on the coast, oom-pah in the
+  Alps, an epic march in the realm, desert scales, heavy and fast over the lava, sparse bells on
+  the ice, synthwave in the neon city and eerie pads on the Moon. Boss waves play their
+  landscape's tune faster and harder.
 - **Shaky camera:** every 9–18 seconds of play the camera swings to a random new 3D angle
   around the arena (turned up to ~35° either way, from almost straight down to a low, steep view),
   always refitted so the whole arena stays on screen. It settles back to the normal view in the lobby.
@@ -108,8 +131,9 @@ Jets fire **continuously** by default — the fire key toggles auto fire on and 
   launches **fighters** from the hangar, sends **walls of bullets** across the arena with a gap to
   slip through, and fires slow, heavy **cannon shells** at every jet; below half health it spins
   its shield faster and adds counter-rotating spirals. 15 points per hit, 10 000 for the final
-  blow — which wins the game: **VICTORY** banner, fanfare and fireworks over the arena, then a gold
-  victory screen with the fireworks still going.
+  blow — which wins the game: **VICTORY** banner, fanfare and fireworks over the arena, then a
+  **victory lap**: the camera tours all ten landscapes while your jets fly in formation and the
+  credits roll (**Enter** or a tap skips it), then a gold victory screen with the fireworks still going.
 - **Self-destruct:** blows your jet up in a massive blast that wipes out every enemy, bullet,
   jet and the boss, shields or not, and **ends the game**. You still score everything the
   blast takes out (and, in free-for-all, every kill) before the final scores are shown.
@@ -169,18 +193,21 @@ src/
                           TestControls (invincible mode, wave jumps, dev money),
                           TouchControls (on-screen buttons that press the same key codes)
   audio/                  SynthAudio (WebAudio synth), SoundEffects (events -> sounds),
-                          MusicPlayer (procedural soundtrack per game state)
-  world/                  World (entities + destruction) and entities/ Ship, Asteroid, Bullet, Boss, Mothership
+                          MusicPlayer (procedural soundtrack per game state), musicStyles (one per landscape)
+  world/                  World (entities + destruction) and entities/ Ship, Asteroid, GroundTarget (AA gun),
+                          Bullet, Boss, Mothership
   systems/                ShipSystem, BulletSystem, EnemySystem (planes shoot, zeppelins launch drones),
                           BossSystem, CollisionSystem, WaveSpawner,
                           SpawnPlanner, ScoreKeeper, Paymaster (money), SelfDestructSystem
   modes/                  GameMode base class, FreeForAllMode, CoopMode
-  game/Session.js         lobby choices, wave banner and final result
+  game/                   Session (lobby choices, wave banner, final result), HighScores (saved top 10)
   upgrades/               catalog (every upgrade, its effect and price), Shop (prices, buying, ready)
-  states/                 LobbyState, PlayState, PausedState, ShopState, GameOverState
+  states/                 LobbyState, PlayState, PausedState, ShopState, FlyoverState (victory lap),
+                          GameOverState (results, high-score initials)
   effects/                ParticleSystem (data), EffectsDirector (events -> particles), Fireworks (victory show)
   render/three/           3D world: ThreeStage, CameraRig, ArenaView, Lighting,
-                          EntityViewSync + views/ (ShipView, AsteroidView, BulletView, BossView, MothershipView, ParticleView)
+                          WeatherView, EntityViewSync + views/ (ShipView, AsteroidView, GroundTargetView, BulletView,
+                          BossView, MothershipView, ParticleView)
                           + scenery/ (Scenery, terrain helpers, noise, one file per landscape theme)
   render/overlay/         2D HUD and menus: Overlay2D primitives, OverlayRenderer, views/
 ```

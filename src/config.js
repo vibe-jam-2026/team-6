@@ -10,6 +10,19 @@ export const PLAYERS = [
 // the player the lobby's computer key hands to the computer (P2)
 export const COMPUTER_PLAYER = 1;
 
+// How well the computer flies, picked in the lobby (it also flies the demo).
+//   think: frames between decisions (it holds its last input in between)
+//   aimError: radians its aim wanders either side of the perfect lead
+//   lookahead / margin: how far ahead (s) and how wide (px) it watches for collisions
+//   turnGain: how hard it steers per radian off course
+//   roll: chance per second it barrel-rolls out of a hit it can't otherwise dodge
+export const CPU_SKILLS = [
+  { name: 'EASY', color: '#9dff5c', think: 14, aimError: 0.22, lookahead: 0.35, margin: 6, turnGain: 2.6, roll: 0 },
+  { name: 'NORMAL', color: '#ffd23f', think: 5, aimError: 0.07, lookahead: 0.6, margin: 16, turnGain: 4, roll: 0.5 },
+  { name: 'ACE', color: '#ff5d73', think: 1, aimError: 0, lookahead: 0.9, margin: 26, turnGain: 5, roll: 3 },
+];
+export const DEFAULT_CPU_SKILL = 1;
+
 // card hints for a computer-flown jet
 export const COMPUTER_LABELS = ['flown by the computer', 'V to hand it back'];
 
@@ -25,6 +38,7 @@ export const MENU_KEYS = {
   mouse: 'KeyC',     // lobby: hand the mouse to nobody / P1 / P2
   computer: 'KeyV',  // lobby: let the computer fly P2 (or hand it back)
   demo: 'KeyX',      // lobby: watch a demo where the computer flies both jets
+  cpuSkill: 'KeyL',  // lobby: cycle the computer pilot's skill
   exitDemo: 'Escape', // the only key that ends a demo
   firstPerson: 'KeyF', // cycle the camera: overview → P1's cockpit → chase behind P1 (any time)
 };
@@ -58,6 +72,12 @@ export const SHIP = {
   maxBullets: 5,
   muzzleOffset: 15,
 };
+
+// Barrel roll: double-tap a turn key to flip sideways out of trouble. The jet
+// hops `distance` px to that side over `duration` seconds and can't be hit
+// while it rolls; then it has to wait `cooldown` seconds to roll again.
+//   doubleTap: max frames between the two taps
+export const ROLL = { duration: 0.42, distance: 80, cooldown: 1.3, doubleTap: 14 };
 
 export const BULLET = { speed: 560, life: 0.95, radius: 2 };
 // px added to the two shots' radii when a jet's shot meets an enemy shot, so
@@ -121,6 +141,21 @@ export const ENEMY_TYPES = {
     launchEvery: [3.5, 5.5],   // seconds between drone launches
     maxDrones: 3,              // drones of its own in the air at once
     launchSpread: 0.6 },       // radians either side of the nearest jet it aims drones
+};
+
+// Anti-aircraft guns on the ground below the arena, from wave 2 on (timed waves
+// only). They swing towards the nearest jet and fire leading flak shots up at
+// it; jets can't hit them by flying into them, only by shooting them.
+//   count(wave): guns placed when the wave starts
+export const GROUND = {
+  count: wave => (wave < 2 ? 0 : Math.min(4, Math.floor((wave + 1) / 2))),
+  radius: 20, hp: 3, score: 150, bounty: 20, color: '#ff4a3a',
+  fireEvery: [2.6, 4.2],     // seconds between shots
+  range: 480,                // only fires at jets this close
+  bullet: { speed: 240, life: 2.4, radius: 4 },
+  edgeMargin: 90,            // px kept clear of the arena edges
+  spacing: 170,              // px between guns
+  shipClearance: 180,        // px from any jet when placed
 };
 
 // how likely each type is when a wave spawns an enemy: [drone, plane, zeppelin] weights,
@@ -201,6 +236,9 @@ export const WAVES = {
 };
 
 export const DEFAULT_JOINED = [true, true];
+
+// The victory flyover after the final boss: seconds spent over each landscape.
+export const FLYOVER = { perLandscape: 4.2 };
 
 // The landscape below the arena for each wave, in order (it cycles if there
 // are ever more waves than entries). The lobby shows the first one.

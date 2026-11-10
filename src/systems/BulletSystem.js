@@ -30,7 +30,7 @@ export class BulletSystem {
 
   // enemies, the boss and, when friendly fire is on, the other pilots
   #targets(b, world, mode) {
-    const list = [...world.asteroids];
+    const list = [...world.asteroids, ...world.groundTargets];
     if (world.boss?.vulnerable) list.push(world.boss);
     if (mode?.friendlyFire) list.push(...world.ships.filter(s => s !== b.owner && s.vulnerable));
     return list;
@@ -40,7 +40,7 @@ export class BulletSystem {
     if (!t) return false;
     if (t === world.boss) return t.vulnerable;
     if (world.ships.includes(t)) return !!mode?.friendlyFire && t.vulnerable;
-    return world.asteroids.includes(t);
+    return world.asteroids.includes(t) || world.groundTargets.includes(t);
   }
 
   // the closest target in the cone ahead, favouring those straight in front

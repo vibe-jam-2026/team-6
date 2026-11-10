@@ -8,6 +8,7 @@ export class World {
   bullets = [];
   pickups = [];   // weapon crates dropped by enemies
   boss = null;
+  groundTargets = []; // AA guns on the ground (see GroundTarget)
   speedScale = 1; // set by the wave spawner, applied to new rocks
 
   constructor(bounds, bus) {
@@ -21,14 +22,16 @@ export class World {
     this.bullets = [];
     this.pickups = [];
     this.boss = null;
+    this.groundTargets = [];
     this.speedScale = 1;
   }
 
   // When a wave's time is up the enemies still flying turn back: no score,
   // no money, just gone (effects can show them leaving).
   retreatEnemies() {
-    const leaving = this.asteroids;
+    const leaving = [...this.asteroids, ...this.groundTargets];
     this.asteroids = [];
+    this.groundTargets = [];
     this.bullets = [];
     this.pickups = [];
     if (leaving.length) this.bus.emit(EVENTS.ENEMIES_RETREATED, { enemies: leaving });
@@ -37,6 +40,7 @@ export class World {
   // removes everything hostile: rocks, the boss and its bullets (used when jumping waves)
   clearField() {
     this.asteroids = [];
+    this.groundTargets = [];
     this.boss = null;
     this.bullets = [];
     this.pickups = [];
@@ -54,6 +58,19 @@ export class World {
     if (!this.asteroids.includes(enemy)) return;
     if (enemy.takeHit(damage)) this.destroyAsteroid(enemy, by);
     else this.bus.emit(EVENTS.ENEMY_HIT, { enemy, by });
+  }
+
+  // A shot lands on a ground gun. It reports through the same events as the
+  // flying enemies, so it scores, pays and explodes like one.
+  hitGroundTarget(target, by = null, damage = 1) {
+    const i = this.groundTargets.indexOf(target);
+    if (i < 0) return;
+    if (!target.takeHit(damage)) {
+      this.bus.emit(EVENTS.ENEMY_HIT, { enemy: target, by });
+      return;
+    }
+    this.groundTargets.splice(i, 1);
+    this.bus.emit(EVENTS.ASTEROID_DESTROYED, { asteroid: target, by });
   }
 
   // gone for good: enemies no longer split into smaller ones

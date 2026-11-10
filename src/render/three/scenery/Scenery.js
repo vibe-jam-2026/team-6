@@ -39,6 +39,17 @@ export class Scenery {
     if (fog) { fog.near = d * 1.15; fog.far = d * 2.6; }
   }
 
+  // Height of whatever is below scene point (x, y): the terrain, or the water
+  // over it. Things placed on the ground (AA guns) stand on this.
+  groundAt(x, y) {
+    let z = -60;
+    for (const o of this.group.children) {
+      if (o.userData.groundAt) z = Math.max(z, o.userData.groundAt(x, y));
+      if (o.userData.waterLevel !== undefined) z = Math.max(z, o.userData.waterLevel);
+    }
+    return z;
+  }
+
   show(key) {
     if (key === this.#key) return;
     this.#key = key;
