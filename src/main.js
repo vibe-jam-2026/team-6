@@ -30,6 +30,7 @@ import { ScoreKeeper } from './systems/ScoreKeeper.js';
 import { Paymaster } from './systems/Paymaster.js';
 import { EnemySystem } from './systems/EnemySystem.js';
 import { SelfDestructSystem } from './systems/SelfDestructSystem.js';
+import { PickupSystem } from './systems/PickupSystem.js';
 import { ParticleSystem } from './effects/ParticleSystem.js';
 import { EffectsDirector } from './effects/EffectsDirector.js';
 import { LobbyState } from './states/LobbyState.js';
@@ -92,6 +93,7 @@ const systems = {
   boss: new BossSystem(bus),
   collisions: new CollisionSystem(bus),
   selfDestruct: new SelfDestructSystem(bus),
+  pickups: new PickupSystem(bus, world),
 };
 
 // --- states ---
@@ -175,4 +177,4 @@ new GameLoop({
 
 // handle for debugging from the browser console
 // game.addMoney(500) gives every pilot $500; game.addMoney(500, 0) only P1
-window.game = { states, world, session, bus, waves, shop, fireworks, addMoney: (amount, player) => testControls.addMoney(amount, player) };
+window.game = { states, world, session, bus, waves, shop, fireworks, systems, addMoney: (amount, player) => testControls.addMoney(amount, player) };

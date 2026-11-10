@@ -41,18 +41,30 @@ export class Ship {
     this.stats = baseStats();
     this.upgrades = new Map();     // upgrade id -> level
     this.shieldCharges = 0;
-    this.weapons = [...WEAPONS];   // the trigger is up, the guns this ship can switch between
-    this.weaponIndex = 0;
+    this.powerup = null;           // a weapon picked up from a crate, while it lasts
+    this.powerupTime = 0;          // seconds left on it
   }
 
-  get weapon() { return this.weapons[this.weaponIndex]; }
+  // the standard gun, or the power-up weapon while one is armed
+  get weapon() { return this.powerup ?? WEAPONS[0]; }
 
-  // Switches to the next available weapon (dir -1 for the previous one).
-  // Returns true if the weapon changed.
-  cycleWeapon(dir = 1) {
-    const n = this.weapons.length;
-    if (n < 2 || !dir) return false;
-    this.weaponIndex = (this.weaponIndex + Math.sign(dir) + n) % n;
+  // arms a power-up weapon for `duration` seconds (replacing any current one)
+  grantPowerup(weapon, duration) {
+    this.powerup = weapon;
+    this.powerupTime = duration;
+  }
+
+  clearPowerup() {
+    this.powerup = null;
+    this.powerupTime = 0;
+  }
+
+  // Counts the power-up down; true on the step it runs out.
+  tickPowerup(dt) {
+    if (!this.powerup) return false;
+    this.powerupTime -= dt;
+    if (this.powerupTime > 0) return false;
+    this.clearPowerup();
     return true;
   }
 
@@ -75,6 +87,7 @@ export class Ship {
   // called as each wave begins: the deflector recharges
   prepareForWave() {
     this.shieldCharges = this.stats.shieldCapacity;
+    this.clearPowerup();
   }
 
   // The deflector soaks up a hit if it has charge left; true if it did.
@@ -98,6 +111,7 @@ export class Ship {
 
   destroy() {
     this.alive = false;
+    this.clearPowerup();
     this.lives--;
     this.respawnTimer = RULES.respawnDelay;
   }
@@ -105,6 +119,7 @@ export class Ship {
   // out of the match for good, whatever lives were left
   eliminate() {
     this.alive = false;
+    this.clearPowerup();
     this.lives = 0;
   }
 

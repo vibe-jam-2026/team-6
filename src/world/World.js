@@ -6,6 +6,7 @@ export class World {
   ships = [];
   asteroids = [];
   bullets = [];
+  pickups = [];   // weapon crates dropped by enemies
   boss = null;
   speedScale = 1; // set by the wave spawner, applied to new rocks
 
@@ -18,6 +19,7 @@ export class World {
     this.ships = ships;
     this.asteroids = [];
     this.bullets = [];
+    this.pickups = [];
     this.boss = null;
     this.speedScale = 1;
   }
@@ -28,6 +30,7 @@ export class World {
     const leaving = this.asteroids;
     this.asteroids = [];
     this.bullets = [];
+    this.pickups = [];
     if (leaving.length) this.bus.emit(EVENTS.ENEMIES_RETREATED, { enemies: leaving });
   }
 
@@ -36,6 +39,7 @@ export class World {
     this.asteroids = [];
     this.boss = null;
     this.bullets = [];
+    this.pickups = [];
   }
 
   get width() { return this.bounds.width; }

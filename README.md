@@ -23,25 +23,28 @@ then open http://localhost:8000.
 Jets fire **continuously** by default — the fire key toggles auto fire on and off (the HUD shows
 *AUTO FIRE* or *FIRE OFF* next to your lives). It also joins the lobby and buys in the shop.
 
-| Player | Thrust | Turn | Fire (toggle) | Switch weapon | Self-destruct |
-|--------|--------|------|------|---------------|---------------|
-| P1 (red)    | W       | A / D       | S       | Q             | E             |
-| P2 (blue)   | ↑       | ← / →       | ↓       | /             | Right Shift   |
+| Player | Thrust | Turn | Fire (toggle) | Self-destruct |
+|--------|--------|------|------|---------------|
+| P1 (red)    | W       | A / D       | S       | E             |
+| P2 (blue)   | ↑       | ← / →       | ↓       | Right Shift   |
 
-- **Weapons:** every jet carries four guns and the switch-weapon key cycles through them
-  (the HUD lists them all under your lives and boxes the active one). **Rockets** are the all-rounder, the
-  **Blaster** fires fast, small, short-range bolts, **Scatter** is a slow five-shot
+- **Weapon power-ups:** every jet flies with **Rockets**, the all-rounder. Shot-down enemies sometimes
+  drop a glowing crate (drones rarely, planes more often, zeppelins usually, bosses always) — fly
+  into it to arm its weapon for **10 seconds**, after which you're back on rockets. Grabbing another
+  crate swaps the weapon and restarts the clock; dying or the wave ending loses it, and an untouched
+  crate blinks and vanishes after 12 seconds. The HUD shows the weapon and a draining timer bar under
+  your lives. The **Blaster** fires fast, small, short-range bolts, **Scatter** is a slow five-shot
   shotgun blast and **Homing** fires slow, heavy missiles that lock on to the nearest enemy
   ahead (in free-for-all also other jets) and take 3 hits off the boss. Upgrades such as Rapid Fire or Spread Shot boost every weapon.
 
 - **Flying solo:** with only one pilot joined, **Space** works as your fire key too (toggles auto fire, buys in the shop).
 - **Mouse control:** in the lobby, **C** hands the mouse to nobody → P1 → P2. That pilot's jet turns its
-  nose towards the pointer, the **left button** toggles auto fire, the **right button** thrusts, the **wheel**
-  switches weapon and the **middle button** self-destructs; between waves the **wheel** browses the shop and a **left click** buys.
+  nose towards the pointer, the **left button** toggles auto fire, the **right button** thrusts and the
+  **middle button** self-destructs; between waves the **wheel** browses the shop and a **left click** buys.
   Their keys keep working too, so e.g. P1 can fly with WASD while P2 uses the mouse.
 - **Computer pilot:** in the lobby, **V** hands P2 to the computer (and joins it), and **V** again
   takes it back. It dodges rocks, the boss and its bullets, leads its shots, hunts the nearest
-  target (including you in free-for-all), switches to the weapon that suits the range and spends its own money in the shop between waves. Its HUD
+  target (including you in free-for-all), detours to grab nearby weapon crates and spends its own money in the shop between waves. Its HUD
   name reads *P2 CPU*. With P1 as the only human, **Space** works as P1's fire key too.
 - **Lobby:** press a player's fire key to join/leave, **Tab** switches mode, **C** picks who uses the mouse,
   **V** lets the computer fly P2, **X** starts a demo, **Enter** starts.
@@ -137,7 +140,7 @@ From the browser console, `game.addMoney(500)` gives every pilot $500 and
 Jumping clears the field (enemies, boss and its bullets) and starts the chosen wave at once.
 
 **Touch screens:** on a phone or tablet, on-screen controls appear after the first
-touch. ◀ ▶ turn, ▲ thrusts, ● toggles auto fire, ⇄ switches weapon and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
+touch. ◀ ▶ turn, ▲ thrusts, ● toggles auto fire and ✸ self-destructs (they fly P1). In the lobby, tap P1's card
 to join or leave, tap P2's card to add or remove a computer pilot, tap the mode line to switch mode and the start line to start. Between
 waves, ◀ ▶ browse the shop and ● buys. In
 game there are pause and sound buttons at the bottom; on the game-over screen, tap

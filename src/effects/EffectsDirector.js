@@ -22,6 +22,9 @@ export class EffectsDirector {
     // shots splashing on the Mothership's shield
     bus.on(EVENTS.SHIELD_BLOCKED, ({ x, y }) => particles.burst(x, y, '#7ae8ff', 6, 120, 0.3));
     bus.on(EVENTS.ENEMY_HIT, ({ enemy: e }) => particles.burst(e.x, e.y, PLANE_DEBRIS, 6 + e.size * 2, 120, 0.4));
+    // a weapon crate pops out of the wreck, and bursts in its colour when grabbed
+    bus.on(EVENTS.POWERUP_DROPPED, ({ pickup: p }) => particles.burst(p.x, p.y, p.color, 14, 110, 0.5));
+    bus.on(EVENTS.POWERUP_COLLECTED, ({ ship: s, weapon }) => particles.burst(s.x, s.y, weapon.color, 30, 180, 0.6));
     bus.on(EVENTS.DRONE_LAUNCHED, ({ drone: d }) => particles.burst(d.x, d.y, DRONE_SPARKS, 8, 70, 0.35));
     // when a wave's time runs out, each enemy still flying leaves with a pale puff
     bus.on(EVENTS.ENEMIES_RETREATED, ({ enemies }) => {
