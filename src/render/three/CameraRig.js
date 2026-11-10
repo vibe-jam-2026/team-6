@@ -11,9 +11,21 @@ const FP_EYE = 22;          // eye height above the jet (a little above, to clea
 const FP_LOOK = 320;        // how far ahead the cockpit view looks
 const FP_DIP = 70;          // ...and how far below the eye it aims there
 const FP_NEAR = 2, NEAR = 10;
+// chase view: a little behind and above the jet, following it on springs
+const CH_BACK = 150;        // distance behind the jet
+const CH_HEIGHT = 60;       // ...and above it
+const CH_LOOK = 260;        // how far ahead of the jet it looks
+const CH_LIFT = 0;          // aim this far above the jet's height there
+const CH_FOLLOW = 7;        // how quickly the eye catches up with its spot (1/s)
+const CH_TURN = 3.5;        // how quickly it swings round behind a turning jet (1/s)
+const CH_ROLL = 4;          // how quickly it follows the jet's bank (1/s)
+const CH_SNAP = 400;        // a jump this big (wrapping round the arena edge) snaps the camera
+const CH_BLEND = 0.8;       // seconds to glide between the cockpit and the chase spot
 
 const smooth = k => k * k * (3 - 2 * k);
 const lerp = (a, b, k) => a + (b - a) * k;
+const wrapAngle = a => Math.atan2(Math.sin(a), Math.cos(a));
+const damp = (rate, dt) => 1 - Math.exp(-rate * dt);   // frame-rate independent easing
 
 // Positions the tilted camera so the whole arena fits on screen, adds menu drift,
 // explosion shake and random swings to new angles during play, and maps screen
@@ -35,6 +47,8 @@ export class CameraRig {
   #look = new THREE.Vector3();
   #up = new THREE.Vector3();
   #jolt = new THREE.Vector3();   // this frame's explosion shake
+  #chase = 0;       // 0..1 how far from the cockpit towards the chase spot we are
+  #ch = null;       // the chase camera's smoothed state: { eye, look, heading, bank }
 
   constructor(camera, bus) {
     this.camera = camera;
@@ -55,7 +69,7 @@ export class CameraRig {
   }
 
   // 0..1: how far the camera has swung into the cockpit (1 = fully first person)
-  get firstPerson() { return this.#fp; }
+  get firstPerson() { return this.#fp * (1 - smooth(this.#chase)); }
 
   fit(viewport) {
     const cam = this.camera;
@@ -74,7 +88,8 @@ export class CameraRig {
 
   // spin: swing to random angles now and then; otherwise ease back to the default view
   // pilot: { x, y, z, angle, bank } in scene space to ride along in that jet's cockpit
-  update(dt, t, { drift = false, spin = false, frozen = false, pilot = null } = {}) {
+  // chase: follow the pilot's jet from a little behind it instead of sitting in its cockpit
+  update(dt, t, { drift = false, spin = false, frozen = false, pilot = null, chase = false } = {}) {
     if (!this.#view) return;
     const cam = this.camera;
     if (!frozen) this.#steer(dt, spin);
@@ -88,7 +103,20 @@ export class CameraRig {
     cam.updateMatrixWorld();
     this.#snapshot();
     this.#fp = pilot ? Math.min(1, this.#fp + dt / FP_BLEND) : Math.max(0, this.#fp - dt / FP_BLEND);
-    if (pilot) this.#aimCockpit(pilot);
+    if (this.#fp === 0) this.#ch = null;   // start the chase afresh next time
+    if (pilot) {
+      // glide between cockpit and chase spot, but swing in from the overview straight to the right one
+      if (!this.#ch) this.#chase = chase ? 1 : 0;
+      else this.#chase = chase ? Math.min(1, this.#chase + dt / CH_BLEND) : Math.max(0, this.#chase - dt / CH_BLEND);
+      this.#aimCockpit(pilot);
+      this.#follow(pilot, dt);
+      if (this.#chase > 0) {
+        const k = smooth(this.#chase);
+        this.#eye.lerp(this.#ch.eye, k);
+        this.#look.lerp(this.#ch.look, k);
+        this.#up.lerp(this.#ch.up, k).normalize();
+      }
+    }
     if (this.#fp > 0) this.#ride(smooth(this.#fp));
     const near = this.#fp > 0.5 ? FP_NEAR : NEAR;
     if (cam.near !== near) { cam.near = near; cam.updateProjectionMatrix(); }
@@ -102,6 +130,26 @@ export class CameraRig {
     this.#look.set(x + fx * FP_LOOK, y + fy * FP_LOOK, z + FP_EYE - FP_DIP);
     // roll with the jet's bank
     this.#up.set(0, 0, 1).applyAxisAngle(new THREE.Vector3(fx, fy, 0), bank * 0.6);
+  }
+
+  // move the chase camera's smoothed spot towards its place behind the jet
+  #follow({ x, y, z, angle, bank }, dt) {
+    const fresh = !this.#ch;
+    if (fresh) this.#ch = { eye: new THREE.Vector3(), look: new THREE.Vector3(), up: new THREE.Vector3(), heading: angle, bank };
+    const ch = this.#ch;
+    ch.heading += wrapAngle(angle - ch.heading) * damp(CH_TURN, dt);
+    ch.bank += (bank - ch.bank) * damp(CH_ROLL, dt);
+    const fx = Math.cos(ch.heading), fy = -Math.sin(ch.heading);   // game y points down, scene y up
+    const eye = new THREE.Vector3(x - fx * CH_BACK, y - fy * CH_BACK, z + CH_HEIGHT);
+    const look = new THREE.Vector3(x + fx * CH_LOOK, y + fy * CH_LOOK, z + CH_LIFT);
+    // jumped across the arena (it wraps at the edges) or just started: no slow glide over
+    if (fresh || ch.eye.distanceTo(eye) > CH_SNAP) {
+      ch.eye.copy(eye); ch.look.copy(look); ch.heading = angle;
+    } else {
+      ch.eye.lerp(eye, damp(CH_FOLLOW, dt));
+      ch.look.lerp(look, damp(CH_FOLLOW, dt));
+    }
+    ch.up.set(0, 0, 1).applyAxisAngle(new THREE.Vector3(fx, fy, 0), ch.bank * 0.35);
   }
 
   // blend the overview camera (already placed) towards the cockpit by k

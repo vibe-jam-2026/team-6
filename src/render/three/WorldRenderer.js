@@ -21,7 +21,7 @@ import { toSceneX, toSceneY } from './coords.js';
 // Draws the game world in 3D. Reads game state; never changes it.
 export class WorldRenderer {
   #lastTime = null;
-  firstPerson = false;   // ride in P1's cockpit during a match (toggled with F)
+  view = 'overview';   // camera during a match: 'overview', 'cockpit' (P1's) or 'chase' (behind P1); F cycles
 
   constructor({ canvas, viewport, bus, world, particles, session, states }) {
     Object.assign(this, { viewport, world, particles, session, states });
@@ -73,14 +73,18 @@ export class WorldRenderer {
     const state = this.states.currentName;
     this.cameraRig.update(dt, t, {
       drift: inLobby, spin: state === 'playing', frozen: state !== 'playing' && !inLobby,
-      pilot: this.firstPerson && !inLobby ? this.#pilot(t) : null,
+      pilot: this.view !== 'overview' && !inLobby ? this.#pilot(t) : null, chase: this.view === 'chase',
     });
     this.scenery.setCameraDistance(this.cameraRig.distance);
     this.lobby.update(inLobby, frame);
     this.stage.render();
   }
 
-  toggleFirstPerson() { this.firstPerson = !this.firstPerson; return this.firstPerson; }
+  cycleView() {
+    const views = ['overview', 'cockpit', 'chase'];
+    this.view = views[(views.indexOf(this.view) + 1) % views.length];
+    return this.view;
+  }
 
   // P1's jet in scene space, at the height its view bobs at, or null while it is down
   #pilot(t) {

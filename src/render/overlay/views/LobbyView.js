@@ -3,7 +3,7 @@ import { lobbyLayout } from '../lobbyLayout.js';
 import { VERSION } from '../../../version.js';
 
 export class LobbyView {
-  draw(o, { time, session, audio, touch, firstPerson }) {
+  draw(o, { time, session, audio, touch, cameraView }) {
     const tap = touch?.enabled;
     const { width: W, height: H } = o;
     const layout = lobbyLayout(W, H);
@@ -46,7 +46,7 @@ export class LobbyView {
       o.text(`C  mouse control: ${owner}`, W / 2, by + 114, 13,
         session.mouseOwner === null ? '#9aa1b2' : PLAYERS[session.mouseOwner].color, 'center');
       if (session.humanCount === 1) o.text('flying solo: SPACE works as your fire key too', W / 2, by + 132, 11, '#7d8496', 'center');
-      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game  ·  F  P1 cockpit view: ${firstPerson?.() ? 'on' : 'off'}  ·  X  demo (starts by itself after ${DEMO.idleTime} s idle)`, W / 2, by + 152, 12, '#545a6a', 'center');
+      o.text(`M  sound ${audio.muted ? 'off' : 'on'}  ·  P  pause in game  ·  F  camera: ${cameraView?.() ?? 'overview'}  ·  X  demo (starts by itself after ${DEMO.idleTime} s idle)`, W / 2, by + 152, 12, '#545a6a', 'center');
       o.text(`testing: ${session.invincible ? 'INVINCIBLE  ·  ' : ''}1-9/0 start at wave${session.invincible ? '  ·  B start at boss' : ''}`,
         W / 2, by + 172, 12, session.invincible ? '#ffd23f' : '#545a6a', 'center');
     }
