@@ -60,6 +60,9 @@ export const SHIP = {
 };
 
 export const BULLET = { speed: 560, life: 0.95, radius: 2 };
+// px added to the two shots' radii when a jet's shot meets an enemy shot, so
+// shooting down enemy fire is forgiving (bigger = easier to intercept)
+export const SHOT_CLASH_PADDING = 10;
 export const SPREAD_ANGLE = 0.14; // radians between bullets of a spread shot
 
 // The guns. Every jet flies with the first one (rockets); the others are
